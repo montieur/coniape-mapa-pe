@@ -1,0 +1,449 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CONIAPE · Municípios de PE</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+<script src="data.js"></script>
+<style>
+:root{
+  --bg:#f6f7f9; --panel:#ffffff; --ink:#1d2430; --muted:#5f6b7a; --line:#e2e6ec;
+  --accent:#0f6e8c; --accent-ink:#ffffff; --hover:#eef4f7; --off:#d9dde3;
+  --c1:#e3f1f4; --c2:#a9d6e0; --c3:#5fb0c6; --c4:#22819f; --c5:#0b4f68;
+  --urb:#e8762c; --via:#c0392b;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#12161c; --panel:#1a2029; --ink:#e7ebf0; --muted:#9aa5b3; --line:#2c3440;
+    --accent:#4fb3cf; --accent-ink:#0b1a20; --hover:#222b36; --off:#3a424e;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#12161c; --panel:#1a2029; --ink:#e7ebf0; --muted:#9aa5b3; --line:#2c3440;
+  --accent:#4fb3cf; --accent-ink:#0b1a20; --hover:#222b36; --off:#3a424e;
+}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--ink);font:14px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;display:flex;flex-direction:column}
+header{display:flex;align-items:center;gap:12px;padding:10px 16px;background:var(--panel);border-bottom:1px solid var(--line)}
+header h1{font-size:16px;margin:0;font-weight:650}
+header .sub{color:var(--muted);font-size:12.5px}
+header .sp{flex:1}
+.btn{border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:8px;padding:7px 12px;font:inherit;font-size:13px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;text-decoration:none}
+.btn:hover{background:var(--hover)}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btn.primary:hover{filter:brightness(1.08)}
+.btn[disabled]{opacity:.5;cursor:not-allowed}
+main{flex:1;display:flex;min-height:0}
+aside{width:380px;max-width:100%;background:var(--panel);border-right:1px solid var(--line);display:flex;flex-direction:column;min-height:0}
+#map{flex:1;min-height:0}
+.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:12px 16px;border-bottom:1px solid var(--line)}
+.kpi{background:var(--bg);border-radius:8px;padding:8px 10px}
+.kpi b{display:block;font-size:17px;font-variant-numeric:tabular-nums}
+.kpi span{color:var(--muted);font-size:11.5px}
+.ctrl{padding:10px 16px;display:flex;gap:8px;border-bottom:1px solid var(--line)}
+.ctrl input,.ctrl select{flex:1;min-width:0;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:8px;padding:7px 10px;font:inherit;font-size:13px}
+.list{overflow:auto;flex:1}
+table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+th,td{padding:6px 8px;text-align:right;border-bottom:1px solid var(--line);white-space:nowrap}
+th:first-child,td:first-child{text-align:left;white-space:normal}
+.list th{position:sticky;top:0;background:var(--panel);font-size:11.5px;color:var(--muted);font-weight:600;cursor:pointer;user-select:none}
+.list th.on{color:var(--accent)}
+.list tbody tr{cursor:pointer}
+.list tbody tr:hover,.list tbody tr.sel{background:var(--hover)}
+.list td:first-child{padding-left:16px}
+.detail{border-top:1px solid var(--line);padding:12px 16px;display:none;max-height:55%;overflow:auto}
+.detail.show{display:block}
+.detail h2{font-size:16px;margin:0 0 2px}
+.detail .meta{color:var(--muted);font-size:12px;margin-bottom:10px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:6px 14px;margin-bottom:10px}
+.grid2 div span{display:block;color:var(--muted);font-size:11.5px}
+.grid2 div b{font-variant-numeric:tabular-nums}
+.detail table{font-size:12.5px;margin:6px 0 12px}
+.detail .acts{display:flex;flex-wrap:wrap;gap:8px}
+.note{color:var(--muted);font-size:11.5px;margin-top:8px}
+.legend{background:var(--panel);color:var(--ink);padding:8px 10px;border-radius:8px;box-shadow:0 1px 4px rgba(0,0,0,.25);font-size:12px;line-height:1.5}
+.legend i{display:inline-block;width:14px;height:10px;margin-right:6px;vertical-align:middle;border-radius:2px}
+.leaflet-tooltip{font-size:12px}
+.toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:var(--ink);color:var(--panel);padding:8px 14px;border-radius:8px;font-size:13px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:9999}
+.toast.on{opacity:.95}
+dialog{border:1px solid var(--line);border-radius:12px;background:var(--panel);color:var(--ink);padding:18px 20px;max-width:420px;width:calc(100% - 32px)}
+dialog::backdrop{background:rgba(0,0,0,.35)}
+dialog h3{margin:0 0 6px;font-size:16px}
+dialog p{margin:0 0 12px;color:var(--muted);font-size:13px}
+dialog label{display:flex;gap:8px;align-items:flex-start;padding:8px 10px;border:1px solid var(--line);border-radius:8px;margin-bottom:8px;cursor:pointer}
+dialog label small{display:block;color:var(--muted)}
+dialog .row{display:flex;justify-content:flex-end;gap:8px;margin-top:12px}
+@media (max-width:760px){
+  main{flex-direction:column}
+  aside{width:100%;height:50%;border-right:0;border-bottom:1px solid var(--line);order:2}
+  #map{order:1;min-height:50%}
+  header .sub{display:none}
+}
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>CONIAPE · Municípios de Pernambuco</h1>
+    <div class="sub">Área urbana (setores IBGE 2022) e km de vias urbanas (OSM) · SIRGAS 2000 / UTM 25S</div>
+  </div>
+  <div class="sp"></div>
+  <button class="btn primary" id="btnGeral">⬇ Relatório geral (PDF)</button>
+</header>
+<main>
+  <aside>
+    <div class="kpis">
+      <div class="kpi"><b id="kMun">–</b><span>municípios</span></div>
+      <div class="kpi"><b id="kUrb">–</b><span>km² urbanos</span></div>
+      <div class="kpi"><b id="kVias">–</b><span>km de vias</span></div>
+    </div>
+    <div class="ctrl">
+      <input id="busca" type="search" placeholder="Buscar município…" aria-label="Buscar município">
+      <select id="metrica" aria-label="Variável do mapa">
+        <option value="vias">Colorir por km de vias</option>
+        <option value="urb">Colorir por área urbana</option>
+        <option value="dens">Colorir por densidade de vias</option>
+        <option value="perc">Colorir por % urbano</option>
+      </select>
+    </div>
+    <div class="list">
+      <table>
+        <thead><tr>
+          <th data-k="n">Município</th><th data-k="urb">Área urb. km²</th><th data-k="vias" class="on">Vias km</th>
+        </tr></thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+    <div class="detail" id="detail"></div>
+  </aside>
+  <div id="map"></div>
+</main>
+
+<dialog id="dlg">
+  <h3 id="dlgTit">Baixar relatório</h3>
+  <p id="dlgSub"></p>
+  <label id="optOficial"><input type="radio" name="tipo" value="oficial" checked>
+    <span><b>Relatório oficial CONIAPE</b><small id="optOficialTxt">PDF original do município, baixado do repositório.</small></span></label>
+  <label><input type="radio" name="tipo" value="gerado">
+    <span><b>Relatório do mapa</b><small>Gerado agora: indicadores, distritos e mapa do município.</small></span></label>
+  <div class="row">
+    <button class="btn" id="dlgCancel">Cancelar</button>
+    <button class="btn primary" id="dlgOk">Baixar</button>
+  </div>
+</dialog>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ===== Configuração =====
+   Onde estão os PDFs oficiais. Vazio = pasta "relatorios/" ao lado deste HTML
+   (funciona localmente e no GitHub Pages). Para buscar direto de um repositório:
+   'https://raw.githubusercontent.com/<usuario>/<repo>/main/relatorios/'          */
+const PDF_BASE_URL = '';
+
+const D = window.CONIAPE_DATA;
+const fmt = (v, d = 2) => v == null ? '–' : Number(v).toLocaleString('pt-BR', {minimumFractionDigits: d, maximumFractionDigits: d});
+const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const toast = (t, ms = 2500) => { const el = document.getElementById('toast'); el.textContent = t; el.classList.add('on'); clearTimeout(el._t); if (ms) el._t = setTimeout(() => el.classList.remove('on'), ms); };
+const slug = s => s.normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^\w]+/g, '_');
+
+const CO = D.mun.filter(m => m.co);
+const byCode = Object.fromEntries(D.mun.map(m => [m.c, m]));
+const LABELS = {vias: 'Vias urbanas (km)', urb: 'Área urbana (km²)', dens: 'Densidade de vias (km/km² urbano)', perc: 'Área urbana / território (%)'};
+
+/* KPIs */
+document.getElementById('kMun').textContent = CO.length;
+document.getElementById('kUrb').textContent = fmt(CO.reduce((s, m) => s + m.urb, 0), 1);
+document.getElementById('kVias').textContent = fmt(CO.reduce((s, m) => s + m.vias, 0), 0);
+
+/* ===== Mapa ===== */
+const map = L.map('map', {preferCanvas: true, zoomControl: true});
+const bases = {
+  'Cinza (Esri)': L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}', {attribution: '© Esri', maxZoom: 16}),
+  'OpenStreetMap': L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {attribution: '© OpenStreetMap', maxZoom: 19}),
+  'Satélite (Esri)': L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {attribution: '© Esri', maxZoom: 19}),
+};
+bases['OpenStreetMap'].addTo(map);
+
+let metric = 'vias', breaks = [], selected = null;
+function quantBreaks(k) {
+  const v = CO.map(m => m[k]).filter(x => x != null).sort((a, b) => a - b);
+  return [0.2, 0.4, 0.6, 0.8].map(q => v[Math.floor(q * (v.length - 1))]);
+}
+function colorFor(v) {
+  if (v == null) return css('--off');
+  const cs = ['--c1', '--c2', '--c3', '--c4', '--c5'];
+  let i = 0; while (i < breaks.length && v > breaks[i]) i++;
+  return css(cs[i]);
+}
+function styleMun(f) {
+  const m = byCode[f.properties.c];
+  return m.co
+    ? {color: '#ffffff', weight: 1, fillColor: colorFor(m[metric]), fillOpacity: .78}
+    : {color: css('--off'), weight: .6, fillColor: css('--off'), fillOpacity: .25};
+}
+const munLayer = L.geoJSON({type: 'FeatureCollection', features: D.mun.map(m => ({type: 'Feature', properties: {c: m.c}, geometry: m.g}))}, {
+  style: styleMun,
+  onEachFeature: (f, l) => {
+    const m = byCode[f.properties.c];
+    l.bindTooltip(m.co
+      ? `<b>${m.n}</b><br>Área urbana: ${fmt(m.urb)} km²<br>Vias: ${fmt(m.vias)} km`
+      : `<b>${m.n}</b><br><span style="opacity:.7">Fora do CONIAPE · ${fmt(m.aI, 1)} km²</span>`, {sticky: true});
+    l.on('click', () => select(m.c, true));
+  },
+}).addTo(map);
+
+const urbLayer = L.geoJSON({type: 'FeatureCollection', features: D.urb.map(u => ({type: 'Feature', properties: u, geometry: u.g}))}, {
+  style: () => ({color: css('--urb'), weight: 1, fillColor: css('--urb'), fillOpacity: .35}),
+  onEachFeature: (f, l) => l.bindTooltip(`<b>${f.properties.n}</b> (${byCode[f.properties.c].n})<br>${fmt(f.properties.a)} km²`, {sticky: true}),
+}).addTo(map);
+
+/* vias: desenhadas sob demanda (zoom ≥ 11 ou município selecionado) */
+const viaRenderer = L.canvas({padding: .3});
+const viasGroup = L.layerGroup();
+const viaCache = {};
+function viaLayer(code) {
+  if (viaCache[code]) return viaCache[code];
+  const lines = (D.vias[code] || []).map(([ni, km, flat]) => {
+    const ll = []; for (let i = 0; i < flat.length; i += 2) ll.push([flat[i + 1], flat[i]]);
+    return L.polyline(ll, {renderer: viaRenderer, color: css('--via'), weight: 1.4, opacity: .85})
+      .bindTooltip(`${D.viaNames[ni] || 'Via sem nome'} · ${fmt(km, 3)} km`, {sticky: true});
+  });
+  return (viaCache[code] = L.layerGroup(lines));
+}
+function refreshVias() {
+  if (!map.hasLayer(viasGroup)) return;
+  const b = map.getBounds(), z = map.getZoom();
+  CO.forEach(m => {
+    const want = z >= 11 ? b.intersects(munBounds[m.c]) : m.c === selected;
+    const lyr = viaLayer(m.c);
+    if (want && !viasGroup.hasLayer(lyr)) viasGroup.addLayer(lyr);
+    if (!want && viasGroup.hasLayer(lyr)) viasGroup.removeLayer(lyr);
+  });
+}
+const munBounds = {}; CO.forEach(m => munBounds[m.c] = L.geoJSON(m.g).getBounds());
+viasGroup.addTo(map);
+map.on('moveend zoomend overlayadd', refreshVias);
+
+L.control.layers(bases, {'Municípios': munLayer, 'Áreas urbanas': urbLayer, 'Vias urbanas': viasGroup}, {collapsed: true}).addTo(map);
+L.control.scale({imperial: false}).addTo(map);
+
+const legend = L.control({position: 'bottomright'});
+legend.onAdd = () => (legend._div = L.DomUtil.create('div', 'legend'));
+legend.addTo(map);
+function drawLegend() {
+  const d = metric === 'perc' || metric === 'dens' ? 1 : 0;
+  const cs = ['--c1', '--c2', '--c3', '--c4', '--c5'];
+  const edges = [null, ...breaks, null];
+  let h = `<b>${LABELS[metric]}</b><br>`;
+  cs.forEach((c, i) => {
+    const lo = edges[i], hi = edges[i + 1];
+    h += `<i style="background:${css(c)}"></i>${lo == null ? '≤ ' + fmt(hi, d) : hi == null ? '> ' + fmt(lo, d) : fmt(lo, d) + ' – ' + fmt(hi, d)}<br>`;
+  });
+  h += `<i style="background:${css('--off')}"></i>Fora do CONIAPE<br><i style="background:${css('--urb')}"></i>Área urbana<br><i style="background:${css('--via')};height:3px"></i>Vias urbanas`;
+  legend._div.innerHTML = h;
+}
+function setMetric(k) { metric = k; breaks = quantBreaks(k); munLayer.setStyle(styleMun); drawLegend(); }
+setMetric('vias');
+const allBounds = L.geoJSON({type: 'FeatureCollection', features: CO.map(m => ({type: 'Feature', geometry: m.g}))}).getBounds();
+map.setView(allBounds.getCenter(), 8);
+const fitAll = () => { map.invalidateSize(); map.fitBounds(allBounds, {padding: [20, 20], maxZoom: 10}); };
+/* enquadra quando o painel do mapa ganha tamanho real (algumas janelas montam o layout depois do load) */
+let userMoved = false;
+const markMoved = () => { userMoved = true; };
+map.on('dragstart', markMoved);
+map.getContainer().addEventListener('wheel', markMoved, {passive: true});
+map.getContainer().addEventListener('dblclick', markMoved);
+new ResizeObserver(([e]) => {
+  if (e.contentRect.width > 50 && e.contentRect.height > 50 && !userMoved && !selected) fitAll();
+}).observe(map.getContainer());
+document.getElementById('metrica').onchange = e => setMetric(e.target.value);
+
+/* ===== Lista ===== */
+let sortK = 'vias', sortDir = -1;
+function renderList() {
+  const q = slug(document.getElementById('busca').value.toLowerCase());
+  const rows = CO.filter(m => slug(m.n.toLowerCase()).includes(q))
+    .sort((a, b) => sortK === 'n' ? a.n.localeCompare(b.n) * -sortDir : (a[sortK] - b[sortK]) * sortDir);
+  document.getElementById('tbody').innerHTML = rows.map(m =>
+    `<tr data-c="${m.c}" class="${m.c === selected ? 'sel' : ''}"><td>${m.n}</td><td>${fmt(m.urb)}</td><td>${fmt(m.vias)}</td></tr>`).join('');
+}
+document.getElementById('tbody').onclick = e => { const tr = e.target.closest('tr'); if (tr) select(tr.dataset.c, true); };
+document.getElementById('busca').oninput = renderList;
+document.querySelectorAll('.list th').forEach(th => th.onclick = () => {
+  const k = th.dataset.k; sortDir = sortK === k ? -sortDir : (k === 'n' ? 1 : -1); sortK = k;
+  document.querySelectorAll('.list th').forEach(x => x.classList.toggle('on', x === th)); renderList();
+});
+renderList();
+
+/* ===== Detalhe ===== */
+function select(code, zoom) {
+  const m = byCode[code];
+  if (!m.co) { toast(`${m.n} não faz parte do CONIAPE`); return; }
+  selected = code; renderList();
+  if (zoom) map.fitBounds(munBounds[code], {padding: [30, 30]});
+  refreshVias();
+  const dist = D.distritos.filter(d => d.CD_MUN === code);
+  const el = document.getElementById('detail');
+  el.innerHTML = `
+    <h2>${m.n}</h2>
+    <div class="meta">IBGE ${m.c} · RGI ${m.rgi} · ${m.rgint}</div>
+    <div class="grid2">
+      <div><span>Área urbana</span><b>${fmt(m.urb)} km²</b></div>
+      <div><span>Vias urbanas</span><b>${fmt(m.vias)} km</b></div>
+      <div><span>Território (IBGE)</span><b>${fmt(m.aI)} km²</b></div>
+      <div><span>Território (UTM 25S)</span><b>${fmt(m.aU)} km²</b></div>
+      <div><span>% urbano</span><b>${fmt(m.perc)} %</b></div>
+      <div><span>Densidade de vias</span><b>${fmt(m.dens)} km/km²</b></div>
+      <div><span>Setores urbanos</span><b>${m.set ?? '–'}</b></div>
+      <div><span>Distritos / manchas</span><b>${m.dist ?? '–'}</b></div>
+    </div>
+    ${dist.length ? `<table><thead><tr><th>Distrito / mancha</th><th>Área km²</th><th>Vias km</th></tr></thead><tbody>
+      ${dist.map(d => `<tr><td>${d.distrito}</td><td>${fmt(d.area_km2)}</td><td>${fmt(d.vias_km)}</td></tr>`).join('')}</tbody></table>` : ''}
+    <div class="acts">
+      <button class="btn primary" id="btnPdf">⬇ Baixar relatório (PDF)</button>
+      <button class="btn" id="btnClose">Fechar</button>
+    </div>
+    <div class="note">Fonte: ${m.fonte}.</div>`;
+  el.classList.add('show');
+  document.getElementById('btnPdf').onclick = () => askDownload(m);
+  document.getElementById('btnClose').onclick = () => { el.classList.remove('show'); selected = null; renderList(); refreshVias(); };
+}
+
+/* ===== Download ===== */
+const dlg = document.getElementById('dlg');
+function askDownload(m) {
+  document.getElementById('dlgTit').textContent = `Relatório · ${m.n}`;
+  document.getElementById('dlgSub').textContent = 'Escolha qual relatório baixar.';
+  const has = !!m.pdf;
+  const opt = document.getElementById('optOficial');
+  opt.querySelector('input').disabled = !has;
+  opt.style.opacity = has ? 1 : .5;
+  document.getElementById('optOficialTxt').textContent = has ? `${m.pdf} — baixado do repositório.` : 'Não há relatório oficial para este município.';
+  dlg.querySelector(`input[value="${has ? 'oficial' : 'gerado'}"]`).checked = true;
+  dlg.showModal();
+  document.getElementById('dlgOk').onclick = async () => {
+    const tipo = dlg.querySelector('input[name=tipo]:checked').value; dlg.close();
+    tipo === 'oficial' ? await baixarOficial(m) : gerarPdfMunicipio(m);
+  };
+}
+document.getElementById('dlgCancel').onclick = () => dlg.close();
+
+async function baixarOficial(m) {
+  const url = (PDF_BASE_URL || 'relatorios/') + encodeURIComponent(m.pdf);
+  toast('Baixando relatório…', 0);
+  try {
+    const r = await fetch(url);
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const blob = await r.blob();
+    const a = Object.assign(document.createElement('a'), {href: URL.createObjectURL(blob), download: m.pdf});
+    document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+    toast('Relatório baixado');
+  } catch (e) {
+    // file:// bloqueia fetch local: abre o arquivo direto
+    toast('Abrindo o PDF…'); window.open(url, '_blank');
+  }
+}
+
+/* ===== PDF gerado (jsPDF) ===== */
+const ACCENT = [15, 110, 140];
+function pdfHeader(doc, title, sub) {
+  doc.setFillColor(...ACCENT); doc.rect(0, 0, 210, 22, 'F');
+  doc.setTextColor(255); doc.setFont('helvetica', 'bold'); doc.setFontSize(14); doc.text(title, 14, 10);
+  doc.setFont('helvetica', 'normal'); doc.setFontSize(9); doc.text(sub, 14, 16.5);
+  doc.setTextColor(30);
+}
+function pdfFooter(doc) {
+  const n = doc.getNumberOfPages();
+  for (let i = 1; i <= n; i++) {
+    doc.setPage(i); doc.setFontSize(7.5); doc.setTextColor(120);
+    doc.text(`CONIAPE · Área urbana: setores IBGE 2022 (CD_SIT 1-3) · Vias: OpenStreetMap · Malha municipal IBGE 2024 · Projeção SIRGAS 2000 / UTM 25S`, 14, 289);
+    doc.text(`Gerado em ${new Date().toLocaleString('pt-BR')} · pág. ${i}/${n}`, 196, 289, {align: 'right'});
+  }
+}
+/* desenha geometrias lon/lat numa caixa da página (equiretangular com correção de latitude) */
+function drawGeoms(doc, box, layers) {
+  let x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9;
+  const each = (g, f) => { const polys = g.type === 'Polygon' ? [g.coordinates] : g.type === 'MultiPolygon' ? g.coordinates : null; if (polys) polys.forEach(p => p.forEach(r => f(r))); };
+  layers.filter(l => l.fit).forEach(l => l.geoms.forEach(g => each(g, r => r.forEach(([x, y]) => { x0 = Math.min(x0, x); x1 = Math.max(x1, x); y0 = Math.min(y0, y); y1 = Math.max(y1, y); }))));
+  const k = Math.cos((y0 + y1) / 2 * Math.PI / 180);
+  const s = Math.min(box.w / ((x1 - x0) * k), box.h / (y1 - y0));
+  const ox = box.x + (box.w - (x1 - x0) * k * s) / 2, oy = box.y + (box.h - (y1 - y0) * s) / 2;
+  const P = ([x, y]) => [ox + (x - x0) * k * s, oy + (y1 - y) * s];
+  const path = (pts, style) => { if (pts.length < 2) return; const [sx, sy] = P(pts[0]); const d = []; let [px, py] = [sx, sy];
+    for (let i = 1; i < pts.length; i++) { const [qx, qy] = P(pts[i]); d.push([qx - px, qy - py]); px = qx; py = qy; }
+    doc.lines(d, sx, sy, [1, 1], style, style !== 'S'); };
+  layers.forEach(l => {
+    doc.setLineWidth(l.lw ?? .2); doc.setDrawColor(...l.stroke); if (l.fill) doc.setFillColor(...l.fill);
+    if (l.lines) l.lines.forEach(pts => path(pts, 'S'));
+    else l.geoms.forEach(g => each(g, r => path(r, l.fill ? 'FD' : 'S')));
+  });
+  doc.setDrawColor(200); doc.setLineWidth(.2); doc.rect(box.x, box.y, box.w, box.h);
+}
+function save(doc, name) { doc.save(name); toast('PDF gerado'); }
+
+function gerarPdfMunicipio(m) {
+  const {jsPDF} = window.jspdf; const doc = new jsPDF({unit: 'mm', format: 'a4'});
+  pdfHeader(doc, `Relatório CONIAPE · ${m.n} – PE`, `Código IBGE ${m.c} · RGI ${m.rgi} · Região intermediária ${m.rgint}`);
+  const urbs = D.urb.filter(u => u.c === m.c);
+  const vias = (D.vias[m.c] || []).map(([, , f]) => { const p = []; for (let i = 0; i < f.length; i += 2) p.push([f[i], f[i + 1]]); return p; });
+  drawGeoms(doc, {x: 14, y: 28, w: 182, h: 120}, [
+    {geoms: [m.g], stroke: [90, 90, 90], fill: [240, 243, 246], lw: .4, fit: true},
+    {geoms: urbs.map(u => u.g), stroke: [232, 118, 44], fill: [250, 214, 190], lw: .25},
+    {lines: vias, stroke: [192, 57, 43], lw: .08},
+  ]);
+  doc.setFontSize(7.5); doc.setTextColor(90);
+  doc.text('Limite municipal (cinza) · áreas urbanas (laranja) · vias urbanas (vermelho)', 14, 152);
+  doc.autoTable({
+    startY: 157, theme: 'grid', headStyles: {fillColor: ACCENT}, styles: {fontSize: 9},
+    columnStyles: {1: {halign: 'right'}},
+    head: [['Indicador', 'Valor']],
+    body: [
+      ['Área urbana (setores IBGE 2022)', fmt(m.urb) + ' km²'],
+      ['Vias urbanas (OSM)', fmt(m.vias) + ' km'],
+      ['Densidade de vias', fmt(m.dens) + ' km/km²'],
+      ['Território – área oficial IBGE', fmt(m.aI, 3) + ' km²'],
+      ['Território – área planimétrica UTM 25S', fmt(m.aU, 3) + ' km²'],
+      ['Área urbana / território', fmt(m.perc) + ' %'],
+      ['Área rural (setores)', m.rur ? fmt(m.rur) + ' km²' : '–'],
+      ['Setores urbanos', m.set ?? '–'], ['Distritos / manchas', m.dist ?? '–'],
+    ],
+  });
+  const dist = D.distritos.filter(d => d.CD_MUN === m.c);
+  if (dist.length) doc.autoTable({
+    startY: doc.lastAutoTable.finalY + 6, theme: 'grid', headStyles: {fillColor: ACCENT}, styles: {fontSize: 9},
+    columnStyles: {1: {halign: 'right'}, 2: {halign: 'right'}},
+    head: [['Distrito / mancha urbana', 'Área (km²)', 'Vias (km)']],
+    body: dist.map(d => [d.distrito, fmt(d.area_km2), fmt(d.vias_km)]),
+  });
+  pdfFooter(doc); save(doc, `Relatorio_mapa_${slug(m.n)}_PE.pdf`);
+}
+
+function gerarPdfGeral() {
+  const {jsPDF} = window.jspdf; const doc = new jsPDF({unit: 'mm', format: 'a4'});
+  pdfHeader(doc, 'Relatório geral CONIAPE · Pernambuco', `${CO.length} municípios · área urbana e extensão de vias urbanas`);
+  drawGeoms(doc, {x: 14, y: 28, w: 182, h: 78}, [
+    {geoms: D.mun.filter(m => !m.co).map(m => m.g), stroke: [205, 210, 216], fill: [244, 245, 247], lw: .1, fit: true},
+    {geoms: CO.map(m => m.g), stroke: [255, 255, 255], fill: [95, 176, 198], lw: .15, fit: true},
+  ]);
+  doc.setFontSize(7.5); doc.setTextColor(90); doc.text('Municípios do CONIAPE em destaque (azul) sobre a malha municipal de PE (IBGE 2024)', 14, 110);
+  const tU = CO.reduce((s, m) => s + m.urb, 0), tV = CO.reduce((s, m) => s + m.vias, 0);
+  const rows = [...CO].sort((a, b) => a.n.localeCompare(b.n));
+  doc.autoTable({
+    startY: 114, theme: 'striped', headStyles: {fillColor: ACCENT}, styles: {fontSize: 8, cellPadding: 1.4},
+    columnStyles: {1: {halign: 'right'}, 2: {halign: 'right'}, 3: {halign: 'right'}, 4: {halign: 'right'}, 5: {halign: 'right'}},
+    head: [['Município', 'Território IBGE (km²)', 'Área urbana (km²)', 'Vias (km)', 'km vias/km²', '% urbano']],
+    body: rows.map(m => [m.n, fmt(m.aI, 1), fmt(m.urb), fmt(m.vias), fmt(m.dens), fmt(m.perc)]),
+    foot: [['TOTAL', fmt(CO.reduce((s, m) => s + m.aI, 0), 1), fmt(tU), fmt(tV), fmt(tV / tU), '']],
+    footStyles: {fillColor: [230, 236, 240], textColor: 20, fontStyle: 'bold', halign: 'right'},
+  });
+  pdfFooter(doc); save(doc, 'Relatorio_geral_CONIAPE_PE.pdf');
+}
+document.getElementById('btnGeral').onclick = gerarPdfGeral;
+</script>
+</body>
+</html>
