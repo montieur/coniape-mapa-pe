@@ -198,8 +198,9 @@ const munLayer = L.geoJSON({type: 'FeatureCollection', features: D.mun.map(m => 
 }).addTo(map);
 
 const urbLayer = L.geoJSON({type: 'FeatureCollection', features: D.urb.map(u => ({type: 'Feature', properties: u, geometry: u.g}))}, {
+  /* só o limite municipal é clicável: áreas urbanas e vias deixam o clique passar */
+  interactive: false,
   style: () => ({color: css('--urb'), weight: 1, fillColor: css('--urb'), fillOpacity: .35}),
-  onEachFeature: (f, l) => l.bindTooltip(`<b>${f.properties.n}</b> (${byCode[f.properties.c].n})<br>${fmt(f.properties.a)} km²`, {sticky: true}),
 }).addTo(map);
 
 /* vias: desenhadas sob demanda (zoom ≥ 11 ou município selecionado) */
@@ -208,10 +209,9 @@ const viasGroup = L.layerGroup();
 const viaCache = {};
 function viaLayer(code) {
   if (viaCache[code]) return viaCache[code];
-  const lines = (D.vias[code] || []).map(([ni, km, flat]) => {
+  const lines = (D.vias[code] || []).map(([, , flat]) => {
     const ll = []; for (let i = 0; i < flat.length; i += 2) ll.push([flat[i + 1], flat[i]]);
-    return L.polyline(ll, {renderer: viaRenderer, color: css('--via'), weight: 1.4, opacity: .85})
-      .bindTooltip(`${D.viaNames[ni] || 'Via sem nome'} · ${fmt(km, 3)} km`, {sticky: true});
+    return L.polyline(ll, {renderer: viaRenderer, interactive: false, color: css('--via'), weight: 1.4, opacity: .85});
   });
   return (viaCache[code] = L.layerGroup(lines));
 }
