@@ -336,7 +336,12 @@ const urbLayer = L.geoJSON({type: 'FeatureCollection', features: D.urb.map(u => 
 }).addTo(map);
 
 /* vias: desenhadas sob demanda (zoom ≥ 11 ou município selecionado) */
-const viaRenderer = L.canvas({padding: .3});
+/* painel próprio sem eventos: o canvas das vias cobre o mapa inteiro e,
+   sem isso, engoliria o clique nos outros municípios */
+map.createPane('vias');
+map.getPane('vias').style.zIndex = 450;
+map.getPane('vias').style.pointerEvents = 'none';
+const viaRenderer = L.canvas({padding: .3, pane: 'vias'});
 const viasGroup = L.layerGroup().addTo(map);
 const viaCache = {};
 function viaLayer(code) {
@@ -481,7 +486,7 @@ function askDownload(m) {
   dlg.showModal();
   $('dlgOk').onclick = async () => {
     const tipo = dlg.querySelector('input[name=tipo]:checked').value; dlg.close();
-    tipo === 'oficial' ? await baixarOficial(m) : gerarPdfMunicipio(m);
+    tipo === 'oficial' ? await baixarOficial(m) : await gerarPdfMunicipio(m).catch(pdfErro);
   };
 }
 $('dlgCancel').onclick = () => dlg.close();
@@ -503,6 +508,9 @@ async function baixarOficial(m) {
 }
 </script>
 <script src="relatorio.js"></script>
-<script>$('btnGeral').onclick = () => gerarPdfGeral();</script>
+<script>
+const pdfErro = e => { console.error(e); toast('Não foi possível gerar o PDF: ' + e.message, 5000); };
+$('btnGeral').onclick = () => gerarPdfGeral().catch(pdfErro);
+</script>
 </body>
 </html>
