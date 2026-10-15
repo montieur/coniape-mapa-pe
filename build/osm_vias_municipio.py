@@ -21,7 +21,11 @@ if transitavel:
     TIPOS = ("motorway|motorway_link|trunk|trunk_link|primary|primary_link|secondary|secondary_link|"
              "tertiary|tertiary_link|unclassified|residential|living_street|service|road|track")
 TAGS = ("highway", "name", "service", "access", "motor_vehicle", "vehicle", "surface", "tracktype")
-lim = (CONIAPE / pasta / "03_limite_municipal.kml").read_text(encoding="utf-8")
+# retângulo de busca: limite municipal; sem ele (ex.: Ipojuca), os polígonos do plano (*/01_poligono.kml)
+kmls = [CONIAPE / pasta / "03_limite_municipal.kml"]
+if not kmls[0].exists():
+    kmls = sorted((CONIAPE / pasta).glob("*/01_poligono.kml"))
+lim = "".join(k.read_text(encoding="utf-8") for k in kmls)
 pts = [tuple(map(float, p.split(",")[:2])) for c in re.findall(r"<coordinates>(.*?)</coordinates>", lim, re.S) for p in c.split()]
 W, E = min(p[0] for p in pts) - .005, max(p[0] for p in pts) + .005
 S, N = min(p[1] for p in pts) - .005, max(p[1] for p in pts) + .005

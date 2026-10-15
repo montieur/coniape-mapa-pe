@@ -17,7 +17,8 @@ function pdfFooter(doc) {
   const n = doc.getNumberOfPages();
   for (let i = 1; i <= n; i++) {
     doc.setPage(i); doc.setFontSize(7.5); doc.setTextColor(120);
-    doc.text(`CONIAPE · Área urbana: setores IBGE 2022 (CD_SIT 1-3) · Vias: OpenStreetMap · Malha municipal IBGE 2024 · Projeção SIRGAS 2000 / UTM 25S`, 14, 289);
+    doc.text(`CONIAPE · Área urbana: setores IBGE 2022 (CD_SIT 1-3) · Vias: OpenStreetMap, transitáveis por veículo, recortadas nas manchas`, 14, 285.5);
+    doc.text(`Malha municipal IBGE 2024 · Projeção SIRGAS 2000 / UTM 25S`, 14, 289);
     doc.text(`Gerado em ${new Date().toLocaleString('pt-BR')} · pág. ${i}/${n}`, 196, 289, {align: 'right'});
   }
 }
@@ -130,15 +131,15 @@ async function gerarPdfMunicipio(m) {
     {geoms: [m.g], stroke: [15, 70, 90], lw: .7, fit: true},
   ], {px: 1100});   // ~150 dpi: rótulos do mapa base legíveis no A4
   doc.setFontSize(7.5); doc.setTextColor(90);
-  doc.text('Limite municipal (azul escuro) · municípios vizinhos (cinza) · áreas urbanas (laranja) · vias urbanas (vermelho)', 14, 152);
+  doc.text('Limite municipal (azul escuro) · municípios vizinhos (cinza) · áreas urbanas (laranja) · vias transitáveis (vermelho)', 14, 152);
   doc.autoTable({
-    startY: 157, theme: 'grid', headStyles: {fillColor: ACCENT}, styles: {fontSize: 9},
+    startY: 157, theme: 'grid', headStyles: {fillColor: ACCENT}, margin: {bottom: 16}, styles: {fontSize: 9},
     columnStyles: {1: {halign: 'right'}},
     head: [['Indicador', 'Valor']],
     body: [
       ['Área urbana (setores IBGE 2022)', fmt(m.urb) + ' km²'],
-      [m.rev ? 'Vias transitáveis dentro das manchas urbanas (revisado)' : 'Vias urbanas (OSM)', fmt(m.vias) + ' km'],
-      ...(m.rev ? [['Vias – valor original CONIAPE (extração incompleta)', fmt(m.rev.orig) + ' km']] : []),
+      ['Vias transitáveis dentro das manchas urbanas', fmt(m.vias) + ' km'],
+      ...(m.rev ? [[`Vias – critério CONIAPE original (via inteira${m.rev.motivo ? ', extração incompleta' : ''})`, fmt(m.rev.orig) + ' km']] : []),
       ['Densidade de vias', fmt(m.dens) + ' km/km²'],
       ['Território – área oficial IBGE', fmt(m.aI, 3) + ' km²'],
       ['Território – área planimétrica UTM 25S', fmt(m.aU, 3) + ' km²'],
@@ -149,7 +150,7 @@ async function gerarPdfMunicipio(m) {
   });
   const dist = D.distritos.filter(d => d.CD_MUN === m.c).sort((a, b) => b.vias_km - a.vias_km);
   if (dist.length) doc.autoTable({
-    startY: doc.lastAutoTable.finalY + 6, theme: 'grid', headStyles: {fillColor: ACCENT}, styles: {fontSize: 9},
+    startY: doc.lastAutoTable.finalY + 6, theme: 'grid', headStyles: {fillColor: ACCENT}, margin: {bottom: 16}, styles: {fontSize: 9},
     columnStyles: {1: {halign: 'right'}, 2: {halign: 'right'}},
     head: [['Distrito / mancha urbana', 'Área (km²)', 'Vias (km)']],
     body: dist.map(d => [d.distrito, fmt(d.area_km2), fmt(d.vias_km)]),
@@ -160,7 +161,7 @@ async function gerarPdfMunicipio(m) {
 async function gerarPdfGeral() {
   toast('Gerando PDF com mapa base…', 0);
   const {jsPDF} = window.jspdf; const doc = new jsPDF({unit: 'mm', format: 'a4'});
-  pdfHeader(doc, 'Relatório geral CONIAPE · Pernambuco', `${CO.length} municípios · área urbana e extensão de vias urbanas`);
+  pdfHeader(doc, 'Relatório geral CONIAPE · Pernambuco', `${CO.length} municípios · área urbana e vias transitáveis dentro das manchas urbanas`);
   // Fernando de Noronha (2605459) fica no oceano e esmagaria o enquadramento do continente
   const continente = D.mun.filter(m => !m.co && m.c !== '2605459');
   await drawMap(doc, {x: 14, y: 28, w: 182, h: 66}, [
@@ -171,11 +172,11 @@ async function gerarPdfGeral() {
   const tU = CO.reduce((s, m) => s + m.urb, 0), tV = CO.reduce((s, m) => s + m.vias, 0);
   const rows = [...CO].sort((a, b) => a.n.localeCompare(b.n));
   doc.autoTable({
-    startY: 102, theme: 'striped', headStyles: {fillColor: ACCENT}, styles: {fontSize: 8, cellPadding: 1.4},
-    columnStyles: {1: {halign: 'right'}, 2: {halign: 'right'}, 3: {halign: 'right'}, 4: {halign: 'right'}, 5: {halign: 'right'}},
-    head: [['Município', 'Território IBGE (km²)', 'Área urbana (km²)', 'Vias (km)', 'km vias/km²', '% urbano']],
-    body: rows.map(m => [m.n, fmt(m.aI, 1), fmt(m.urb), fmt(m.vias), fmt(m.dens), fmt(m.perc)]),
-    foot: [['TOTAL', fmt(CO.reduce((s, m) => s + m.aI, 0), 1), fmt(tU), fmt(tV), fmt(tV / tU), '']],
+    startY: 102, theme: 'striped', headStyles: {fillColor: ACCENT}, margin: {bottom: 16}, styles: {fontSize: 8, cellPadding: 1.4},
+    columnStyles: {1: {halign: 'right'}, 2: {halign: 'right'}, 3: {halign: 'right'}, 4: {halign: 'right'}, 5: {halign: 'right'}, 6: {halign: 'right'}},
+    head: [['Município', 'Território IBGE (km²)', 'Área urbana (km²)', 'Vias transitáveis (km)', 'Vias CONIAPE orig. (km)', 'km vias/km²', '% urbano']],
+    body: rows.map(m => [m.n, fmt(m.aI, 1), fmt(m.urb), fmt(m.vias), m.rev ? fmt(m.rev.orig) : '–', fmt(m.dens), fmt(m.perc)]),
+    foot: [['TOTAL', fmt(CO.reduce((s, m) => s + m.aI, 0), 1), fmt(tU), fmt(tV), fmt(CO.reduce((s, m) => s + (m.rev ? m.rev.orig : m.vias), 0)), fmt(tV / tU), '']],
     footStyles: {fillColor: [230, 236, 240], textColor: 20, fontStyle: 'bold', halign: 'right'},
   });
   pdfFooter(doc); save(doc, 'Relatorio_geral_CONIAPE_PE.pdf');

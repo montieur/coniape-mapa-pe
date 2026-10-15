@@ -28,13 +28,14 @@ def motivo_exclusao(t):
 # ---- manchas urbanas (uma por subpasta de Distritos/, com o nome do quantitativos.txt)
 def manchas():
     subs = sorted((base / "Distritos").glob("*/area_urbana.kml")) if (base / "Distritos").exists() else []
+    subs = subs or sorted(base.glob("*/01_poligono.kml"))   # Ipojuca: polígonos do plano em vez de manchas IBGE
     for kml, d in ([(s, s.parent) for s in subs] or [(base / "01_area_urbana.kml", None)]):
         lyr = QgsVectorLayer(str(kml), "m", "ogr")
         tr = QgsCoordinateTransform(lyr.crs(), UTM, QgsProject.instance())
         gs = []
         for f in lyr.getFeatures():
             g = QgsGeometry(f.geometry()); g.transform(tr); gs.append(g)
-        nome = d.name if d else pasta
+        nome = d.name.replace("_", " ") if d else pasta
         if d and (d / "quantitativos.txt").exists():
             campos = dict(ln.split(":", 1) for ln in (d / "quantitativos.txt").read_text(encoding="utf-8").splitlines() if ":" in ln)
             nome = (campos.get("Mancha") or campos.get("Distrito") or nome).strip()
@@ -43,7 +44,8 @@ M = list(manchas())
 
 osm = QgsVectorLayer(src, "osm", "ogr")
 tr = QgsCoordinateTransform(osm.crs(), UTM, QgsProject.instance())
-nome_mun = json.loads((base / "quantitativos.json").read_text(encoding="utf-8"))["name"]
+q = base / "quantitativos.json"
+nome_mun = json.loads(q.read_text(encoding="utf-8"))["name"] if q.exists() else pasta
 
 fields = QgsFields()
 for n, t, l in (("CD_MUN", QVariant.String, 7), ("NM_MUN", QVariant.String, 60), ("NOME_VIA", QVariant.String, 120),

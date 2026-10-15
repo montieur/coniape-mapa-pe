@@ -8,7 +8,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
-<script src="data.js?v=77966b22"></script>
+<script src="data.js?v=0e1fa3b2"></script>
 <style>
 :root{
   --bg:#f3f5f8; --panel:#ffffff; --sunk:#f6f8fa; --ink:#18212b; --ink-2:#3d4955; --muted:#6b7785; --line:#e3e7ec;
@@ -179,7 +179,7 @@ dialog .rowb{display:flex;justify-content:flex-end;gap:8px;margin-top:14px}
     <div class="mark" aria-hidden="true"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3 3 6v15l6-3 6 3 6-3V3l-6 3-6-3z"/><path d="M9 3v15M15 6v15"/></svg></div>
     <div style="min-width:0">
       <h1>CONIAPE · <span class="long">Municípios de </span>Pernambuco</h1>
-      <p>Área urbana e extensão de vias urbanas · SIRGAS 2000 / UTM 25S</p>
+      <p>Área urbana IBGE e vias transitáveis dentro das manchas urbanas · SIRGAS 2000 / UTM 25S</p>
     </div>
   </div>
   <div class="sp"></div>
@@ -195,7 +195,7 @@ dialog .rowb{display:flex;justify-content:flex-end;gap:8px;margin-top:14px}
       <div class="kpis">
         <div class="kpi"><b class="num" id="kMun">–</b><span>municípios</span></div>
         <div class="kpi"><b class="num" id="kUrb">–</b><span>km² urbanos</span></div>
-        <div class="kpi"><b class="num" id="kVias">–</b><span>km de vias</span></div>
+        <div class="kpi"><b class="num" id="kVias">–</b><span>km de vias transitáveis</span></div>
       </div>
     </section>
 
@@ -206,7 +206,7 @@ dialog .rowb{display:flex;justify-content:flex-end;gap:8px;margin-top:14px}
       </div>
       <label>Indicador
         <select id="metrica">
-          <option value="vias">Vias urbanas (km)</option>
+          <option value="vias">Vias transitáveis (km)</option>
           <option value="urb">Área urbana (km²)</option>
           <option value="dens">Densidade de vias (km/km²)</option>
           <option value="perc">Área urbana / território (%)</option>
@@ -269,7 +269,7 @@ const $ = id => document.getElementById(id);
 const CO = D.mun.filter(m => m.co);
 const byCode = Object.fromEntries(D.mun.map(m => [m.c, m]));
 const M = {
-  vias: {label: 'Vias urbanas', unit: 'km', short: 'Vias km', d: 0},
+  vias: {label: 'Vias transitáveis', unit: 'km', short: 'Vias km', d: 0},
   urb:  {label: 'Área urbana', unit: 'km²', short: 'Área urb. km²', d: 2},
   dens: {label: 'Densidade de vias', unit: 'km/km²', short: 'Densidade', d: 1},
   perc: {label: 'Área urbana / território', unit: '%', short: '% urbano', d: 1},
@@ -367,7 +367,7 @@ map.on('moveend zoomend overlayadd', refreshVias);
 map.on('overlayremove', e => { if (e.layer === labels && !syncing) labelsOn = false; });
 map.on('overlayadd', e => { if (e.layer === labels && !syncing) { labelsOn = true; syncLabels(); } });
 
-L.control.layers(bases, {'Nomes dos municípios': labels, 'Áreas urbanas': urbLayer, 'Vias urbanas': viasGroup}, {position: 'topright'}).addTo(map);
+L.control.layers(bases, {'Nomes dos municípios': labels, 'Áreas urbanas': urbLayer, 'Vias transitáveis': viasGroup}, {position: 'topright'}).addTo(map);
 L.control.scale({imperial: false, position: 'bottomleft'}).addTo(map);
 
 /* legenda recolhível */
@@ -389,7 +389,7 @@ function drawLegend() {
     <div class="ticks num"><span>menor</span>${e.map(v => `<span>${fmt(v, d)}</span>`).join('')}<span>maior</span></div>
     <div class="it"><span class="sw" style="background:${css('--off-fill')};opacity:.6"></span>Fora do CONIAPE</div>
     <div class="it"><span class="sw" style="background:${css('--urb')};opacity:.75"></span>Área urbana</div>
-    <div class="it"><span class="sw" style="height:3px;background:${css('--via')}"></span>Vias urbanas (zoom ≥ 11)</div>`;
+    <div class="it"><span class="sw" style="height:3px;background:${css('--via')}"></span>Vias transitáveis (zoom ≥ 11)</div>`;
 }
 
 /* enquadramento inicial: espera o painel ter tamanho real */
@@ -456,12 +456,12 @@ function renderDetail(m) {
     <div class="dtitle"><h2>${m.n}</h2><p>Código IBGE ${m.c}<br>Região imediata de ${m.rgi} · Região intermediária de ${m.rgint}</p></div>
     <div class="hero">
       <div><span>Área urbana</span><b class="num">${fmt(m.urb)} km²</b><small>${RANK[m.c].urb}º de ${n} no CONIAPE</small></div>
-      <div><span>Vias urbanas</span><b class="num">${fmt(m.vias)} km</b><small>${RANK[m.c].vias}º de ${n} no CONIAPE</small></div>
+      <div><span>Vias transitáveis</span><b class="num">${fmt(m.vias)} km</b><small>${RANK[m.c].vias}º de ${n} no CONIAPE</small></div>
     </div>
-    ${m.rev ? `<div class="alert"><b>Vias revisadas em ${m.rev.data.split('-').reverse().join('/')}.</b>
-      ${m.rev.criterio}. A extração original do CONIAPE (${fmt(m.rev.orig)} km) estava incompleta no centro.
-      ${Object.keys(m.rev.excl).length ? `Ficaram de fora ${fmt(Object.values(m.rev.excl).reduce((a, b) => a + b, 0), 1)} km não transitáveis (vias privadas, estacionamentos, garagens).` : ''}</div>` : ''}
+    ${m.rev?.motivo ? `<div class="alert"><b>Atenção:</b> ${m.rev.motivo} O valor atual vem de nova extração do OpenStreetMap.</div>` : ''}
     <div class="stats">
+      <div><span>Vias – critério CONIAPE original</span><b class="num">${m.rev ? fmt(m.rev.orig) + ' km' : '–'}</b></div>
+      <div><span>Não transitáveis excluídas</span><b class="num">${m.rev ? fmt(Object.values(m.rev.excl).reduce((a, b) => a + b, 0)) + ' km' : '–'}</b></div>
       <div><span>Densidade de vias</span><b class="num">${fmt(m.dens)} km/km²</b></div>
       <div><span>Área urbana / território</span><b class="num">${fmt(m.perc)} %</b></div>
       <div><span>Território (área oficial IBGE)</span><b class="num">${fmt(m.aI, 1)} km²</b></div>
@@ -492,7 +492,7 @@ function askDownload(m) {
   const has = !!m.pdf, opt = $('optOficial');
   opt.querySelector('input').disabled = !has; opt.style.opacity = has ? 1 : .5;
   $('optOficialTxt').textContent = !has ? 'Não há relatório oficial para este município.'
-    : m.rev ? `PDF original do município. Atenção: traz o valor de vias antes da revisão (${fmt(m.rev.orig)} km).`
+    : m.rev ? `PDF original do município. Atenção: traz o km de vias pelo critério antigo do CONIAPE (${fmt(m.rev.orig)} km).`
     : 'PDF original do município, baixado do repositório.';
   dlg.querySelector(`input[value="${has ? 'oficial' : 'gerado'}"]`).checked = true;
   dlg.showModal();
@@ -519,7 +519,7 @@ async function baixarOficial(m) {
   }
 }
 </script>
-<script src="relatorio.js?v=9f1535f0"></script>
+<script src="relatorio.js?v=0ff5b90b"></script>
 <script>
 const pdfErro = e => { console.error(e); toast('Não foi possível gerar o PDF: ' + e.message, 5000); };
 $('btnGeral').onclick = () => gerarPdfGeral().catch(pdfErro);
