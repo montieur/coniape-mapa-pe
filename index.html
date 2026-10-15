@@ -8,7 +8,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
-<script src="data.js"></script>
+<script src="data.js?v=77966b22"></script>
 <style>
 :root{
   --bg:#f3f5f8; --panel:#ffffff; --sunk:#f6f8fa; --ink:#18212b; --ink-2:#3d4955; --muted:#6b7785; --line:#e3e7ec;
@@ -519,7 +519,7 @@ async function baixarOficial(m) {
   }
 }
 </script>
-<script src="relatorio.js"></script>
+<script src="relatorio.js?v=9f1535f0"></script>
 <script>
 const pdfErro = e => { console.error(e); toast('Não foi possível gerar o PDF: ' + e.message, 5000); };
 $('btnGeral').onclick = () => gerarPdfGeral().catch(pdfErro);

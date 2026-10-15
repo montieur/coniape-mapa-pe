@@ -93,5 +93,14 @@ data = {"mun": mun, "urb": urb, "viaNames": names, "vias": vias, "distritos": di
         "gerado": __import__("datetime").date.today().isoformat()}
 js = "window.CONIAPE_DATA=" + json.dumps(data, ensure_ascii=False, separators=(",", ":")) + ";"
 (SITE / "data.js").write_text(js, encoding="utf-8")
+
+# versão no endereço dos scripts: o navegador não reaproveita um data.js/relatorio.js antigo do cache
+import hashlib, re
+idx = SITE / "index.html"
+html = idx.read_text(encoding="utf-8")
+for nome in ("data.js", "relatorio.js"):
+    v = hashlib.sha1((SITE / nome).read_bytes()).hexdigest()[:8]
+    html = re.sub(rf'src="{re.escape(nome)}(\?v=\w+)?"', f'src="{nome}?v={v}"', html)
+idx.write_text(html, encoding="utf-8")
 print("data.js", round(len(js.encode()) / 1e6, 2), "MB |", len(mun), "municipios |",
       sum(1 for m in mun if m["co"]), "CONIAPE |", len(pdf_by_code), "PDFs")
