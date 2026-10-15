@@ -66,7 +66,8 @@ revs = json.loads(rev_path.read_text(encoding="utf-8")) if rev_path.exists() els
 orig = revs.get(cd, {}).get("vias_km_original", orig)   # sempre o valor do CONIAPE, não o de uma revisão anterior
 revs[cd] = {"municipio": nome, "data": date.today().isoformat(), "vias_km_original": orig,
             "vias_km": med["total"]["vias_km"], "vias_recortadas_km": med["total"]["vias_recortadas_km"],
-            "motivo": "Extração OSM original do CONIAPE incompleta (faltavam eixos na mancha principal).",
+            # aviso só quando houve falha na extração original (Caruaru); senão é a padronização do critério
+            "motivo": revs.get(cd, {}).get("motivo", ""),
             "criterio": med.get("criterio", "Vias reextraídas do OpenStreetMap com o mesmo filtro e critério do CONIAPE "
                                             "(vias que tocam as manchas urbanas, comprimento inteiro)."),
             "por_tipo_km": med.get("por_tipo_km"), "excluidas_km": med.get("excluidas_km"),

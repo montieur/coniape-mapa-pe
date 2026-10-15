@@ -1,0 +1,2000 @@
+{
+ "2604106": {
+  "municipio": "Caruaru",
+  "data": "2026-10-15",
+  "vias_km_original": 1016.04,
+  "vias_km": 1501.18,
+  "vias_recortadas_km": 1501.18,
+  "motivo": "Extração OSM original do CONIAPE incompleta (faltavam eixos na mancha principal).",
+  "criterio": "Vias transitáveis por veículo (OSM), recortadas nas manchas urbanas IBGE 2022 (CD_SIT 1-3)",
+  "por_tipo_km": {
+   "residential": 1184.83,
+   "tertiary": 94.11,
+   "service": 54.01,
+   "trunk": 50.95,
+   "secondary": 40.17,
+   "unclassified": 34.87,
+   "primary": 25.32,
+   "trunk_link": 8.1,
+   "track": 6.25,
+   "living_street": 1.01,
+   "secondary_link": 0.76,
+   "primary_link": 0.56,
+   "tertiary_link": 0.24
+  },
+  "excluidas_km": {
+   "acesso privado/proibido": 13.76,
+   "service=parking_aisle": 5.09,
+   "service=driveway": 0.22,
+   "proibido a veículos": 0.23
+  },
+  "manchas": [
+   {
+    "mancha": "Caruaru (1)",
+    "area_km2": 0.47,
+    "vias_km": 8.84,
+    "vias_recortadas_km": 8.84,
+    "n_vias": 45
+   },
+   {
+    "mancha": "Caruaru (2)",
+    "area_km2": 0.18,
+    "vias_km": 2.23,
+    "vias_recortadas_km": 2.23,
+    "n_vias": 16
+   },
+   {
+    "mancha": "Caruaru (3)",
+    "area_km2": 0.31,
+    "vias_km": 10.82,
+    "vias_recortadas_km": 10.82,
+    "n_vias": 52
+   },
+   {
+    "mancha": "Caruaru (4)",
+    "area_km2": 74.93,
+    "vias_km": 1362.4,
+    "vias_recortadas_km": 1362.4,
+    "n_vias": 7180
+   },
+   {
+    "mancha": "Caruaru (5)",
+    "area_km2": 0.78,
+    "vias_km": 15.63,
+    "vias_recortadas_km": 15.63,
+    "n_vias": 69
+   },
+   {
+    "mancha": "Caruaru (6)",
+    "area_km2": 0.29,
+    "vias_km": 2.72,
+    "vias_recortadas_km": 2.72,
+    "n_vias": 17
+   },
+   {
+    "mancha": "Caruaru (7)",
+    "area_km2": 0.57,
+    "vias_km": 9.91,
+    "vias_recortadas_km": 9.91,
+    "n_vias": 55
+   },
+   {
+    "mancha": "Caruaru (8)",
+    "area_km2": 0.18,
+    "vias_km": 3.76,
+    "vias_recortadas_km": 3.76,
+    "n_vias": 20
+   },
+   {
+    "mancha": "Caruaru (9)",
+    "area_km2": 0.02,
+    "vias_km": 0.61,
+    "vias_recortadas_km": 0.61,
+    "n_vias": 3
+   },
+   {
+    "mancha": "Caruaru (10)",
+    "area_km2": 0.03,
+    "vias_km": 0.4,
+    "vias_recortadas_km": 0.4,
+    "n_vias": 5
+   },
+   {
+    "mancha": "Carapotós (1)",
+    "area_km2": 0.63,
+    "vias_km": 10.35,
+    "vias_recortadas_km": 10.35,
+    "n_vias": 59
+   },
+   {
+    "mancha": "Carapotós (2)",
+    "area_km2": 1.04,
+    "vias_km": 18.06,
+    "vias_recortadas_km": 18.06,
+    "n_vias": 126
+   },
+   {
+    "mancha": "Carapotós (3)",
+    "area_km2": 0.8,
+    "vias_km": 11.89,
+    "vias_recortadas_km": 11.89,
+    "n_vias": 61
+   },
+   {
+    "mancha": "Carapotós (4)",
+    "area_km2": 1.43,
+    "vias_km": 21.76,
+    "vias_recortadas_km": 21.76,
+    "n_vias": 149
+   },
+   {
+    "mancha": "Carapotós (5)",
+    "area_km2": 0.69,
+    "vias_km": 13.44,
+    "vias_recortadas_km": 13.44,
+    "n_vias": 94
+   },
+   {
+    "mancha": "Gonçalves Ferreira (1)",
+    "area_km2": 0.19,
+    "vias_km": 2.33,
+    "vias_recortadas_km": 2.33,
+    "n_vias": 17
+   },
+   {
+    "mancha": "Gonçalves Ferreira (2)",
+    "area_km2": 0.32,
+    "vias_km": 4.97,
+    "vias_recortadas_km": 4.97,
+    "n_vias": 40
+   },
+   {
+    "mancha": "Lajedo do Cedro",
+    "area_km2": 0.11,
+    "vias_km": 1.06,
+    "vias_recortadas_km": 1.06,
+    "n_vias": 7
+   }
+  ]
+ },
+ "2600302": {
+  "municipio": "Agrestina",
+  "data": "2026-10-15",
+  "vias_km_original": 110.77,
+  "vias_km": 90.1,
+  "vias_recortadas_km": 90.1,
+  "motivo": "",
+  "criterio": "Vias transitáveis por veículo (OSM), recortadas nas manchas urbanas IBGE 2022 (CD_SIT 1-3)",
+  "por_tipo_km": {
+   "residential": 74.59,
+   "tertiary": 8.45,
+   "trunk": 3.12,
+   "unclassified": 1.42,
+   "track": 0.75,
+   "primary": 0.75,
+   "service": 0.74,
+   "trunk_link": 0.28
+  },
+  "excluidas_km": {},
+  "manchas": [
+   {
+    "mancha": "Agrestina",
+    "area_km2": 4.14,
+    "vias_km": 85.44,
+    "vias_recortadas_km": 85.44,
+    "n_vias": 470
+   },
+   {
+    "mancha": "Barra do Chata",
+    "area_km2": 0.21,
+    "vias_km": 2.15,
+    "vias_recortadas_km": 2.15,
+    "n_vias": 17
+   },
+   {
+    "mancha": "Barra do Jardim",
+    "area_km2": 0.26,
+    "vias_km": 2.5,
+    "vias_recortadas_km": 2.5,
+    "n_vias": 16
+   }
+  ]
+ },
+ "2600807": {
+  "municipio": "Altinho",
+  "data": "2026-10-15",
+  "vias_km_original": 120.57,
+  "vias_km": 66.22,
+  "vias_recortadas_km": 66.22,
+  "motivo": "",
+  "criterio": "Vias transitáveis por veículo (OSM), recortadas nas manchas urbanas IBGE 2022 (CD_SIT 1-3)",
+  "por_tipo_km": {
+   "residential": 53.37,
+   "tertiary": 9.85,
+   "secondary": 2.31,
+   "unclassified": 0.23,
+   "living_street": 0.17,
+   "service": 0.15,
+   "primary": 0.09,
+   "track": 0.03,
+   "tertiary_link": 0.02,
+   "secondary_link": 0.01
+  },
+  "excluidas_km": {},
+  "manchas": [
+   {
+    "mancha": "Altinho (1)",
+    "area_km2": 3.26,
+    "vias_km": 63.75,
+    "vias_recortadas_km": 63.75,
+    "n_vias": 405
+   },
+   {
+    "mancha": "Altinho (2)",
+    "area_km2": 0.02,
+    "vias_km": 0.65,
+    "vias_recortadas_km": 0.65,
+    "n_vias": 9
+   },
+   {
+    "mancha": "Ituguaçu",
+    "area_km2": 0.2,
+    "vias_km": 1.83,
+    "vias_recortadas_km": 1.83,
+    "n_vias": 10
+   }
+  ]
+ },
+ "2601003": {
+  "municipio": "Angelim",
+  "data": "2026-10-15",
+  "vias_km_original": 49.28,
+  "vias_km": 27.64,
+  "vias_recortadas_km": 27.64,
+  "motivo": "",
+  "criterio": "Vias transitáveis por veículo (OSM), recortadas nas manchas urbanas IBGE 2022 (CD_SIT 1-3)",
+  "por_tipo_km": {
+   "residential": 15.36,
+   "unclassified": 3.46,
+   "service": 3.43,
+   "secondary": 2.76,
+   "tertiary": 1.26,
+   "track": 0.79,
+   "primary": 0.51,
+   "primary_link": 0.07
+  },
+  "excluidas_km": {},
+  "manchas": [
+   {
+    "mancha": "03_Angelim",
+    "area_km2": 1.59,
+    "vias_km": 27.64,
+    "vias_recortadas_km": 27.64,
+    "n_vias": 164
+   }
+  ]
+ },
+ "2601904": {
+  "municipio": "Bezerros",
+  "data": "2026-10-15",
+  "vias_km_original": 460.38,
+  "vias_km": 357.58,
+  "vias_recortadas_km": 357.58,
+  "motivo": "",
+  "criterio": "Vias transitáveis por veículo (OSM), recortadas nas manchas urbanas IBGE 2022 (CD_SIT 1-3)",
+  "por_tipo_km": {
+   "residential": 248.69,
+   "unclassified": 29.92,
+   "track": 19.88,
+   "primary": 14.32,
+   "tertiary": 14.2,
+   "trunk": 13.7,
+   "service": 10.16,
+   "secondary": 4.92,
+   "trunk_link": 1.45,
+   "primary_link": 0.33
+  },
+  "excluidas_km": {
+   "service=driveway": 0.28,
+   "service=parking_aisle": 0.24,
+   "acesso privado/proibido": 0.18
+  },
+  "manchas": [
+   {
+    "mancha": "Bezerros (1)",
+    "area_km2": 2.4,
+    "vias_km": 30.24,
+    "vias_recortadas_km": 30.24,
+    "n_vias": 178
+   },
+   {
+    "mancha": "Bezerros (2)",
+    "area_km2": 19.78,
+    "vias_km": 317.58,
+    "vias_recortadas_km": 317.58,
+    "n_vias": 1623
+   },
+   {
+    "mancha": "Boas Novas",
+    "area_km2": 0.5,
+    "vias_km": 2.96,
+    "vias_recortadas_km": 2.96,
+    "n_vias": 25
+   },
+   {
+    "mancha": "Sapucarana",
+    "area_km2": 0.82,
+    "vias_km": 6.78,
+    "vias_recortadas_km": 6.78,
+    "n_vias": 42
+   }
+  ]
+ },
+ "2602209": {
+  "municipio": "Bom Jardim",
+  "data": "2026-10-15",
+  "vias_km_original": 162.14,
+  "vias_km": 86.35,
+  "vias_recortadas_km": 86.35,
+  "motivo": "",
+  "criterio": "Vias transitáveis por veículo (OSM), recortadas nas manchas urbanas IBGE 2022 (CD_SIT 1-3)",
+  "por_tipo_km": {
+   "residential": 49.36,
+   "primary": 9.07,
+   "unclassified": 8.8,
+   "tertiary": 7.5,
+   "track": 6.36,
+   "secondary": 2.97,
+   "living_street": 1.07,
+   "service": 0.83,
+   "primary_link": 0.33,
+   "tertiary_link": 0.06
+  },
+  "excluidas_km": {
+   "acesso privado/proibido": 0.61
+  },
+  "manchas": [
+   {
+    "mancha": "Bom Jardim",
+    "area_km2": 3.18,
+    "vias_km": 36.97,
+    "vias_recortadas_km": 36.97,
+    "n_vias": 257
+   },
+   {
+    "mancha": "Bizarra",
+    "area_km2": 0.67,
+    "vias_km": 8.17,
+    "vias_recortadas_km": 8.17,
+    "n_vias": 45
+   },
+   {
+    "mancha": "Encruzilhada",
+    "area_km2": 3.0,
+    "vias_km": 22.88,
+    "vias_recortadas_km": 22.88,
+    "n_vias": 113
+   },
+   {
+    "mancha": "Tamboatá",
+    "area_km2": 0.1,
+    "vias_km": 1.4,
+    "vias_recortadas_km": 1.4,
+    "n_vias": 12
+   },
+   {
+    "mancha": "Umari",
+    "area_km2": 1.53,
+    "vias_km": 16.93,
+    "vias_recortadas_km": 16.93,
+    "n_vias": 98
+   }
+  ]
+ },
+ "2602308": {
+  "municipio": "Bonito",
+  "data": "2026-10-15",
+  "vias_km_original": 160.21,
+  "vias_km": 102.02,
+  "vias_recortadas_km": 102.02,
+  "motivo": "",
+  "criterio": "Vias transitáveis por veículo (OSM), recortadas nas manchas urbanas IBGE 2022 (CD_SIT 1-3)",
+  "por_tipo_km": {
+   "residential": 80.72,
+   "tertiary": 11.85,
+   "primary": 4.54,
+   "unclassified": 3.2,
+   "service": 1.47,
+   "primary_link": 0.21,
+   "tertiary_link": 0.02
+  },
+  "excluidas_km": {},
+  "manchas": [
+   {
+    "mancha": "Bonito (1)",
+    "area_km2": 0.4,
+    "vias_km": 8.98,
+    "vias_recortadas_km": 8.98,
+    "n_vias": 46
+   },
+   {
+    "mancha": "Bonito (2)",
+    "area_km2": 4.16,
+    "vias_km": 71.33,
+    "vias_recortadas_km": 71.33,
+    "n_vias": 423
+   },
+   {
+    "mancha": "Bentevi",
+    "area_km2": 0.35,
+    "vias_km": 3.93,
+    "vias_recortadas_km": 3.93,
+    "n_vias": 31
+   },
+   {
+    "mancha": "Alto Bonito",
+    "area_km2": 1.35,
+    "vias_km": 17.78,
+    "vias_recortadas_km": 17.78,
+    "n_vias": 98
+   }
+  ]
+ },
+ "2603504": {
+  "municipio": "Camocim de São Félix",
+  "data": "2026-10-15",
+  "vias_km_original": 57.05,
+  "vias_km": 46.48,
+  "vias_recortadas_km": 46.48,
+  "motivo": "",
+  "criterio": "Vias transitáveis por veículo (OSM), recortadas nas manchas urbanas IBGE 2022 (CD_SIT 1-3)",
+  "por_tipo_km": {
+   "residential": 38.4,
+   "tertiary": 3.79,
+   "primary": 3.64,
+   "unclassified": 0.34,
+   "service": 0.16,
+   "primary_link": 0.14
+  },
+  "excluidas_km": {
+   "proibido a veículos": 0.1
+  },
+  "manchas": [
+   {
+    "mancha": "Camocim de São Félix (1)",
+    "area_km2": 0.21,
+    "vias_km": 5.31,
+    "vias_recortadas_km": 5.31,
+    "n_vias": 27
+   },
+   {
+    "mancha": "Camocim de São Félix (2)",
+    "area_km2": 1.4,
+    "vias_km": 41.16,
+    "vias_recortadas_km": 41.16,
+    "n_vias": 321
+   }
+  ]
+ },
+ "2604155": {
+  "municipio": "Casinhas",
+  "data": "2026-10-15",
+  "vias_km_original": 37.01,
+  "vias_km": 11.53,
+  "vias_recortadas_km": 11.53,
+  "motivo": "",
+  "criterio": "Vias transitáveis por veículo (OSM), recortadas nas manchas urbanas IBGE 2022 (CD_SIT 1-3)",
+  "por_tipo_km": {
+   "residential": 6.31,
+   "secondary": 2.76,
+   "unclassified": 2.11,
+   "service": 0.22,
+   "track": 0.14
+  },
+  "excluidas_km": {},
+  "manchas": [
+   {
+    "mancha": "Casinhas (1)",
+    "area_km2": 0.12,
+    "vias_km": 0.7,
+    "vias_recortadas_km": 0.7,
+    "n_vias": 6
+   },
+   {
+    "mancha": "Casinhas (2)",
+    "area_km2": 0.71,
+    "vias_km": 8.44,
+    "vias_recortadas_km": 8.44,
+    "n_vias": 62
+   },
+   {
+    "mancha": "Casinhas (3)",
+    "area_km2": 0.47,
+    "vias_km": 2.39,
+    "vias_recortadas_km": 2.39,
+    "n_vias": 7
+   }
+  ]
+ },
+ "2604908": {
+  "municipio": "Cumaru",
+  "data": "2026-10-15",
+  "vias_km_original": 97.5,
+  "vias_km": 51.25,
+  "vias_recortadas_km": 51.25,
+  "motivo": "",
+  "criterio": "Vias transitáveis por veículo (OSM), recortadas nas manchas urbanas IBGE 2022 (CD_SIT 1-3)",
+  "por_tipo_km": {
+   "residential": 37.92,
+   "tertiary": 5.09,
+   "unclassified": 4.18,
+   "secondary": 1.4,
+   "track": 1.27,
+   "primary": 1.06,
+   "service": 0.33,
+   "tertiary_link": 0.01
+  },
+  "excluidas_km": {},
+  "manchas": [
+   {
+    "mancha": "Cumaru",
+    "area_km2": 2.63,
+    "vias_km": 24.58,
+    "vias_recortadas_km": 24.58,
+    "n_vias": 153
+   },
+   {
+    "mancha": "Ameixas (1)",
+    "area_km2": 1.2,
+    "vias_km": 24.47,
+    "vias_recortadas_km": 24.47,
+    "n_vias": 129
+   },
+   {
+    "mancha": "Ameixas (2)",
+    "area_km2": 0.2,
+    "vias_km": 2.21,
+    "vias_recortadas_km": 2.21,
+    "n_vias": 13
+   }
+  ]
+ },
+ "2605004": {
+  "municipio": "Cupira",
+  "data": "2026-10-15",
+  "vias_km_original": 116.84,
+  "vias_km": 93.23,
+  "vias_recortadas_km": 93.23,
+  "motivo": "",
+  "criterio": "Vias transitáveis por veículo (OSM), recortadas nas manchas urbanas IBGE 2022 (CD_SIT 1-3)",
+  "por_tipo_km": {
+   "residential": 81.3,
+   "secondary": 7.5,
+   "tertiary": 1.57,
+   "service": 1.52,
+   "unclassified": 1.11,
+   "trunk_link": 0.08,
+   "trunk": 0.07,
+   "secondary_link": 0.06
+  },
+  "excluidas_km": {},
+  "manchas": [
+   {
+    "mancha": "Cupira",
+    "area_km2": 4.57,
+    "vias_km": 90.55,
+    "vias_recortadas_km": 90.55,
+    "n_vias": 511
+   },
+   {
+    "mancha": "Laje de São José (1)",
+    "area_km2": 0.2,
+    "vias_km": 2.26,
+    "vias_recortadas_km": 2.26,
+    "n_vias": 22
+   },
+   {
+    "mancha": "Laje de São José (2)",
+    "area_km2": 0.03,
+    "vias_km": 0.43,
+    "vias_recortadas_km": 0.43,
+    "n_vias": 6
+   }
+  ]
+ },
+ "2605806": {
+  "municipio": "Frei Miguelinho",
+  "data": "2026-10-15",
+  "vias_km_original": 72.16,
+  "vias_km": 41.62,
+  "vias_recortadas_km": 41.62,
+  "motivo": "",
+  "criterio": "Vias transitáveis por veículo (OSM), recortadas nas manchas urbanas IBGE 2022 (CD_SIT 1-3)",
+  "por_tipo_km": {
+   "residential": 31.82,
+   "unclassified": 4.04,
+   "tertiary": 2.68,
+   "primary": 2.1,
+   "secondary": 0.71,
+   "service": 0.22,
+   "primary_link": 0.03,
+   "tertiary_link": 0.02
+  },
+  "excluidas_km": {},
+  "manchas": [
+   {
+    "mancha": "Frei Miguelinho",
+    "area_km2": 1.27,
+    "vias_km": 17.07,
+    "vias_recortadas_km": 17.07,
+    "n_vias": 116
+   },
+   {
+    "mancha": "Lagoa de João Carlos",
+    "area_km2": 2.89,
+    "vias_km": 24.55,
+    "vias_recortadas_km": 24.55,
+    "n_vias": 133
+   }
+  ]
+ },
+ "2606705": {
+  "municipio": "Ibirajuba",
+  "data": "2026-10-15",
+  "vias_km_original": 52.28,
+  "vias_km": 20.53,
+  "vias_recortadas_km": 20.53,
+  "motivo": "",
+  "criterio": "Vias transitáveis por veículo (OSM), recortadas nas manchas urbanas IBGE 2022 (CD_SIT 1-3)",
+  "por_tipo_km": {
+   "residential": 14.17,
+   "tertiary": 2.28,
+   "primary": 1.92,
+   "unclassified": 1.71,
+   "track": 0.28,
+   "service": 0.17
+  },
+  "excluidas_km": {},
+  "manchas": [
+   {
+    "mancha": "13_Ibirajuba",
+    "area_km2": 1.2,
+    "vias_km": 20.53,
+    "vias_recortadas_km": 20.53,
+    "n_vias": 127
+   }
+  ]
+ },
+ "2607653": {
+  "municipio": "Itambé",
+  "data": "2026-10-15",
+  "vias_km_original": 163.55,
+  "vias_km": 110.3,
+  "vias_recortadas_km": 110.3,
+  "motivo": "",
+  "criterio": "Vias transitáveis por veículo (OSM), recortadas nas manchas urbanas IBGE 2022 (CD_SIT 1-3)",
+  "por_tipo_km": {
+   "residential": 91.91,
+   "unclassified": 6.08,
+   "primary": 5.23,
+   "tertiary": 4.08,
+   "service": 1.16,
+   "secondary": 1.1,
+   "track": 0.34,
+   "primary_link": 0.25,
+   "living_street": 0.08,
+   "tertiary_link": 0.05
+  },
+  "excluidas_km": {},
+  "manchas": [
+   {
+    "mancha": "Itambé",
+    "area_km2": 3.22,
+    "vias_km": 75.43,
+    "vias_recortadas_km": 75.43,
+    "n_vias": 413
+   },
+   {
+    "mancha": "Caricé",
+    "area_km2": 1.01,
+    "vias_km": 10.89,
+    "vias_recortadas_km": 10.89,
+    "n_vias": 61
+   },
+   {
+    "mancha": "Ibiranga (1)",
+    "area_km2": 0.39,
+    "vias_km": 7.04,
+    "vias_recortadas_km": 7.04,
+    "n_vias": 43
+   },
+   {
+    "mancha": "Ibiranga (2)",
+    "area_km2": 0.77,
+    "vias_km": 16.94,
+    "vias_recortadas_km": 16.94,
+    "n_vias": 95
+   }
+  ]
+ },
+ "2608008": {
+  "municipio": "Jataúba",
+  "data": "2026-10-15",
+  "vias_km_original": 136.23,
+  "vias_km": 53.33,
+  "vias_recortadas_km": 53.33,
+  "motivo": "",
+  "criterio": "Vias transitáveis por veículo (OSM), recortadas nas manchas urbanas IBGE 2022 (CD_SIT 1-3)",
+  "por_tipo_km": {
+   "residential": 41.79,
+   "tertiary": 5.63,
+   "primary": 2.82,
+   "unclassified": 1.96,
+   "service": 0.79,
+   "secondary": 0.28,
+   "tertiary_link": 0.07
+  },
+  "excluidas_km": {},
+  "manchas": [
+   {
+    "mancha": "Jataúba",
+    "area_km2": 2.43,
+    "vias_km": 42.01,
+    "vias_recortadas_km": 42.01,
+    "n_vias": 275
+   },
+   {
+    "mancha": "Jacu",
+    "area_km2": 0.13,
+    "vias_km": 3.01,
+    "vias_recortadas_km": 3.01,
+    "n_vias": 40
+   },
+   {
+    "mancha": "Jundiá",
+    "area_km2": 0.25,
+    "vias_km": 4.31,
+    "vias_recortadas_km": 4.31,
+    "n_vias": 33
+   },
+   {
+    "mancha": "Passagem do Tó",
+    "area_km2": 0.11,
+    "vias_km": 1.36,
+    "vias_recortadas_km": 1.36,
+    "n_vias": 14
+   },
+   {
+    "mancha": "Riacho do Meio",
+    "area_km2": 0.31,
+    "vias_km": 2.64,
+    "vias_recortadas_km": 2.64,
+    "n_vias": 24
+   }
+  ]
+ },
+ "2608107": {
+  "municipio": "João Alfredo",
+  "data": "2026-10-15",
+  "vias_km_original": 65.59,
+  "vias_km": 50.26,
+  "vias_recortadas_km": 50.26,
+  "motivo": "",
+  "criterio": "Vias transitáveis por veículo (OSM), recortadas nas manchas urbanas IBGE 2022 (CD_SIT 1-3)",
+  "por_tipo_km": {
+   "residential": 41.21,
+   "secondary": 3.68,
+   "track": 2.6,
+   "tertiary": 1.21,
+   "primary": 0.62,
+   "unclassified": 0.47,
+   "service": 0.37,
+   "primary_link": 0.05,
+   "secondary_link": 0.04
+  },
+  "excluidas_km": {},
+  "manchas": [
+   {
+    "mancha": "João Alfredo (1)",
+    "area_km2": 3.05,
+    "vias_km": 43.83,
+    "vias_recortadas_km": 43.83,
+    "n_vias": 348
+   },
+   {
+    "mancha": "João Alfredo (2)",
+    "area_km2": 0.6,
+    "vias_km": 6.43,
+    "vias_recortadas_km": 6.43,
+    "n_vias": 43
+   }
+  ]
+ },
+ "2608404": {
+  "municipio": "Jurema",
+  "data": "2026-10-15",
+  "vias_km_original": 92.49,
+  "vias_km": 54.83,
+  "vias_recortadas_km": 54.83,
+  "motivo": "",
+  "criterio": "Vias transitáveis por veículo (OSM), recortadas nas manchas urbanas IBGE 2022 (CD_SIT 1-3)",
+  "por_tipo_km": {
+   "residential": 42.82,
+   "tertiary": 6.26,
+   "unclassified": 4.41,
+   "secondary": 1.07,
+   "living_street": 0.12,
+   "secondary_link": 0.08,
+   "service": 0.07,
+   "tertiary_link": 0.01
+  },
+  "excluidas_km": {},
+  "manchas": [
+   {
+    "mancha": "Jurema (1)",
+    "area_km2": 0.13,
+    "vias_km": 1.61,
+    "vias_recortadas_km": 1.61,
+    "n_vias": 11
+   },
+   {
+    "mancha": "Jurema (2)",
+    "area_km2": 0.04,
+    "vias_km": 0.79,
+    "vias_recortadas_km": 0.79,
+    "n_vias": 6
+   },
+   {
+    "mancha": "Jurema (3)",
+    "area_km2": 2.56,
+    "vias_km": 40.5,
+    "vias_recortadas_km": 40.5,
+    "n_vias": 243
+   },
+   {
+    "mancha": "Santo Antônio das Queimadas",
+    "area_km2": 0.56,
+    "vias_km": 11.93,
+    "vias_recortadas_km": 11.93,
+    "n_vias": 73
+   }
+  ]
+ },
+ "2608453": {
+  "municipio": "Lagoa do Carro",
+  "data": "2026-10-15",
+  "vias_km_original": 94.95,
+  "vias_km": 68.92,
+  "vias_recortadas_km": 68.92,
+  "motivo": "",
+  "criterio": "Vias transitáveis por veículo (OSM), recortadas nas manchas urbanas IBGE 2022 (CD_SIT 1-3)",
+  "por_tipo_km": {
+   "residential": 59.36,
+   "unclassified": 4.39,
+   "primary": 2.94,
+   "service": 2.23
+  },
+  "excluidas_km": {
+   "acesso privado/proibido": 0.09
+  },
+  "manchas": [
+   {
+    "mancha": "Lagoa do Carro (1)",
+    "area_km2": 4.61,
+    "vias_km": 65.9,
+    "vias_recortadas_km": 65.9,
+    "n_vias": 407
+   },
+   {
+    "mancha": "Lagoa do Carro (2)",
+    "area_km2": 0.28,
+    "vias_km": 3.03,
+    "vias_recortadas_km": 3.03,
+    "n_vias": 10
+   }
+  ]
+ },
+ "2608701": {
+  "municipio": "Lagoa dos Gatos",
+  "data": "2026-10-15",
+  "vias_km_original": 59.64,
+  "vias_km": 36.02,
+  "vias_recortadas_km": 36.02,
+  "motivo": "",
+  "criterio": "Vias transitáveis por veículo (OSM), recortadas nas manchas urbanas IBGE 2022 (CD_SIT 1-3)",
+  "por_tipo_km": {
+   "residential": 25.72,
+   "unclassified": 3.9,
+   "tertiary": 3.51,
+   "secondary": 2.46,
+   "service": 0.43,
+   "secondary_link": 0.01
+  },
+  "excluidas_km": {},
+  "manchas": [
+   {
+    "mancha": "Lagoa dos Gatos",
+    "area_km2": 2.15,
+    "vias_km": 29.37,
+    "vias_recortadas_km": 29.37,
+    "n_vias": 191
+   },
+   {
+    "mancha": "Entroncamento (1)",
+    "area_km2": 0.17,
+    "vias_km": 1.59,
+    "vias_recortadas_km": 1.59,
+    "n_vias": 14
+   },
+   {
+    "mancha": "Entroncamento (2)",
+    "area_km2": 0.12,
+    "vias_km": 1.29,
+    "vias_recortadas_km": 1.29,
+    "n_vias": 12
+   },
+   {
+    "mancha": "Igarapeassu",
+    "area_km2": 0.12,
+    "vias_km": 1.15,
+    "vias_recortadas_km": 1.15,
+    "n_vias": 9
+   },
+   {
+    "mancha": "Lagoa do Souza",
+    "area_km2": 0.42,
+    "vias_km": 2.62,
+    "vias_recortadas_km": 2.62,
+    "n_vias": 17
+   }
+  ]
+ },
+ "2608800": {
+  "municipio": "Lajedo",
+  "data": "2026-10-15",
+  "vias_km_original": 247.57,
+  "vias_km": 194.1,
+  "vias_recortadas_km": 194.1,
+  "motivo": "",
+  "criterio": "Vias transitáveis por veículo (OSM), recortadas nas manchas urbanas IBGE 2022 (CD_SIT 1-3)",
+  "por_tipo_km": {
+   "residential": 135.7,
+   "tertiary": 30.4,
+   "service": 11.04,
+   "primary": 9.02,
+   "unclassified": 6.48,
+   "secondary": 1.02,
+   "primary_link": 0.4,
+   "tertiary_link": 0.03
+  },
+  "excluidas_km": {
+   "service=driveway": 0.03,
+   "acesso privado/proibido": 0.14
+  },
+  "manchas": [
+   {
+    "mancha": "Lajedo (1)",
+    "area_km2": 11.36,
+    "vias_km": 186.61,
+    "vias_recortadas_km": 186.61,
+    "n_vias": 1041
+   },
+   {
+    "mancha": "Lajedo (2)",
+    "area_km2": 0.24,
+    "vias_km": 7.49,
+    "vias_recortadas_km": 7.49,
+    "n_vias": 34
+   }
+  ]
+ },
+ "2609402": {
+  "municipio": "Moreno",
+  "data": "2026-10-15",
+  "vias_km_original": 201.11,
+  "vias_km": 192.27,
+  "vias_recortadas_km": 192.27,
+  "motivo": "",
+  "criterio": "Vias transitáveis por veículo (OSM), recortadas nas manchas urbanas IBGE 2022 (CD_SIT 1-3)",
+  "por_tipo_km": {
+   "residential": 125.26,
+   "trunk": 19.46,
+   "track": 18.1,
+   "tertiary": 7.51,
+   "unclassified": 7.06,
+   "primary": 6.96,
+   "service": 5.53,
+   "secondary": 1.43,
+   "trunk_link": 0.88,
+   "tertiary_link": 0.08
+  },
+  "excluidas_km": {
+   "service=driveway": 0.31,
+   "acesso privado/proibido": 0.27
+  },
+  "manchas": [
+   {
+    "mancha": "Moreno (1)",
+    "area_km2": 0.17,
+    "vias_km": 2.24,
+    "vias_recortadas_km": 2.24,
+    "n_vias": 15
+   },
+   {
+    "mancha": "Moreno (2)",
+    "area_km2": 0.05,
+    "vias_km": 1.26,
+    "vias_recortadas_km": 1.26,
+    "n_vias": 9
+   },
+   {
+    "mancha": "Moreno (3)",
+    "area_km2": 13.8,
+    "vias_km": 148.35,
+    "vias_recortadas_km": 148.35,
+    "n_vias": 716
+   },
+   {
+    "mancha": "Bonança",
+    "area_km2": 3.5,
+    "vias_km": 40.41,
+    "vias_recortadas_km": 40.41,
+    "n_vias": 192
+   }
+  ]
+ },
+ "2610202": {
+  "municipio": "Panelas",
+  "data": "2026-10-15",
+  "vias_km_original": 116.85,
+  "vias_km": 56.48,
+  "vias_recortadas_km": 56.48,
+  "motivo": "",
+  "criterio": "Vias transitáveis por veículo (OSM), recortadas nas manchas urbanas IBGE 2022 (CD_SIT 1-3)",
+  "por_tipo_km": {
+   "residential": 41.13,
+   "unclassified": 5.49,
+   "tertiary": 4.93,
+   "secondary": 2.72,
+   "trunk": 1.11,
+   "track": 0.56,
+   "service": 0.52,
+   "tertiary_link": 0.01
+  },
+  "excluidas_km": {},
+  "manchas": [
+   {
+    "mancha": "Panelas",
+    "area_km2": 2.04,
+    "vias_km": 30.74,
+    "vias_recortadas_km": 30.74,
+    "n_vias": 207
+   },
+   {
+    "mancha": "Cruzes",
+    "area_km2": 1.26,
+    "vias_km": 18.25,
+    "vias_recortadas_km": 18.25,
+    "n_vias": 121
+   },
+   {
+    "mancha": "São José",
+    "area_km2": 0.24,
+    "vias_km": 3.83,
+    "vias_recortadas_km": 3.83,
+    "n_vias": 41
+   },
+   {
+    "mancha": "São Lázaro",
+    "area_km2": 0.25,
+    "vias_km": 3.66,
+    "vias_recortadas_km": 3.66,
+    "n_vias": 46
+   }
+  ]
+ },
+ "2611200": {
+  "municipio": "Poção",
+  "data": "2026-10-15",
+  "vias_km_original": 56.64,
+  "vias_km": 25.82,
+  "vias_recortadas_km": 25.82,
+  "motivo": "",
+  "criterio": "Vias transitáveis por veículo (OSM), recortadas nas manchas urbanas IBGE 2022 (CD_SIT 1-3)",
+  "por_tipo_km": {
+   "residential": 20.36,
+   "secondary": 2.47,
+   "unclassified": 1.57,
+   "tertiary": 1.14,
+   "service": 0.22,
+   "living_street": 0.07
+  },
+  "excluidas_km": {
+   "proibido a veículos": 0.07
+  },
+  "manchas": [
+   {
+    "mancha": "Poção",
+    "area_km2": 2.0,
+    "vias_km": 24.45,
+    "vias_recortadas_km": 24.45,
+    "n_vias": 149
+   },
+   {
+    "mancha": "Pão de Açúcar de Poção",
+    "area_km2": 0.08,
+    "vias_km": 1.37,
+    "vias_recortadas_km": 1.37,
+    "n_vias": 13
+   }
+  ]
+ },
+ "2611705": {
+  "municipio": "Riacho das Almas",
+  "data": "2026-10-15",
+  "vias_km_original": 116.71,
+  "vias_km": 71.0,
+  "vias_recortadas_km": 71.0,
+  "motivo": "",
+  "criterio": "Vias transitáveis por veículo (OSM), recortadas nas manchas urbanas IBGE 2022 (CD_SIT 1-3)",
+  "por_tipo_km": {
+   "residential": 57.06,
+   "tertiary": 7.96,
+   "unclassified": 2.39,
+   "primary": 2.35,
+   "service": 1.05,
+   "primary_link": 0.18
+  },
+  "excluidas_km": {},
+  "manchas": [
+   {
+    "mancha": "Riacho das Almas (1)",
+    "area_km2": 0.24,
+    "vias_km": 7.17,
+    "vias_recortadas_km": 7.17,
+    "n_vias": 42
+   },
+   {
+    "mancha": "Riacho das Almas (2)",
+    "area_km2": 1.92,
+    "vias_km": 44.5,
+    "vias_recortadas_km": 44.5,
+    "n_vias": 289
+   },
+   {
+    "mancha": "Couro d'Antas",
+    "area_km2": 0.31,
+    "vias_km": 3.65,
+    "vias_recortadas_km": 3.65,
+    "n_vias": 25
+   },
+   {
+    "mancha": "Pinhões",
+    "area_km2": 0.3,
+    "vias_km": 3.31,
+    "vias_recortadas_km": 3.31,
+    "n_vias": 21
+   },
+   {
+    "mancha": "Trapiá",
+    "area_km2": 0.64,
+    "vias_km": 7.76,
+    "vias_recortadas_km": 7.76,
+    "n_vias": 50
+   },
+   {
+    "mancha": "Vitorino",
+    "area_km2": 0.39,
+    "vias_km": 4.61,
+    "vias_recortadas_km": 4.61,
+    "n_vias": 33
+   }
+  ]
+ },
+ "2612307": {
+  "municipio": "Saloá",
+  "data": "2026-10-15",
+  "vias_km_original": 99.07,
+  "vias_km": 46.43,
+  "vias_recortadas_km": 46.43,
+  "motivo": "",
+  "criterio": "Vias transitáveis por veículo (OSM), recortadas nas manchas urbanas IBGE 2022 (CD_SIT 1-3)",
+  "por_tipo_km": {
+   "residential": 35.87,
+   "tertiary": 4.84,
+   "secondary": 3.13,
+   "unclassified": 1.75,
+   "service": 0.58,
+   "living_street": 0.26
+  },
+  "excluidas_km": {},
+  "manchas": [
+   {
+    "mancha": "Saloá",
+    "area_km2": 2.81,
+    "vias_km": 42.84,
+    "vias_recortadas_km": 42.84,
+    "n_vias": 240
+   },
+   {
+    "mancha": "Iatecá",
+    "area_km2": 0.8,
+    "vias_km": 3.59,
+    "vias_recortadas_km": 3.59,
+    "n_vias": 19
+   }
+  ]
+ },
+ "2612505": {
+  "municipio": "Santa Cruz do Capibaribe",
+  "data": "2026-10-15",
+  "vias_km_original": 493.76,
+  "vias_km": 444.73,
+  "vias_recortadas_km": 444.73,
+  "motivo": "",
+  "criterio": "Vias transitáveis por veículo (OSM), recortadas nas manchas urbanas IBGE 2022 (CD_SIT 1-3)",
+  "por_tipo_km": {
+   "residential": 364.33,
+   "tertiary": 26.86,
+   "service": 14.42,
+   "primary": 14.39,
+   "unclassified": 10.59,
+   "secondary": 9.43,
+   "living_street": 2.49,
+   "track": 1.44,
+   "primary_link": 0.58,
+   "secondary_link": 0.14,
+   "tertiary_link": 0.05
+  },
+  "excluidas_km": {
+   "service=parking_aisle": 5.94,
+   "service=driveway": 0.22,
+   "acesso privado/proibido": 0.47
+  },
+  "manchas": [
+   {
+    "mancha": "Santa Cruz do Capibaribe (1)",
+    "area_km2": 1.41,
+    "vias_km": 27.43,
+    "vias_recortadas_km": 27.43,
+    "n_vias": 111
+   },
+   {
+    "mancha": "Santa Cruz do Capibaribe (2)",
+    "area_km2": 17.13,
+    "vias_km": 374.95,
+    "vias_recortadas_km": 374.95,
+    "n_vias": 1593
+   },
+   {
+    "mancha": "Santa Cruz do Capibaribe (3)",
+    "area_km2": 0.15,
+    "vias_km": 3.96,
+    "vias_recortadas_km": 3.96,
+    "n_vias": 21
+   },
+   {
+    "mancha": "Pará",
+    "area_km2": 0.19,
+    "vias_km": 4.78,
+    "vias_recortadas_km": 4.78,
+    "n_vias": 32
+   },
+   {
+    "mancha": "Poço Fundo (1)",
+    "area_km2": 1.75,
+    "vias_km": 24.48,
+    "vias_recortadas_km": 24.48,
+    "n_vias": 134
+   },
+   {
+    "mancha": "Poço Fundo (2)",
+    "area_km2": 1.01,
+    "vias_km": 9.14,
+    "vias_recortadas_km": 9.14,
+    "n_vias": 14
+   }
+  ]
+ },
+ "2612703": {
+  "municipio": "Santa Maria do Cambucá",
+  "data": "2026-10-15",
+  "vias_km_original": 35.35,
+  "vias_km": 24.52,
+  "vias_recortadas_km": 24.52,
+  "motivo": "",
+  "criterio": "Vias transitáveis por veículo (OSM), recortadas nas manchas urbanas IBGE 2022 (CD_SIT 1-3)",
+  "por_tipo_km": {
+   "residential": 19.56,
+   "secondary": 2.11,
+   "tertiary": 2.03,
+   "track": 0.35,
+   "service": 0.35,
+   "unclassified": 0.07,
+   "tertiary_link": 0.05
+  },
+  "excluidas_km": {},
+  "manchas": [
+   {
+    "mancha": "27_Santa_Maria_do_Cambuca",
+    "area_km2": 1.58,
+    "vias_km": 24.52,
+    "vias_recortadas_km": 24.52,
+    "n_vias": 178
+   }
+  ]
+ },
+ "2614501": {
+  "municipio": "Surubim",
+  "data": "2026-10-15",
+  "vias_km_original": 366.33,
+  "vias_km": 307.68,
+  "vias_recortadas_km": 307.68,
+  "motivo": "",
+  "criterio": "Vias transitáveis por veículo (OSM), recortadas nas manchas urbanas IBGE 2022 (CD_SIT 1-3)",
+  "por_tipo_km": {
+   "residential": 253.86,
+   "secondary": 19.79,
+   "tertiary": 10.64,
+   "unclassified": 9.17,
+   "primary": 6.5,
+   "service": 5.17,
+   "track": 2.13,
+   "primary_link": 0.35,
+   "secondary_link": 0.05,
+   "tertiary_link": 0.02
+  },
+  "excluidas_km": {},
+  "manchas": [
+   {
+    "mancha": "Surubim",
+    "area_km2": 24.05,
+    "vias_km": 305.0,
+    "vias_recortadas_km": 305.0,
+    "n_vias": 1622
+   },
+   {
+    "mancha": "Chéus",
+    "area_km2": 0.37,
+    "vias_km": 2.68,
+    "vias_recortadas_km": 2.68,
+    "n_vias": 19
+   }
+  ]
+ },
+ "2612901": {
+  "municipio": "São Benedito do Sul",
+  "data": "2026-10-15",
+  "vias_km_original": 42.78,
+  "vias_km": 27.24,
+  "vias_recortadas_km": 27.24,
+  "motivo": "",
+  "criterio": "Vias transitáveis por veículo (OSM), recortadas nas manchas urbanas IBGE 2022 (CD_SIT 1-3)",
+  "por_tipo_km": {
+   "residential": 19.78,
+   "tertiary": 3.08,
+   "unclassified": 2.15,
+   "secondary": 1.4,
+   "service": 0.83
+  },
+  "excluidas_km": {},
+  "manchas": [
+   {
+    "mancha": "São Benedito do Sul",
+    "area_km2": 1.4,
+    "vias_km": 20.59,
+    "vias_recortadas_km": 20.59,
+    "n_vias": 123
+   },
+   {
+    "mancha": "Igarapeba (1)",
+    "area_km2": 0.43,
+    "vias_km": 5.62,
+    "vias_recortadas_km": 5.62,
+    "n_vias": 39
+   },
+   {
+    "mancha": "Igarapeba (2)",
+    "area_km2": 0.09,
+    "vias_km": 1.02,
+    "vias_recortadas_km": 1.02,
+    "n_vias": 8
+   }
+  ]
+ },
+ "2613008": {
+  "municipio": "São Bento do Una",
+  "data": "2026-10-15",
+  "vias_km_original": 227.34,
+  "vias_km": 129.72,
+  "vias_recortadas_km": 129.72,
+  "motivo": "",
+  "criterio": "Vias transitáveis por veículo (OSM), recortadas nas manchas urbanas IBGE 2022 (CD_SIT 1-3)",
+  "por_tipo_km": {
+   "residential": 95.16,
+   "tertiary": 15.54,
+   "primary": 8.61,
+   "unclassified": 5.39,
+   "secondary": 3.89,
+   "track": 0.67,
+   "service": 0.23,
+   "primary_link": 0.2,
+   "tertiary_link": 0.04
+  },
+  "excluidas_km": {
+   "acesso privado/proibido": 0.1
+  },
+  "manchas": [
+   {
+    "mancha": "São Bento do Una (1)",
+    "area_km2": 8.59,
+    "vias_km": 117.74,
+    "vias_recortadas_km": 117.74,
+    "n_vias": 610
+   },
+   {
+    "mancha": "São Bento do Una (2)",
+    "area_km2": 0.58,
+    "vias_km": 4.64,
+    "vias_recortadas_km": 4.64,
+    "n_vias": 24
+   },
+   {
+    "mancha": "Espírito Santo",
+    "area_km2": 0.51,
+    "vias_km": 7.34,
+    "vias_recortadas_km": 7.34,
+    "n_vias": 48
+   }
+  ]
+ },
+ "2613107": {
+  "municipio": "São Caitano",
+  "data": "2026-10-15",
+  "vias_km_original": 239.06,
+  "vias_km": 160.38,
+  "vias_recortadas_km": 160.38,
+  "motivo": "",
+  "criterio": "Vias transitáveis por veículo (OSM), recortadas nas manchas urbanas IBGE 2022 (CD_SIT 1-3)",
+  "por_tipo_km": {
+   "residential": 116.23,
+   "tertiary": 11.87,
+   "unclassified": 11.43,
+   "trunk": 5.74,
+   "primary": 3.99,
+   "secondary": 3.36,
+   "trunk_link": 2.43,
+   "service": 2.09,
+   "track": 2.06,
+   "primary_link": 1.16,
+   "secondary_link": 0.01,
+   "tertiary_link": 0.01
+  },
+  "excluidas_km": {},
+  "manchas": [
+   {
+    "mancha": "São Caitano (1)",
+    "area_km2": 6.37,
+    "vias_km": 123.45,
+    "vias_recortadas_km": 123.45,
+    "n_vias": 759
+   },
+   {
+    "mancha": "São Caitano (2)",
+    "area_km2": 2.18,
+    "vias_km": 24.44,
+    "vias_recortadas_km": 24.44,
+    "n_vias": 116
+   },
+   {
+    "mancha": "Maniçoba",
+    "area_km2": 0.47,
+    "vias_km": 5.28,
+    "vias_recortadas_km": 5.28,
+    "n_vias": 39
+   },
+   {
+    "mancha": "Tapiraim",
+    "area_km2": 0.64,
+    "vias_km": 7.21,
+    "vias_recortadas_km": 7.21,
+    "n_vias": 54
+   }
+  ]
+ },
+ "2613305": {
+  "municipio": "São Joaquim do Monte",
+  "data": "2026-10-15",
+  "vias_km_original": 89.11,
+  "vias_km": 50.38,
+  "vias_recortadas_km": 50.38,
+  "motivo": "",
+  "criterio": "Vias transitáveis por veículo (OSM), recortadas nas manchas urbanas IBGE 2022 (CD_SIT 1-3)",
+  "por_tipo_km": {
+   "residential": 38.96,
+   "tertiary": 5.87,
+   "unclassified": 2.81,
+   "primary": 2.4,
+   "service": 0.13,
+   "tertiary_link": 0.13,
+   "primary_link": 0.07
+  },
+  "excluidas_km": {},
+  "manchas": [
+   {
+    "mancha": "São Joaquim do Monte (1)",
+    "area_km2": 0.05,
+    "vias_km": 1.08,
+    "vias_recortadas_km": 1.08,
+    "n_vias": 8
+   },
+   {
+    "mancha": "São Joaquim do Monte (2)",
+    "area_km2": 2.46,
+    "vias_km": 41.0,
+    "vias_recortadas_km": 41.0,
+    "n_vias": 287
+   },
+   {
+    "mancha": "Barra do Riachão",
+    "area_km2": 0.14,
+    "vias_km": 1.53,
+    "vias_recortadas_km": 1.53,
+    "n_vias": 16
+   },
+   {
+    "mancha": "Santana de São Joaquim",
+    "area_km2": 0.48,
+    "vias_km": 6.77,
+    "vias_recortadas_km": 6.77,
+    "n_vias": 40
+   }
+  ]
+ },
+ "2613701": {
+  "municipio": "São Lourenço da Mata",
+  "data": "2026-10-15",
+  "vias_km_original": 402.35,
+  "vias_km": 398.17,
+  "vias_recortadas_km": 398.17,
+  "motivo": "",
+  "criterio": "Vias transitáveis por veículo (OSM), recortadas nas manchas urbanas IBGE 2022 (CD_SIT 1-3)",
+  "por_tipo_km": {
+   "residential": 272.93,
+   "service": 37.44,
+   "unclassified": 20.12,
+   "tertiary": 17.7,
+   "secondary": 12.67,
+   "primary": 11.15,
+   "trunk": 10.42,
+   "track": 8.61,
+   "trunk_link": 5.28,
+   "tertiary_link": 0.85,
+   "secondary_link": 0.58,
+   "living_street": 0.27,
+   "primary_link": 0.16
+  },
+  "excluidas_km": {
+   "service=parking_aisle": 9.54,
+   "service=driveway": 1.37,
+   "acesso privado/proibido": 4.02
+  },
+  "manchas": [
+   {
+    "mancha": "São Lourenço da Mata",
+    "area_km2": 36.23,
+    "vias_km": 377.16,
+    "vias_recortadas_km": 377.16,
+    "n_vias": 2053
+   },
+   {
+    "mancha": "Nossa Senhora da Luz",
+    "area_km2": 1.77,
+    "vias_km": 21.02,
+    "vias_recortadas_km": 21.02,
+    "n_vias": 114
+   }
+  ]
+ },
+ "2614709": {
+  "municipio": "Tacaimbó",
+  "data": "2026-10-15",
+  "vias_km_original": 71.7,
+  "vias_km": 45.05,
+  "vias_recortadas_km": 45.05,
+  "motivo": "",
+  "criterio": "Vias transitáveis por veículo (OSM), recortadas nas manchas urbanas IBGE 2022 (CD_SIT 1-3)",
+  "por_tipo_km": {
+   "residential": 35.97,
+   "tertiary": 4.48,
+   "secondary": 1.85,
+   "unclassified": 1.81,
+   "living_street": 0.34,
+   "track": 0.27,
+   "trunk": 0.13,
+   "service": 0.11,
+   "trunk_link": 0.08,
+   "tertiary_link": 0.01
+  },
+  "excluidas_km": {},
+  "manchas": [
+   {
+    "mancha": "Tacaimbó",
+    "area_km2": 4.24,
+    "vias_km": 41.99,
+    "vias_recortadas_km": 41.99,
+    "n_vias": 221
+   },
+   {
+    "mancha": "Riacho Fechado",
+    "area_km2": 0.33,
+    "vias_km": 3.06,
+    "vias_recortadas_km": 3.06,
+    "n_vias": 20
+   }
+  ]
+ },
+ "2615003": {
+  "municipio": "Taquaritinga do Norte",
+  "data": "2026-10-15",
+  "vias_km_original": 170.38,
+  "vias_km": 107.83,
+  "vias_recortadas_km": 107.83,
+  "motivo": "",
+  "criterio": "Vias transitáveis por veículo (OSM), recortadas nas manchas urbanas IBGE 2022 (CD_SIT 1-3)",
+  "por_tipo_km": {
+   "residential": 77.63,
+   "tertiary": 6.89,
+   "unclassified": 6.0,
+   "primary": 5.55,
+   "track": 5.13,
+   "trunk": 3.74,
+   "service": 2.42,
+   "trunk_link": 0.3,
+   "primary_link": 0.15,
+   "tertiary_link": 0.01
+  },
+  "excluidas_km": {},
+  "manchas": [
+   {
+    "mancha": "Taquaritinga do Norte (1)",
+    "area_km2": 0.19,
+    "vias_km": 1.93,
+    "vias_recortadas_km": 1.93,
+    "n_vias": 8
+   },
+   {
+    "mancha": "Taquaritinga do Norte (2)",
+    "area_km2": 2.53,
+    "vias_km": 42.98,
+    "vias_recortadas_km": 42.98,
+    "n_vias": 294
+   },
+   {
+    "mancha": "Gravatá do Ibiapina",
+    "area_km2": 0.39,
+    "vias_km": 5.07,
+    "vias_recortadas_km": 5.07,
+    "n_vias": 30
+   },
+   {
+    "mancha": "Pão de Açucar (1)",
+    "area_km2": 2.63,
+    "vias_km": 47.77,
+    "vias_recortadas_km": 47.77,
+    "n_vias": 311
+   },
+   {
+    "mancha": "Pão de Açucar (2)",
+    "area_km2": 0.88,
+    "vias_km": 10.08,
+    "vias_recortadas_km": 10.08,
+    "n_vias": 61
+   }
+  ]
+ },
+ "2615409": {
+  "municipio": "Toritama",
+  "data": "2026-10-15",
+  "vias_km_original": 213.14,
+  "vias_km": 183.76,
+  "vias_recortadas_km": 183.76,
+  "motivo": "",
+  "criterio": "Vias transitáveis por veículo (OSM), recortadas nas manchas urbanas IBGE 2022 (CD_SIT 1-3)",
+  "por_tipo_km": {
+   "residential": 154.93,
+   "tertiary": 11.07,
+   "service": 6.22,
+   "trunk": 4.43,
+   "unclassified": 3.54,
+   "primary": 2.6,
+   "track": 0.59,
+   "trunk_link": 0.3,
+   "tertiary_link": 0.09
+  },
+  "excluidas_km": {
+   "acesso privado/proibido": 4.89
+  },
+  "manchas": [
+   {
+    "mancha": "36_Toritama",
+    "area_km2": 11.09,
+    "vias_km": 183.76,
+    "vias_recortadas_km": 183.76,
+    "n_vias": 1039
+   }
+  ]
+ },
+ "2616209": {
+  "municipio": "Vertentes",
+  "data": "2026-10-15",
+  "vias_km_original": 211.1,
+  "vias_km": 124.31,
+  "vias_recortadas_km": 124.31,
+  "motivo": "",
+  "criterio": "Vias transitáveis por veículo (OSM), recortadas nas manchas urbanas IBGE 2022 (CD_SIT 1-3)",
+  "por_tipo_km": {
+   "residential": 101.38,
+   "tertiary": 10.24,
+   "primary": 5.31,
+   "unclassified": 3.19,
+   "secondary": 3.07,
+   "service": 0.77,
+   "primary_link": 0.33,
+   "secondary_link": 0.02,
+   "track": 0.0
+  },
+  "excluidas_km": {},
+  "manchas": [
+   {
+    "mancha": "Vertentes (1)",
+    "area_km2": 0.62,
+    "vias_km": 17.68,
+    "vias_recortadas_km": 17.68,
+    "n_vias": 73
+   },
+   {
+    "mancha": "Vertentes (2)",
+    "area_km2": 0.14,
+    "vias_km": 1.0,
+    "vias_recortadas_km": 1.0,
+    "n_vias": 12
+   },
+   {
+    "mancha": "Vertentes (3)",
+    "area_km2": 4.7,
+    "vias_km": 79.23,
+    "vias_recortadas_km": 79.23,
+    "n_vias": 459
+   },
+   {
+    "mancha": "Vertentes (4)",
+    "area_km2": 0.15,
+    "vias_km": 1.69,
+    "vias_recortadas_km": 1.69,
+    "n_vias": 11
+   },
+   {
+    "mancha": "Vertentes (5)",
+    "area_km2": 0.18,
+    "vias_km": 4.08,
+    "vias_recortadas_km": 4.08,
+    "n_vias": 50
+   },
+   {
+    "mancha": "Vertentes (6)",
+    "area_km2": 0.98,
+    "vias_km": 11.97,
+    "vias_recortadas_km": 11.97,
+    "n_vias": 75
+   },
+   {
+    "mancha": "Vertentes (7)",
+    "area_km2": 0.65,
+    "vias_km": 8.65,
+    "vias_recortadas_km": 8.65,
+    "n_vias": 67
+   }
+  ]
+ },
+ "2601706": {
+  "municipio": "Belo Jardim",
+  "data": "2026-10-15",
+  "vias_km_original": 460.53,
+  "vias_km": 341.42,
+  "vias_recortadas_km": 341.42,
+  "motivo": "",
+  "criterio": "Vias transitáveis por veículo (OSM), recortadas nas manchas urbanas IBGE 2022 (CD_SIT 1-3)",
+  "por_tipo_km": {
+   "residential": 242.13,
+   "unclassified": 42.43,
+   "service": 15.67,
+   "tertiary": 15.41,
+   "secondary": 13.27,
+   "trunk": 7.64,
+   "primary": 3.3,
+   "track": 0.77,
+   "trunk_link": 0.48,
+   "living_street": 0.15,
+   "secondary_link": 0.14,
+   "primary_link": 0.03
+  },
+  "excluidas_km": {
+   "service=driveway": 5.71,
+   "acesso privado/proibido": 0.24
+  },
+  "manchas": [
+   {
+    "mancha": "Belo Jardim (1)",
+    "area_km2": 14.49,
+    "vias_km": 209.01,
+    "vias_recortadas_km": 209.01,
+    "n_vias": 1214
+   },
+   {
+    "mancha": "Belo Jardim (2)",
+    "area_km2": 0.56,
+    "vias_km": 12.93,
+    "vias_recortadas_km": 12.93,
+    "n_vias": 43
+   },
+   {
+    "mancha": "Belo Jardim (3)",
+    "area_km2": 0.5,
+    "vias_km": 13.34,
+    "vias_recortadas_km": 13.34,
+    "n_vias": 67
+   },
+   {
+    "mancha": "Belo Jardim (4)",
+    "area_km2": 0.1,
+    "vias_km": 3.12,
+    "vias_recortadas_km": 3.12,
+    "n_vias": 15
+   },
+   {
+    "mancha": "Água Fria (1)",
+    "area_km2": 0.71,
+    "vias_km": 4.91,
+    "vias_recortadas_km": 4.91,
+    "n_vias": 29
+   },
+   {
+    "mancha": "Água Fria (2)",
+    "area_km2": 8.05,
+    "vias_km": 81.99,
+    "vias_recortadas_km": 81.99,
+    "n_vias": 377
+   },
+   {
+    "mancha": "Serra do Vento",
+    "area_km2": 1.5,
+    "vias_km": 7.53,
+    "vias_recortadas_km": 7.53,
+    "n_vias": 36
+   },
+   {
+    "mancha": "Xucuru",
+    "area_km2": 1.16,
+    "vias_km": 8.58,
+    "vias_recortadas_km": 8.58,
+    "n_vias": 50
+   }
+  ]
+ },
+ "2606002": {
+  "municipio": "Garanhuns",
+  "data": "2026-10-15",
+  "vias_km_original": 790.98,
+  "vias_km": 675.77,
+  "vias_recortadas_km": 675.77,
+  "motivo": "",
+  "criterio": "Vias transitáveis por veículo (OSM), recortadas nas manchas urbanas IBGE 2022 (CD_SIT 1-3)",
+  "por_tipo_km": {
+   "residential": 496.03,
+   "unclassified": 49.6,
+   "tertiary": 46.76,
+   "secondary": 26.86,
+   "service": 26.37,
+   "primary": 19.98,
+   "living_street": 6.06,
+   "primary_link": 2.88,
+   "secondary_link": 0.54,
+   "track": 0.53,
+   "tertiary_link": 0.18
+  },
+  "excluidas_km": {
+   "acesso privado/proibido": 13.38,
+   "service=parking_aisle": 1.56,
+   "service=driveway": 1.04
+  },
+  "manchas": [
+   {
+    "mancha": "Garanhuns",
+    "area_km2": 47.5,
+    "vias_km": 641.81,
+    "vias_recortadas_km": 641.81,
+    "n_vias": 2924
+   },
+   {
+    "mancha": "Iratama",
+    "area_km2": 0.12,
+    "vias_km": 2.06,
+    "vias_recortadas_km": 2.06,
+    "n_vias": 18
+   },
+   {
+    "mancha": "São Pedro (1)",
+    "area_km2": 0.43,
+    "vias_km": 8.43,
+    "vias_recortadas_km": 8.43,
+    "n_vias": 71
+   },
+   {
+    "mancha": "São Pedro (2)",
+    "area_km2": 1.02,
+    "vias_km": 19.43,
+    "vias_recortadas_km": 19.43,
+    "n_vias": 82
+   },
+   {
+    "mancha": "Miracica",
+    "area_km2": 0.19,
+    "vias_km": 4.04,
+    "vias_recortadas_km": 4.04,
+    "n_vias": 32
+   }
+  ]
+ },
+ "2607208": {
+  "municipio": "Ipojuca",
+  "data": "2026-10-15",
+  "vias_km_original": 320.95,
+  "vias_km": 321.77,
+  "vias_recortadas_km": 321.77,
+  "motivo": "",
+  "criterio": "Vias transitáveis por veículo (OSM), recortadas nas manchas urbanas IBGE 2022 (CD_SIT 1-3)",
+  "por_tipo_km": {
+   "residential": 203.83,
+   "unclassified": 27.98,
+   "primary": 24.14,
+   "service": 22.2,
+   "tertiary": 20.92,
+   "secondary": 5.94,
+   "trunk": 5.78,
+   "track": 4.91,
+   "living_street": 4.72,
+   "primary_link": 0.99,
+   "tertiary_link": 0.25,
+   "trunk_link": 0.1
+  },
+  "excluidas_km": {
+   "acesso privado/proibido": 5.4,
+   "service=driveway": 0.28,
+   "service=parking_aisle": 1.34
+  },
+  "manchas": [
+   {
+    "mancha": "01 - ORLA",
+    "area_km2": 13.41,
+    "vias_km": 145.84,
+    "vias_recortadas_km": 145.84,
+    "n_vias": 710
+   },
+   {
+    "mancha": "02 - O E SALGADO",
+    "area_km2": 13.43,
+    "vias_km": 120.97,
+    "vias_recortadas_km": 120.97,
+    "n_vias": 615
+   },
+   {
+    "mancha": "04 - SEDE E RUROPOLIS",
+    "area_km2": 3.08,
+    "vias_km": 54.96,
+    "vias_recortadas_km": 54.96,
+    "n_vias": 375
+   }
+  ]
+ }
+}

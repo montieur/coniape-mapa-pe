@@ -1,0 +1,40 @@
+﻿municipio,pasta,km_coniape,km_osm_atual,diferenca_pct,km_transitavel_recortado,transitavel_vs_coniape_pct,mancha_maior_diferenca,mancha_km_coniape,mancha_km_osm,mancha_diferenca_pct,manchas_que_batem,situacao,base_osm,status
+Agrestina,01_Agrestina,110.77,110.63,-0.1,90.1,-18.7,Agrestina,91.98,91.86,-0.1,3/3,bate,2026-10-15,ok
+Altinho,02_Altinho,120.57,120.51,-0.1,66.22,-45.1,Altinho (1),95.48,95.39,-0.1,3/3,bate,2026-10-15,ok
+Angelim,03_Angelim,49.28,49.25,-0.1,27.64,-43.9,03_Angelim,49.28,49.25,-0.1,1/1,bate,2026-10-15,ok
+Bezerros,04_Bezerros,460.38,463.04,0.6,357.58,-22.3,Bezerros (2),385.03,387.69,0.7,4/4,bate,2026-10-15,ok
+Bom Jardim,05_Bom_Jardim,162.14,162.02,-0.1,86.35,-46.7,Umari,36.85,36.94,0.2,5/5,bate,2026-10-15,ok
+Bonito,06_Bonito,160.21,160.11,-0.1,102.02,-36.3,Bonito (1),26.98,26.91,-0.3,4/4,bate,2026-10-15,ok
+Camocim de São Félix,07_Camocim_de_Sao_Felix,57.05,56.95,-0.2,46.48,-18.5,Camocim de São Félix (2),50.15,50.06,-0.2,2/2,bate,2026-10-15,ok
+Caruaru,08_Caruaru,1016.04,1681.13,65.5,1501.18,47.7,Caruaru (4),853.97,1448.06,69.6,5/18,candidato à revisão,2026-10-15,ok
+Casinhas,09_Casinhas,37.01,36.96,-0.1,11.53,-68.8,Casinhas (2),24.07,24.03,-0.2,3/3,bate,2026-10-15,ok
+Cumaru,10_Cumaru,97.5,97.39,-0.1,51.25,-47.4,Ameixas (1),60.81,60.73,-0.1,3/3,bate,2026-10-15,ok
+Cupira,11_Cupira,116.84,116.71,-0.1,93.23,-20.2,Cupira,105.0,104.87,-0.1,3/3,bate,2026-10-15,ok
+Frei Miguelinho,12_Frei_Miguelinho,72.16,72.04,-0.2,41.62,-42.3,Lagoa de João Carlos,39.9,39.83,-0.2,2/2,bate,2026-10-15,ok
+Ibirajuba,13_Ibirajuba,52.28,52.24,-0.1,20.53,-60.7,13_Ibirajuba,52.28,52.24,-0.1,1/1,bate,2026-10-15,ok
+Itambé,14_Itambe,163.55,163.51,-0.0,110.3,-32.6,Caricé,20.42,20.37,-0.2,4/4,bate,2026-10-15,ok
+Jataúba,15_Jatauba,136.23,136.18,-0.0,53.33,-60.9,Jacu,25.9,25.88,-0.1,5/5,bate,2026-10-15,ok
+João Alfredo,16_Joao_Alfredo,65.59,65.54,-0.1,50.26,-23.4,João Alfredo (1),59.15,59.11,-0.1,2/2,bate,2026-10-15,ok
+Jurema,17_Jurema,92.49,92.41,-0.1,54.83,-40.7,Jurema (3),66.95,66.89,-0.1,4/4,bate,2026-10-15,ok
+Lagoa do Carro,18_Lagoa_do_Carro,94.95,94.81,-0.1,68.92,-27.4,Lagoa do Carro (1),91.77,91.64,-0.1,2/2,bate,2026-10-15,ok
+Lagoa dos Gatos,19_Lagoa_dos_Gatos,59.64,59.57,-0.1,36.02,-39.6,Lagoa dos Gatos,37.33,37.29,-0.1,5/5,bate,2026-10-15,ok
+Lajedo,20_Lajedo,247.57,247.36,-0.1,194.1,-21.6,Lajedo (1),237.88,237.68,-0.1,2/2,bate,2026-10-15,ok
+Moreno,21_Moreno,201.11,203.78,1.3,192.27,-4.4,Moreno (3),144.12,146.8,1.9,3/4,bate,2026-10-15,ok
+Panelas,22_Panelas,116.85,116.81,-0.0,56.48,-51.7,Panelas,57.43,57.47,0.1,4/4,bate,2026-10-15,ok
+Poção,23_Pocao,56.64,56.63,-0.0,25.82,-54.4,Pão de Açúcar de Poção,8.13,8.14,0.1,2/2,bate,2026-10-15,ok
+Riacho das Almas,24_Riacho_das_Almas,116.71,116.51,-0.2,71.0,-39.2,Riacho das Almas (2),54.46,54.39,-0.1,6/6,bate,2026-10-15,ok
+Saloá,25_Saloa,99.07,99.01,-0.1,46.43,-53.1,Saloá,70.34,70.3,-0.1,2/2,bate,2026-10-15,ok
+Santa Cruz do Capibaribe,26_Santa_Cruz_do_Capibaribe,493.76,522.89,5.9,444.73,-9.9,Santa Cruz do Capibaribe (2),377.32,399.03,5.8,3/6,atenção (5-10%),2026-10-15,ok
+Santa Maria do Cambucá,27_Santa_Maria_do_Cambuca,35.35,35.3,-0.1,24.52,-30.6,27_Santa_Maria_do_Cambuca,35.35,35.3,-0.1,1/1,bate,2026-10-15,ok
+Surubim,28_Surubim,366.33,366.31,-0.0,307.68,-16.0,Chéus,13.75,13.73,-0.1,2/2,bate,2026-10-15,ok
+São Benedito do Sul,29_Sao_Benedito_do_Sul,42.78,42.72,-0.1,27.24,-36.3,São Benedito do Sul,29.89,29.85,-0.1,3/3,bate,2026-10-15,ok
+São Bento do Una,30_Sao_Bento_do_Una,227.34,227.69,0.2,129.72,-42.9,São Bento do Una (1),203.52,203.88,0.2,3/3,bate,2026-10-15,ok
+São Caitano,31_Sao_Caitano,239.06,237.81,-0.5,160.38,-32.9,São Caitano (1),160.96,159.79,-0.7,4/4,bate,2026-10-15,ok
+São Joaquim do Monte,32_Sao_Joaquim_do_Monte,89.11,89.0,-0.1,50.38,-43.5,São Joaquim do Monte (2),63.76,63.67,-0.1,4/4,bate,2026-10-15,ok
+São Lourenço da Mata,33_Sao_Lourenco_da_Mata,402.35,428.81,6.6,398.17,-1.0,São Lourenço da Mata,375.68,402.2,7.1,1/2,atenção (5-10%),2026-10-15,ok
+Tacaimbó,34_Tacaimbo,71.7,71.66,-0.1,45.05,-37.2,Tacaimbó,60.46,60.44,-0.0,2/2,bate,2026-10-15,ok
+Taquaritinga do Norte,35_Taquaritinga_do_Norte,170.38,170.28,-0.1,107.83,-36.7,Pão de Açucar (1),68.88,68.83,-0.1,5/5,bate,2026-10-15,ok
+Toritama,36_Toritama,213.14,213.65,0.2,183.76,-13.8,36_Toritama,213.14,213.65,0.2,1/1,bate,2026-10-15,ok
+Vertentes,37_Vertentes,211.1,210.81,-0.1,124.31,-41.1,Vertentes (3),127.85,127.66,-0.1,7/7,bate,2026-10-15,ok
+Belo Jardim,38_Belo_Jardim,460.53,460.88,0.1,341.42,-25.9,Belo Jardim (1),249.97,250.5,0.2,8/8,bate,2026-10-15,ok
+Garanhuns,40_Garanhuns,790.98,792.25,0.2,675.77,-14.6,Garanhuns,734.85,736.14,0.2,5/5,bate,2026-10-15,ok
