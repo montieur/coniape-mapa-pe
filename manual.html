@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="pt-BR" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Manual · Mapa CONIAPE PE</title>
+<link rel="stylesheet" href="manual.css">
+<script src="manual.js"></script>
+<style>
+/* página do manual (versão para leitura direta e base do PDF) */
+:root{--bg:#ffffff;--panel:#ffffff;--sunk:#f4f6f8;--ink:#18212b;--ink-2:#3d4955;--muted:#6b7785;--line:#dfe4ea;
+  --accent:#0f6e8c;--accent-soft:#e3f1f5;--shadow:0 1px 3px rgba(16,24,32,.12)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.capa{background:#0f6e8c;color:#fff;padding:22px 32px}
+.capa b{display:block;font-size:22px;letter-spacing:-.01em}
+.capa span{opacity:.85;font-size:13px}
+main{padding:24px 32px 48px}
+/* no PDF: sem o H1 repetido (a capa já tem o título) e quebras de página nas partes */
+.md > h1:first-child{display:none}
+@media print{
+  @page{size:A4;margin:14mm 14mm 16mm}
+  body{font-size:12px}
+  .capa{padding:16px 18px;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  main{padding:10px 0 0}
+  .md{max-width:none;font-size:12.5px}
+  .md h2{break-before:page;border-top:0;margin-top:0}
+  .md img{box-shadow:none;break-inside:avoid;max-height:120mm;width:auto;margin-left:auto;margin-right:auto}
+  .md table,.md pre{break-inside:avoid}
+  .md a{color:inherit;text-decoration:none}
+}
+</style>
+</head>
+<body>
+<div class="capa"><b>Manual de uso · Mapa CONIAPE Pernambuco</b>
+  <span>TECGEO · https://montieur.github.io/coniape-mapa-pe/</span></div>
+<main><article class="md" id="manual"><p>Carregando…</p></article></main>
+<script>
+renderManual(document.getElementById('manual')).then(() => {
+  // sinaliza para o gerador de PDF que tudo (inclusive imagens) terminou de carregar
+  Promise.all([...document.images].map(i => i.complete ? 0 : new Promise(r => { i.onload = i.onerror = r; i.loading = 'eager'; })))
+    .then(() => document.body.dataset.pronto = '1');
+});
+</script>
+</body>
+</html>

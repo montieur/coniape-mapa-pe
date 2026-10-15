@@ -1,0 +1,18 @@
+{
+  "name": "CONIAPE · Municípios de Pernambuco",
+  "short_name": "CONIAPE PE",
+  "description": "Área urbana e vias transitáveis dos 40 municípios de PE do CONIAPE",
+  "lang": "pt-BR",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0f1318",
+  "theme_color": "#0f6e8c",
+  "icons": [
+    {"src": "icones/icone-192.png", "sizes": "192x192", "type": "image/png"},
+    {"src": "icones/icone-512.png", "sizes": "512x512", "type": "image/png"},
+    {"src": "icones/icone-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable"},
+    {"src": "icones/icone.svg", "sizes": "any", "type": "image/svg+xml"}
+  ]
+}

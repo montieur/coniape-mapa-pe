@@ -1,0 +1,24 @@
+/* Tipografia do manual (janela do mapa e manual.html). Usa os tokens de cor do index.html. */
+.md{font-size:14.5px;line-height:1.6;color:var(--ink);max-width:860px;margin:0 auto}
+.md h1{font-size:24px;margin:0 0 10px;letter-spacing:-.01em}
+.md h2{font-size:19px;margin:34px 0 10px;padding-top:6px;border-top:1px solid var(--line)}
+.md h3{font-size:15.5px;margin:22px 0 8px}
+.md p,.md ul,.md ol{margin:0 0 12px}
+.md ul,.md ol{padding-left:22px}
+.md li{margin:3px 0}
+.md a{color:var(--accent)}
+.md strong{font-weight:650}
+.md code{font:12.5px/1.4 ui-monospace,Consolas,monospace;background:var(--sunk);border:1px solid var(--line);border-radius:5px;padding:1px 5px}
+.md pre{background:var(--sunk);border:1px solid var(--line);border-radius:8px;padding:10px 12px;overflow:auto}
+.md pre code{border:0;padding:0;background:none}
+.md table{border-collapse:collapse;width:100%;margin:0 0 14px;font-size:13.5px;display:block;overflow-x:auto}
+.md th,.md td{border:1px solid var(--line);padding:6px 9px;text-align:left;vertical-align:top}
+.md th{background:var(--sunk);font-weight:620}
+.md hr{border:0;border-top:1px solid var(--line);margin:22px 0}
+.md img{max-width:100%;height:auto;border:1px solid var(--line);border-radius:10px;box-shadow:var(--shadow);cursor:zoom-in;display:block;margin:6px 0 4px}
+.md img + em,.md p > em:only-child{display:block;color:var(--muted);font-size:12.5px;margin-bottom:12px}
+.md blockquote{margin:0 0 12px;padding:8px 14px;border-left:3px solid var(--accent);background:var(--accent-soft);border-radius:0 8px 8px 0}
+.md blockquote p{margin:0}
+.md hr + h2{border-top:0;padding-top:0}
+/* prints de celular lado a lado (no .md: <img width="…"> dentro de um parágrafo; o GitHub faz o mesmo) */
+.md p > img[width]{display:inline-block;vertical-align:top;margin:6px 8px 6px 0;max-width:calc(50% - 8px);border:0;box-shadow:none;border-radius:0}
