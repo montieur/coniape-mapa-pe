@@ -44,7 +44,7 @@ for f in mun.getFeatures(f"\"CD_MUN\" = '{cd}'"):
     nome = f["NM_MUN"]; orig = f["VIAS_KM"]
     f["VIAS_KM"] = med["total"]["vias_km"]
     f["DENS_VIAS"] = round(med["total"]["vias_km"] / f["AREA_URB"], 2)
-    f["FONTE"] = f"CONIAPE + vias OSM reextraidas em {date.today():%d/%m/%Y}"
+    f["FONTE"] = f"CONIAPE + vias OSM revisadas em {date.today():%d/%m/%Y}"
     mun.updateFeature(f)
 assert mun.commitChanges(), mun.commitErrors()
 
@@ -63,10 +63,13 @@ gravar(vias, MP / "01_dados" / "web_vias.geojson", QgsCoordinateReferenceSystem(
 # 4) registro da revisão
 rev_path = MP / "01_dados" / "revisoes.json"
 revs = json.loads(rev_path.read_text(encoding="utf-8")) if rev_path.exists() else {}
+orig = revs.get(cd, {}).get("vias_km_original", orig)   # sempre o valor do CONIAPE, não o de uma revisão anterior
 revs[cd] = {"municipio": nome, "data": date.today().isoformat(), "vias_km_original": orig,
             "vias_km": med["total"]["vias_km"], "vias_recortadas_km": med["total"]["vias_recortadas_km"],
-            "motivo": "Extração OSM original do CONIAPE incompleta (faltavam eixos na mancha principal). "
-                      "Vias reextraídas do OpenStreetMap com o mesmo filtro e critério (vias que tocam as manchas urbanas).",
+            "motivo": "Extração OSM original do CONIAPE incompleta (faltavam eixos na mancha principal).",
+            "criterio": med.get("criterio", "Vias reextraídas do OpenStreetMap com o mesmo filtro e critério do CONIAPE "
+                                            "(vias que tocam as manchas urbanas, comprimento inteiro)."),
+            "por_tipo_km": med.get("por_tipo_km"), "excluidas_km": med.get("excluidas_km"),
             "manchas": med["manchas"]}
 rev_path.write_text(json.dumps(revs, ensure_ascii=False, indent=1), encoding="utf-8")
 print("revisão registrada:", rev_path)

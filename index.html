@@ -434,7 +434,7 @@ setMetric('vias');
 function select(code, zoom) {
   const prev = selected; selected = code;
   munLayer.setStyle(styleMun); layerByCode[code].bringToFront();
-  if (zoom) map.flyToBounds(munBounds[code], {padding: [40, 40], duration: .6});
+  if (zoom) flyTo(code);
   refreshVias();
   renderDetail(byCode[code]);
   $('viewList').hidden = true; $('viewDetail').hidden = false;
@@ -459,8 +459,8 @@ function renderDetail(m) {
       <div><span>Vias urbanas</span><b class="num">${fmt(m.vias)} km</b><small>${RANK[m.c].vias}º de ${n} no CONIAPE</small></div>
     </div>
     ${m.rev ? `<div class="alert"><b>Vias revisadas em ${m.rev.data.split('-').reverse().join('/')}.</b>
-      A extração original do CONIAPE (${fmt(m.rev.orig)} km) estava incompleta no centro; as vias foram reextraídas do
-      OpenStreetMap com o mesmo critério. Só o trecho dentro das manchas: ${fmt(m.rev.recort)} km.</div>` : ''}
+      ${m.rev.criterio}. A extração original do CONIAPE (${fmt(m.rev.orig)} km) estava incompleta no centro.
+      ${Object.keys(m.rev.excl).length ? `Ficaram de fora ${fmt(Object.values(m.rev.excl).reduce((a, b) => a + b, 0), 1)} km não transitáveis (vias privadas, estacionamentos, garagens).` : ''}</div>` : ''}
     <div class="stats">
       <div><span>Densidade de vias</span><b class="num">${fmt(m.dens)} km/km²</b></div>
       <div><span>Área urbana / território</span><b class="num">${fmt(m.perc)} %</b></div>
@@ -476,7 +476,12 @@ function renderDetail(m) {
     <p class="note">Fonte: ${m.fonte}. ${m.pdf ? '' : 'Este município não tem relatório oficial; o PDF é gerado pelo mapa.'}</p>`;
   $('btnBack').onclick = closeDetail;
 }
-$('btnZoom').onclick = () => selected && map.flyToBounds(munBounds[selected], {padding: [40, 40], duration: .6});
+/* flyTo quebra (NaN) com o mapa sem tamanho, p.ex. aba em segundo plano: aí só enquadra */
+function flyTo(code) {
+  const s = map.getSize();
+  s.x > 0 && s.y > 0 ? map.flyToBounds(munBounds[code], {padding: [40, 40], duration: .6}) : map.fitBounds(munBounds[code]);
+}
+$('btnZoom').onclick = () => selected && flyTo(selected);
 $('btnPdf').onclick = () => selected && askDownload(byCode[selected]);
 document.addEventListener('keydown', e => { if (e.key === 'Escape' && selected && !$('dlg').open) closeDetail(); });
 

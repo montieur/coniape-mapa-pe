@@ -57,8 +57,9 @@ for m in mun:
     if r:
         m["vias"] = r["vias_km"]
         m["dens"] = round(r["vias_km"] / m["urb"], 2)
-        m["fonte"] = "CONIAPE (setores IBGE 2022) + vias OSM reextraídas"
-        m["rev"] = {"data": r["data"], "orig": r["vias_km_original"], "recort": r["vias_recortadas_km"], "motivo": r["motivo"]}
+        m["fonte"] = "CONIAPE (setores IBGE 2022) + vias OSM revisadas"
+        m["rev"] = {"data": r["data"], "orig": r["vias_km_original"], "recort": r["vias_recortadas_km"],
+                    "motivo": r["motivo"], "criterio": r.get("criterio", ""), "excl": r.get("excluidas_km") or {}}
 
 urb = [{"c": f["properties"]["CD_MUN"], "n": f["properties"]["NOME"],
         "a": f["properties"]["AREA_KM2"],
