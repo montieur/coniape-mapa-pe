@@ -31,22 +31,7 @@ for d in sorted(root.iterdir()):
         if (d / f).exists():
             lst.append(str(d / f))
 
-# Ipojuca: plano específico por polígonos (soma dos 3)
-ip = json.loads((root / "Ipojuca" / "RESUMO.json").read_text(encoding="utf-8"))["results"]
-rows.append({
-    "CD_MUN": "2607208", "municipio": "Ipojuca", "pasta": "Ipojuca",
-    "area_urb_km2": round(sum(r["area_km2"] for r in ip), 2),
-    "vias_km": round(sum(r["vias_km"] for r in ip), 2), "area_rur_km2": None,
-    "setores_urb": None, "distritos": len(ip),
-    "fonte": "CONIAPE Ipojuca (polígonos do plano + vias OSM clipadas)",
-})
-for r in ip:
-    distritos.append({"CD_MUN": "2607208", "municipio": "Ipojuca", "distrito": r["poligono"],
-                      "area_km2": r["area_km2"], "vias_km": r["vias_km"]})
-for sub in sorted((root / "Ipojuca").glob("*/01_poligono.kml")):
-    kml_urb.append(str(sub))
-for sub in sorted((root / "Ipojuca").glob("*/03_vias_clipadas.gpx")):
-    kml_vias.append(str(sub))
+# Ipojuca (pasta CONIAPE\Ipojuca, plano por polígonos) ficou fora do mapa a pedido (15/10/2026)
 
 with open(out / "coniape_pe.csv", "w", newline="", encoding="utf-8") as f:
     w = csv.DictWriter(f, fieldnames=list(rows[0]))

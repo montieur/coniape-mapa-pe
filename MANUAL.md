@@ -4,7 +4,7 @@
 - **Manual em PDF:** [Manual_CONIAPE_PE.pdf](https://montieur.github.io/coniape-mapa-pe/dados/Manual_CONIAPE_PE.pdf)
 - **Repositório:** https://github.com/montieur/coniape-mapa-pe
 
-O mapa mostra, para os **40 municípios de Pernambuco atendidos pelo CONIAPE**, a área urbana e a extensão de **vias transitáveis por veículo dentro das manchas urbanas**, que é a base de quantitativos do mapeamento 360°. Os outros 145 municípios de PE aparecem em cinza só para referência.
+O mapa mostra, para os **39 municípios de Pernambuco atendidos pelo CONIAPE**, a área urbana e a extensão de **vias transitáveis por veículo dentro das manchas urbanas**, que é a base de quantitativos do mapeamento 360°. Os outros 146 municípios de PE aparecem em cinza só para referência.
 
 - [Parte 1: Usar o mapa](#parte-1-usar-o-mapa)
 - [Parte 2: Entender os números](#parte-2-entender-os-números)
@@ -18,11 +18,11 @@ O mapa mostra, para os **40 municípios de Pernambuco atendidos pelo CONIAPE**, 
 ### A tela
 
 ![Tela inicial do mapa no computador](docs/img/01_visao_geral.png)
-*Tela inicial: painel à esquerda, mapa à direita, com os 40 municípios coloridos por km de vias transitáveis.*
+*Tela inicial: painel à esquerda, mapa à direita, com os 39 municípios coloridos por km de vias transitáveis.*
 
 | Área | O que tem |
 |---|---|
-| **Cabeçalho** | Título e os botões **Manual** (esta janela), **Dados** (downloads) e **Relatório geral** (PDF com os 40 municípios) |
+| **Cabeçalho** | Título e os botões **Manual** (esta janela), **Dados** (downloads) e **Relatório geral** (PDF com os 39 municípios) |
 | **Resumo** | Totais do CONIAPE em PE: municípios, km² urbanos e km de vias transitáveis |
 | **Busca e indicador** | Campo para achar um município e escolha da variável que colore o mapa |
 | **Lista** | Municípios ranqueados pelo indicador escolhido, com barra comparativa |
@@ -59,7 +59,7 @@ Municípios em cinza estão fora do CONIAPE. Ao clicar num deles aparece um avis
 
 Ao selecionar um município, o painel mostra:
 
-- **Área urbana** e **vias transitáveis** em destaque, com a posição entre os 40 (ex.: "3º de 40 no CONIAPE")
+- **Área urbana** e **vias transitáveis** em destaque, com a posição entre os 39 (ex.: "3º de 39 no CONIAPE")
 - **Vias, critério CONIAPE original**: o número antigo, para comparação ([veja a Parte 2](#parte-2-entender-os-números))
 - **Não transitáveis excluídas**: km de vias privadas, estacionamentos e garagens que ficaram de fora
 - Densidade, % urbano, território (área oficial IBGE e área planimétrica UTM), setores urbanos e número de manchas
@@ -93,10 +93,10 @@ No botão de camadas (canto superior direito do mapa):
 
 | Opção | O que é |
 |---|---|
-| **Relatório oficial CONIAPE** | PDF original do município, baixado do repositório. **Atenção:** traz o km de vias pelo critério antigo do CONIAPE. Ipojuca não tem relatório oficial. |
+| **Relatório oficial CONIAPE** | PDF original do município, baixado do repositório. **Atenção:** traz o km de vias pelo critério antigo do CONIAPE. |
 | **Relatório do mapa** | PDF gerado na hora com mapa base, limite, áreas urbanas, vias, escala, indicadores atuais e tabela de manchas |
 
-**Relatório geral:** o botão no cabeçalho gera um PDF com o mapa de PE e a tabela dos 40 municípios: território, área urbana, vias transitáveis, valor original do CONIAPE, densidade e % urbano, com totais.
+**Relatório geral:** o botão no cabeçalho gera um PDF com o mapa de PE e a tabela dos 39 municípios: território, área urbana, vias transitáveis, valor original do CONIAPE, densidade e % urbano, com totais.
 
 Os PDFs são gerados no próprio navegador e precisam de internet para baixar o mapa base. Sem conexão, o PDF sai com fundo liso e um aviso.
 
@@ -177,7 +177,6 @@ O mapa e os relatórios gerados mostram os dois valores. Os **relatórios oficia
 ### Casos especiais
 
 - **Caruaru:** a extração original do CONIAPE estava **incompleta**: faltava a maior parte dos eixos do centro (1.016 km no original). Na nova extração, as manchas pequenas bateram exatamente com o original, o que valida o método. O valor atual é 1.501,18 km.
-- **Ipojuca:** segue o plano específico do município, com três polígonos (Orla, O e Salgado, Sede e Ruropólis) em vez das manchas do IBGE, e o mesmo filtro de vias transitáveis.
 - **Auditoria:** os 39 municípios foram comparados com o OSM atual pelo critério original. Só Caruaru tinha falha de extração (mais de 10% de diferença); veja `dados/auditoria_vias_osm_resumo.md`.
 
 ### Áreas do território
@@ -209,7 +208,7 @@ Todas as camadas estão em **SIRGAS 2000 / UTM zona 25S (EPSG:31985)**.
 |---|---|
 | `CD_MUN`, `NM_MUN` | Código e nome IBGE do município |
 | `NM_RGI`, `NM_RGINT` | Regiões geográficas imediata e intermediária (IBGE) |
-| `CONIAPE` | `Sim` para os 40 municípios do CONIAPE |
+| `CONIAPE` | `Sim` para os 39 municípios do CONIAPE |
 | `AREA_IBGE` | Área territorial oficial IBGE (km²) |
 | `AREA_UTM` | Área planimétrica em UTM 25S (km²) |
 | `AREA_URB`, `AREA_RUR` | Área urbana e rural pelos setores IBGE 2022 (km²) |
@@ -257,6 +256,7 @@ CONIAPE\MAPA_PE\
 | `vias_transitaveis_mancha.py` | Filtra as vias transitáveis e recorta nas manchas (PyQGIS) |
 | `medir_vias_manchas.py` | Mede pelo critério antigo do CONIAPE (via inteira), para auditoria |
 | `aplicar_revisao_vias.py` / `aplicar_revisao_lote.py` | Grava as vias novas nos produtos UTM e em `revisoes.json` |
+| `remover_municipio.py <CD_MUN>` | Tira um município do CONIAPE nos produtos (vias, manchas, quantitativos) |
 | `build_data.py` | Gera o `data.js` do mapa e copia os PDFs oficiais |
 | `compilar_pacote.py` | Gera os ZIPs e CSVs de `dados/` |
 | `capturar_prints.py` | Tira os prints deste manual (`docs/img/`) e gera o PDF do manual, com o Edge headless |

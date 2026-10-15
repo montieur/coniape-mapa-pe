@@ -1945,56 +1945,5 @@
     "n_vias": 32
    }
   ]
- },
- "2607208": {
-  "municipio": "Ipojuca",
-  "data": "2026-10-15",
-  "vias_km_original": 320.95,
-  "vias_km": 321.77,
-  "vias_recortadas_km": 321.77,
-  "motivo": "",
-  "criterio": "Vias transitáveis por veículo (OSM), recortadas nas manchas urbanas IBGE 2022 (CD_SIT 1-3)",
-  "por_tipo_km": {
-   "residential": 203.83,
-   "unclassified": 27.98,
-   "primary": 24.14,
-   "service": 22.2,
-   "tertiary": 20.92,
-   "secondary": 5.94,
-   "trunk": 5.78,
-   "track": 4.91,
-   "living_street": 4.72,
-   "primary_link": 0.99,
-   "tertiary_link": 0.25,
-   "trunk_link": 0.1
-  },
-  "excluidas_km": {
-   "acesso privado/proibido": 5.4,
-   "service=driveway": 0.28,
-   "service=parking_aisle": 1.34
-  },
-  "manchas": [
-   {
-    "mancha": "01 - ORLA",
-    "area_km2": 13.41,
-    "vias_km": 145.84,
-    "vias_recortadas_km": 145.84,
-    "n_vias": 710
-   },
-   {
-    "mancha": "02 - O E SALGADO",
-    "area_km2": 13.43,
-    "vias_km": 120.97,
-    "vias_recortadas_km": 120.97,
-    "n_vias": 615
-   },
-   {
-    "mancha": "04 - SEDE E RUROPOLIS",
-    "area_km2": 3.08,
-    "vias_km": 54.96,
-    "vias_recortadas_km": 54.96,
-    "n_vias": 375
-   }
-  ]
  }
 }
