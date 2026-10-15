@@ -20,6 +20,7 @@ PRINTS = [   # arquivo, URL, tamanho da janela (ou "celular": moldura de 390 x 8
     ("02_indicador_densidade.png", "/?ind=dens", DESK),
     ("03_detalhe_municipio.png", "/?mun=2604106", DESK),
     ("04_vias_zoom.png", "/?mun=2604106&zoom=15", DESK),
+    ("04b_zoom_mancha.png", "/?mun=2604106&mancha=" + quote("Carapotós (4)"), DESK),
     ("05_baixar_relatorio.png", "/?mun=2601904&baixar", DESK),
     ("06_janela_manual.png", "/?manual", DESK),
     ("07_celular_lista.png", "/", CEL),

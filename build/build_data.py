@@ -4,7 +4,7 @@ Uso:  python -I build_data.py
 Entradas: ../../01_dados/web_*.geojson, distritos.json  (exportados do QGIS)
 Saídas:   ../data.js  e  ../relatorios/*.pdf
 """
-import json, shutil
+import hashlib, json, re, shutil
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
@@ -83,10 +83,18 @@ for f in load("web_vias.geojson"):
         vias.setdefault(p["CD_MUN"], []).append([name_idx[nm], round(p["COMP_KM"], 3), flat])
 
 distritos = json.loads((DADOS / "distritos.json").read_text(encoding="utf-8"))
+urb_nomes = {}
+for u in urb:
+    urb_nomes.setdefault(u["c"], []).append(u["n"])
 for cd, r in revs.items():   # manchas remedidas com as vias novas
     nome = r["municipio"]
+    def rotulo(x):
+        # município de mancha única: a medição usa o nome da pasta ("03_Angelim"); mostra o nome do polígono
+        if re.match(r"^\d\d_", x["mancha"]) and len(set(urb_nomes.get(cd, []))) == 1:
+            return urb_nomes[cd][0]
+        return x["mancha"]
     distritos = [d for d in distritos if d["CD_MUN"] != cd] + [
-        {"CD_MUN": cd, "municipio": nome, "distrito": x["mancha"], "area_km2": x["area_km2"],
+        {"CD_MUN": cd, "municipio": nome, "distrito": rotulo(x), "area_km2": x["area_km2"],
          "vias_km": x["vias_km"]} for x in r["manchas"]]
 
 data = {"mun": mun, "urb": urb, "viaNames": names, "vias": vias, "distritos": distritos,
@@ -95,7 +103,6 @@ js = "window.CONIAPE_DATA=" + json.dumps(data, ensure_ascii=False, separators=("
 (SITE / "data.js").write_text(js, encoding="utf-8")
 
 # versão no endereço dos scripts: o navegador não reaproveita um data.js/relatorio.js antigo do cache
-import hashlib, re
 idx = SITE / "index.html"
 html = idx.read_text(encoding="utf-8")
 for nome in ("data.js", "relatorio.js"):

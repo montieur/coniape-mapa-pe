@@ -63,9 +63,12 @@ Ao selecionar um município, o painel mostra:
 - **Vias, critério CONIAPE original**: o número antigo, para comparação ([veja a Parte 2](#parte-2-entender-os-números))
 - **Não transitáveis excluídas**: km de vias privadas, estacionamentos e garagens que ficaram de fora
 - Densidade, % urbano, território (área oficial IBGE e área planimétrica UTM), setores urbanos e número de manchas
-- **Distritos e manchas urbanas**: cada mancha com área e km de vias, da maior para a menor
+- **Distritos e manchas urbanas**: cada mancha com área e km de vias, da maior para a menor. **Clique numa mancha** para aproximar o mapa nela: a mancha ganha um contorno tracejado e a linha fica marcada. Clique de novo na mesma linha para voltar ao município inteiro.
 
 No mapa, o município selecionado ganha contorno forte, os outros ficam esmaecidos e as vias dele aparecem.
+
+![Zoom na mancha Carapotós (4), em Caruaru](docs/img/04b_zoom_mancha.png)
+*Clique em "Carapotós (4)" na tabela de manchas: o mapa aproxima na mancha (contorno tracejado) e mostra as vias dela.*
 
 Para voltar à lista, use **Todos os municípios** ou a tecla **Esc**. O botão **Ver no mapa** reenquadra o município.
 
@@ -139,6 +142,7 @@ Dá para compartilhar um link que já abre o mapa num estado específico:
 |---|---|
 | `…/coniape-mapa-pe/?mun=2604106` | Caruaru selecionado (use o código IBGE do município) |
 | `…/coniape-mapa-pe/?mun=2604106&zoom=15` | Caruaru com zoom 15 |
+| `…/coniape-mapa-pe/?mun=2604106&mancha=Carapotós (4)` | Caruaru com zoom na mancha Carapotós (4) (nome como aparece na tabela) |
 | `…/coniape-mapa-pe/?ind=dens` | Mapa colorido por densidade de vias (`vias`, `urb`, `dens` ou `perc`) |
 | `…/coniape-mapa-pe/?mun=2601904&baixar` | Bezerros com a janela de relatório aberta |
 | `…/coniape-mapa-pe/?manual` | Manual aberto |

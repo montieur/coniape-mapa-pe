@@ -19,7 +19,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 <link rel="stylesheet" href="manual.css">
 <script src="manual.js"></script>
-<script src="data.js?v=0e1fa3b2"></script>
+<script src="data.js?v=95707a46"></script>
 <style>
 :root{
   --bg:#f3f5f8; --panel:#ffffff; --sunk:#f6f8fa; --ink:#18212b; --ink-2:#3d4955; --muted:#6b7785; --line:#e3e7ec;
@@ -131,6 +131,13 @@ h3{font-size:12px;font-weight:650;letter-spacing:.05em;text-transform:uppercase;
 .dist td:first-child{padding-right:10px}
 .dist .bar{margin-top:4px}
 .dist tfoot td{font-weight:650;border-bottom:0}
+.dist tbody tr{cursor:pointer}
+.dist tbody tr:hover td{background:var(--hover)}
+.dist tbody tr:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+.dist tbody tr.sel td{background:var(--accent-soft);color:var(--ink);font-weight:620}
+.dist tbody tr.sel td:first-child{box-shadow:inset 3px 0 0 var(--accent)}
+.dist td:first-child{padding-left:6px}
+.dist .zi{width:13px;height:13px;color:var(--accent);vertical-align:-2px;margin-right:6px;opacity:.75}
 .note{color:var(--muted);font-size:11.5px;margin:4px 0 0}
 .alert{border:1px solid #e6b450;background:color-mix(in srgb,#e6b450 14%,var(--panel));border-radius:10px;padding:9px 11px;font-size:12px;margin:0 0 12px;color:var(--ink-2)}
 .alert b{color:var(--ink)}
@@ -367,7 +374,8 @@ function styleMun(f) {
     color: isSel ? css('--sel') : '#ffffff',
     weight: isSel ? 3 : isHov ? 2.2 : .9,
     fillColor: colorFor(m[metric]),
-    fillOpacity: selected && !isSel ? .5 : .82,
+    // de perto o preenchimento clareia, para aparecerem o mapa base, as manchas e as ruas
+    fillOpacity: (selected && !isSel ? .5 : .82) * (map.getZoom() >= 13 ? .2 : map.getZoom() >= 11 ? .45 : 1),
   };
 }
 const munLayer = L.geoJSON({type: 'FeatureCollection', features: D.mun.map(m => ({type: 'Feature', properties: {c: m.c}, geometry: m.g}))}, {
@@ -426,6 +434,7 @@ function refreshVias() {
   });
 }
 map.on('zoomend', syncLabels);
+map.on('zoomend', () => munLayer.setStyle(styleMun));
 map.on('moveend zoomend overlayadd', refreshVias);
 map.on('overlayremove', e => { if (e.layer === labels && !syncing) labelsOn = false; });
 map.on('overlayadd', e => { if (e.layer === labels && !syncing) { labelsOn = true; syncLabels(); } });
@@ -549,6 +558,7 @@ setMetric('vias');
 /* ===== Detalhe ===== */
 function select(code, zoom) {
   const prev = selected; selected = code;
+  if (prev !== code) limparMancha();
   if (telaPequena.matches) setSheet('meio');   // metade da tela: detalhe embaixo, município visível em cima
   munLayer.setStyle(styleMun); layerByCode[code].bringToFront();
   if (zoom) flyTo(code);
@@ -559,7 +569,7 @@ function select(code, zoom) {
   if (prev !== code) $('detail').scrollTop = 0;
 }
 function closeDetail() {
-  selected = null; munLayer.setStyle(styleMun); refreshVias();
+  selected = null; limparMancha(); munLayer.setStyle(styleMun); refreshVias();
   $('viewDetail').hidden = true; $('viewList').hidden = false;
   document.querySelector('aside').classList.remove('detail-open');
 }
@@ -588,11 +598,58 @@ function renderDetail(m) {
     </div>
     ${dist.length ? `<h3>Distritos e manchas urbanas</h3>
     <table class="dist num"><thead><tr><th>Nome</th><th>Área km²</th><th>Vias km</th></tr></thead><tbody>
-      ${dist.map(d => `<tr><td>${d.distrito}</td><td>${fmt(d.area_km2)}</td><td>${fmt(d.vias_km)}<div class="bar"><i style="width:${(d.vias_km / maxV * 100).toFixed(1)}%"></i></div></td></tr>`).join('')}
+      ${dist.map(d => `<tr data-mancha="${encodeURIComponent(d.distrito)}" tabindex="0" title="Aproximar ${d.distrito} no mapa">
+        <td><svg class="zi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4-4M11 8.5v5M8.5 11h5"/></svg>${d.distrito}</td>
+        <td>${fmt(d.area_km2)}</td><td>${fmt(d.vias_km)}<div class="bar"><i style="width:${(d.vias_km / maxV * 100).toFixed(1)}%"></i></div></td></tr>`).join('')}
     </tbody>${dist.length > 1 ? `<tfoot><tr><td>Total</td><td>${fmt(dist.reduce((s, d) => s + d.area_km2, 0))}</td><td>${fmt(dist.reduce((s, d) => s + d.vias_km, 0))}</td></tr></tfoot>` : ''}</table>` : ''}
+    ${dist.length ? '<p class="note">Toque numa mancha para aproximar o mapa nela; toque de novo para voltar ao município.</p>' : ''}
     <p class="note">Fonte: ${m.fonte}. ${m.pdf ? '' : 'Este município não tem relatório oficial; o PDF é gerado pelo mapa.'}</p>`;
   $('btnBack').onclick = closeDetail;
+  marcarManchas();
 }
+
+/* ===== Zoom numa mancha urbana (linhas da tabela de distritos) ===== */
+map.createPane('destaque');
+map.getPane('destaque').style.zIndex = 455;
+map.getPane('destaque').style.pointerEvents = 'none';
+const destaqueMancha = L.layerGroup().addTo(map);
+let manchaSel = null;
+/* polígonos da mancha: pelo nome; município de mancha única cai no único polígono que tiver */
+function poligonosMancha(cd, nome) {
+  const doMun = urbLayer.getLayers().filter(l => l.feature.properties.c === cd);
+  const porNome = doMun.filter(l => l.feature.properties.n === nome);
+  return porNome.length ? porNome : new Set(doMun.map(l => l.feature.properties.n)).size === 1 ? doMun : [];
+}
+function desenharDestaque(camadas = []) {
+  destaqueMancha.clearLayers();
+  camadas.forEach(l => L.geoJSON(l.feature, {pane: 'destaque', interactive: false,
+    style: {color: css('--sel'), weight: 3, dashArray: '7 5', fill: false}}).addTo(destaqueMancha));
+}
+function marcarManchas() {
+  document.querySelectorAll('#detail tr[data-mancha]').forEach(tr =>
+    tr.classList.toggle('sel', decodeURIComponent(tr.dataset.mancha) === manchaSel));
+}
+function zoomMancha(nome) {
+  if (!selected) return;
+  if (manchaSel === nome) {   // segundo toque: volta ao município inteiro
+    manchaSel = null; desenharDestaque(); marcarManchas(); flyTo(selected); return;
+  }
+  const camadas = poligonosMancha(selected, nome);
+  if (!camadas.length) { toast('Não achei o polígono desta mancha no mapa'); return; }
+  manchaSel = nome; desenharDestaque(camadas); marcarManchas();
+  document.querySelector('#detail tr.sel')?.scrollIntoView({block: 'nearest'});
+  const b = L.latLngBounds([]); camadas.forEach(l => b.extend(l.getBounds()));
+  const s = map.getSize(), pad = {paddingTopLeft: [40, 40], paddingBottomRight: [40, 40 + sheetPx()], maxZoom: 16};
+  s.x > 0 && s.y > 0 ? map.flyToBounds(b, {...pad, duration: .6}) : map.fitBounds(b, pad);
+}
+const limparMancha = () => { manchaSel = null; desenharDestaque(); };
+$('detail').addEventListener('click', e => {
+  const tr = e.target.closest('tr[data-mancha]'); if (tr) zoomMancha(decodeURIComponent(tr.dataset.mancha));
+});
+$('detail').addEventListener('keydown', e => {
+  const tr = e.target.closest('tr[data-mancha]');
+  if (tr && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); zoomMancha(decodeURIComponent(tr.dataset.mancha)); }
+});
 /* flyTo quebra (NaN) com o mapa sem tamanho, p.ex. aba em segundo plano: aí só enquadra */
 function flyTo(code) {
   const s = map.getSize(), pad = {paddingTopLeft: [30, 30], paddingBottomRight: [30, 30 + sheetPx()]};
@@ -662,7 +719,7 @@ $('manualPdf').onclick = () => {
 };
 
 /* ===== Estado pela URL (links compartilháveis):
-   ?mun=<código IBGE>[&zoom=<nível>]  ?ind=vias|urb|dens|perc  ?baixar  ?manual[=<seção>]
+   ?mun=<código IBGE>[&zoom=<nível>][&mancha=<nome>]  ?ind=vias|urb|dens|perc  ?baixar  ?manual[=<seção>]
    ?painel=min|meio|max (smartphone) ===== */
 {
   const P = new URLSearchParams(location.search);
@@ -674,6 +731,7 @@ $('manualPdf').onclick = () => {
     const z = +P.get('zoom');
     z ? map.setView(layerByCode[cd].getCenter(), z) : enquadrar(munBounds[cd]);
   }
+  if (P.get('mancha') && selected) zoomMancha(P.get('mancha'));
   if (P.has('baixar') && selected) askDownload(byCode[selected]);
   if (P.has('manual')) abrirManual(P.get('manual') || undefined);
 }
