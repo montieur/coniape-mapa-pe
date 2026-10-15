@@ -49,6 +49,17 @@ for f in load("web_municipios.geojson"):
         "g": {"type": f["geometry"]["type"], "coordinates": rnd(f["geometry"]["coordinates"], 4)},
     })
 
+# revisões de vias (aplicar_revisao_vias.py): sobrepõem os quantitativos originais
+rev_path = DADOS / "revisoes.json"
+revs = json.loads(rev_path.read_text(encoding="utf-8")) if rev_path.exists() else {}
+for m in mun:
+    r = revs.get(m["c"])
+    if r:
+        m["vias"] = r["vias_km"]
+        m["dens"] = round(r["vias_km"] / m["urb"], 2)
+        m["fonte"] = "CONIAPE (setores IBGE 2022) + vias OSM reextraídas"
+        m["rev"] = {"data": r["data"], "orig": r["vias_km_original"], "recort": r["vias_recortadas_km"], "motivo": r["motivo"]}
+
 urb = [{"c": f["properties"]["CD_MUN"], "n": f["properties"]["NOME"],
         "a": f["properties"]["AREA_KM2"],
         "g": {"type": f["geometry"]["type"], "coordinates": rnd(f["geometry"]["coordinates"], 5)}}
@@ -71,6 +82,11 @@ for f in load("web_vias.geojson"):
         vias.setdefault(p["CD_MUN"], []).append([name_idx[nm], round(p["COMP_KM"], 3), flat])
 
 distritos = json.loads((DADOS / "distritos.json").read_text(encoding="utf-8"))
+for cd, r in revs.items():   # manchas remedidas com as vias novas
+    nome = r["municipio"]
+    distritos = [d for d in distritos if d["CD_MUN"] != cd] + [
+        {"CD_MUN": cd, "municipio": nome, "distrito": x["mancha"], "area_km2": x["area_km2"],
+         "vias_km": x["vias_km"]} for x in r["manchas"]]
 
 data = {"mun": mun, "urb": urb, "viaNames": names, "vias": vias, "distritos": distritos,
         "gerado": __import__("datetime").date.today().isoformat()}

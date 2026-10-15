@@ -137,7 +137,9 @@ async function gerarPdfMunicipio(m) {
     head: [['Indicador', 'Valor']],
     body: [
       ['Área urbana (setores IBGE 2022)', fmt(m.urb) + ' km²'],
-      ['Vias urbanas (OSM)', fmt(m.vias) + ' km'],
+      ['Vias urbanas (OSM)' + (m.rev ? ' – revisado' : ''), fmt(m.vias) + ' km'],
+      ...(m.rev ? [['Vias – valor original CONIAPE (extração incompleta)', fmt(m.rev.orig) + ' km'],
+                   ['Vias – só o trecho dentro das manchas', fmt(m.rev.recort) + ' km']] : []),
       ['Densidade de vias', fmt(m.dens) + ' km/km²'],
       ['Território – área oficial IBGE', fmt(m.aI, 3) + ' km²'],
       ['Território – área planimétrica UTM 25S', fmt(m.aU, 3) + ' km²'],
