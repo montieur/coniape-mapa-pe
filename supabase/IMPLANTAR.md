@@ -37,6 +37,7 @@ Requisitos: Node (para `npx supabase`), `gh` logado na conta dona do repositóri
    ```
    npx supabase db query --linked --project-ref <ref> -f supabase/migrations/20261019000000_gis_comercial.sql
    npx supabase db query --linked --project-ref <ref> -f supabase/migrations/20261019010000_pedido_verificar.sql
+   npx supabase db query --linked --project-ref <ref> -f supabase/migrations/20261019020000_arquivos_gis.sql
    ```
    Não use `supabase db push` num projeto que já tem outras migrações: ele compara com o histórico do projeto.
 3. **Função:** `npx supabase functions deploy gc-solicitar --project-ref <ref> --use-api` (o `--use-api` dispensa o Docker).
@@ -72,3 +73,7 @@ Não use o token do `gh` (tem acesso amplo à conta).
 - **Atribuição:** dados do OpenStreetMap exigem "© colaboradores do OpenStreetMap" (já está no manual e no mapa).
 - **Senha do banco:** foi gerada na criação do projeto e não foi guardada. Se precisar de acesso direto ao Postgres, redefina em
   Supabase > Project Settings > Database.
+
+## Arquivos GIS (pedido `exportar`)
+
+O pedido `exportar` gera Shapefile, KML e KMZ (limite, área urbana/rural, vias urbanas/rurais) de um município já na base e os guarda em `arquivos/<código>/` no bucket; os caminhos ficam em `gc_municipios.arquivos`. Município gerado novo já sai com os arquivos. Para preparar em massa: insira linhas em `gc_pedidos` com `tipo = 'exportar'` (a automação processa 6 por rodada).

@@ -120,6 +120,20 @@ No botão de camadas (canto superior direito do mapa):
 ![Vias transitáveis no centro de Caruaru](docs/img/04_vias_zoom.png)
 *Zoom no centro de Caruaru: cada linha vermelha é um trecho de via transitável dentro da mancha urbana.*
 
+### Baixar dados GIS (Shapefile, KML e KMZ)
+
+No detalhe de qualquer município da base aparece o cartão **Baixar dados GIS**, com três arquivos prontos para QGIS, ArcGIS e Google Earth:
+
+| Arquivo | Uso | Sistema de coordenadas |
+|---|---|---|
+| Shapefile (.zip) | QGIS, ArcGIS, CAD | SIRGAS 2000 / UTM do fuso do município |
+| KMZ | Google Earth, celular | WGS 84 |
+| KML | Google Earth, outros programas | WGS 84 |
+
+Cada arquivo traz cinco camadas: **limite do município**, **área urbana** (manchas IBGE 2022), **área rural** (limite menos a área urbana), **vias urbanas** e **vias rurais** (só as transitáveis por veículo, do OpenStreetMap). O zip do Shapefile inclui um `LEIA-ME.txt` com fontes e licença.
+
+Se o cartão mostrar **Preparar arquivos GIS**, clique: o servidor gera os arquivos em alguns minutos e o cartão se atualiza sozinho. Notas: o limite é a união dos setores censitários do IBGE 2022; as vias do OpenStreetMap exigem a atribuição "© colaboradores do OpenStreetMap" (licença ODbL).
+
 ### Baixar relatórios
 
 **Relatório de um município:** no detalhe, clique em **Baixar relatório** e escolha uma opção.
