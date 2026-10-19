@@ -1,4 +1,4 @@
-"""Gera os prints do manual (docs/img) e o PDF do manual (dados/Manual_CONIAPE_PE.pdf) com o Edge headless.
+"""Gera os prints do manual (docs/img) e o PDF do manual (dados/Manual_GIS_Comercial.pdf) com o Edge headless.
 
 Uso: com o site servido localmente (python -m http.server 8791 na pasta 03_mapa_html):
      python -I capturar_prints.py [http://localhost:8791]
@@ -45,6 +45,6 @@ for nome, url, tam in PRINTS:
     edge(f"--window-size={w},{h}", "--virtual-time-budget=15000", f"--screenshot={IMG / nome}", BASE + url)
     print("print:", nome, (IMG / nome).stat().st_size // 1024, "KB")
 
-pdf = SITE / "dados" / "Manual_CONIAPE_PE.pdf"
+pdf = SITE / "dados" / "Manual_GIS_Comercial.pdf"
 edge("--virtual-time-budget=20000", "--no-pdf-header-footer", f"--print-to-pdf={pdf}", BASE + "/manual.html")
 print("pdf:", pdf.name, pdf.stat().st_size // 1024, "KB")

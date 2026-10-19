@@ -17,7 +17,7 @@ function pdfFooter(doc) {
   const n = doc.getNumberOfPages();
   for (let i = 1; i <= n; i++) {
     doc.setPage(i); doc.setFontSize(7.5); doc.setTextColor(120);
-    doc.text(`CONIAPE · Área urbana: setores IBGE 2022 (CD_SIT 1-3) · Vias: OpenStreetMap, transitáveis por veículo, recortadas nas manchas`, 14, 285.5);
+    doc.text(`GIS Comercial · Área urbana: setores IBGE 2022 (CD_SIT 1-3) · Vias: OpenStreetMap, transitáveis por veículo, recortadas nas manchas`, 14, 285.5);
     doc.text(`Malha municipal IBGE 2024 · Projeção SIRGAS 2000 / UTM 25S`, 14, 289);
     doc.text(`Gerado em ${new Date().toLocaleString('pt-BR')} · pág. ${i}/${n}`, 196, 289, {align: 'right'});
   }
@@ -121,7 +121,7 @@ function save(doc, name) { doc.save(name); toast('PDF gerado'); }
 async function gerarPdfMunicipio(m) {
   toast('Gerando PDF com mapa base…', 0);
   const {jsPDF} = window.jspdf; const doc = new jsPDF({unit: 'mm', format: 'a4'});
-  pdfHeader(doc, `Relatório CONIAPE · ${m.n} – PE`, `Código IBGE ${m.c} · Região imediata de ${m.rgi} · Região intermediária de ${m.rgint}`);
+  pdfHeader(doc, `GIS Comercial · ${m.n} – PE`, `Código IBGE ${m.c} · Região imediata de ${m.rgi} · Região intermediária de ${m.rgint}`);
   const urbs = D.urb.filter(u => u.c === m.c);
   const vias = (D.vias[m.c] || []).map(([, , f]) => { const p = []; for (let i = 0; i < f.length; i += 2) p.push([f[i], f[i + 1]]); return p; });
   await drawMap(doc, {x: 14, y: 28, w: 182, h: 120}, [
@@ -161,7 +161,7 @@ async function gerarPdfMunicipio(m) {
 async function gerarPdfGeral() {
   toast('Gerando PDF com mapa base…', 0);
   const {jsPDF} = window.jspdf; const doc = new jsPDF({unit: 'mm', format: 'a4'});
-  pdfHeader(doc, 'Relatório geral CONIAPE · Pernambuco', `${CO.length} municípios · área urbana e vias transitáveis dentro das manchas urbanas`);
+  pdfHeader(doc, 'GIS Comercial · Relatório geral · Pernambuco', `${CO.length} municípios · área urbana e vias transitáveis dentro das manchas urbanas`);
   // Fernando de Noronha (2605459) fica no oceano e esmagaria o enquadramento do continente
   const continente = D.mun.filter(m => !m.co && m.c !== '2605459');
   await drawMap(doc, {x: 14, y: 28, w: 182, h: 66}, [
@@ -179,5 +179,5 @@ async function gerarPdfGeral() {
     foot: [['TOTAL', fmt(CO.reduce((s, m) => s + m.aI, 0), 1), fmt(tU), fmt(tV), fmt(CO.reduce((s, m) => s + (m.rev ? m.rev.orig : m.vias), 0)), fmt(tV / tU), '']],
     footStyles: {fillColor: [230, 236, 240], textColor: 20, fontStyle: 'bold', halign: 'right'},
   });
-  pdfFooter(doc); save(doc, 'Relatorio_geral_CONIAPE_PE.pdf');
+  pdfFooter(doc); save(doc, 'Relatorio_geral_GIS_Comercial_PE.pdf');
 }

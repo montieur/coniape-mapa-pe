@@ -1,4 +1,4 @@
-# CONIAPE · Mapa dos municípios de Pernambuco
+# GIS Comercial · Mapa dos municípios de Pernambuco
 
 Mapa interativo com a área urbana (setores IBGE 2022, CD_SIT 1–3) e as **vias transitáveis por veículo dentro das manchas urbanas** (OpenStreetMap) dos 39 municípios de PE atendidos pelo CONIAPE, sobre a malha municipal IBGE 2024. É a base de quantitativos do mapeamento 360°.
 

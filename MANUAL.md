@@ -1,10 +1,10 @@
-# Manual de uso · Mapa CONIAPE Pernambuco
+# Manual de uso · GIS Comercial
 
 - **Mapa:** https://montieur.github.io/coniape-mapa-pe/ (computador e smartphone)
-- **Manual em PDF:** [Manual_CONIAPE_PE.pdf](https://montieur.github.io/coniape-mapa-pe/dados/Manual_CONIAPE_PE.pdf)
+- **Manual em PDF:** [Manual_GIS_Comercial.pdf](https://montieur.github.io/coniape-mapa-pe/dados/Manual_GIS_Comercial.pdf)
 - **Repositório:** https://github.com/montieur/coniape-mapa-pe
 
-O mapa mostra, para os **39 municípios de Pernambuco atendidos pelo CONIAPE**, a área urbana e a extensão de **vias transitáveis por veículo dentro das manchas urbanas**, que é a base de quantitativos do mapeamento 360°. Os outros 146 municípios de PE aparecem em cinza só para referência.
+O **GIS Comercial** mostra, para os **39 municípios de Pernambuco atendidos pelo CONIAPE**, a área urbana e a extensão de **vias transitáveis por veículo dentro das manchas urbanas**, que é a base de quantitativos do mapeamento 360°. Os outros 146 municípios de PE aparecem em cinza só para referência.
 
 - [Parte 1: Usar o mapa](#parte-1-usar-o-mapa)
 - [Parte 2: Entender os números](#parte-2-entender-os-números)
@@ -198,7 +198,7 @@ Todos os arquivos ficam na pasta [`dados/`](https://github.com/montieur/coniape-
 | [quantitativos_manchas.csv](https://montieur.github.io/coniape-mapa-pe/dados/quantitativos_manchas.csv) | Uma mancha urbana por linha |
 | [auditoria_vias_osm.csv](https://montieur.github.io/coniape-mapa-pe/dados/auditoria_vias_osm.csv) | Comparação CONIAPE × OSM por município |
 | [revisoes.json](https://montieur.github.io/coniape-mapa-pe/dados/revisoes.json) | Registro técnico das revisões: valores, critério, km por tipo de via, excluídas, manchas |
-| [Manual_CONIAPE_PE.pdf](https://montieur.github.io/coniape-mapa-pe/dados/Manual_CONIAPE_PE.pdf) | Este manual em PDF, com os prints |
+| [Manual_GIS_Comercial.pdf](https://montieur.github.io/coniape-mapa-pe/dados/Manual_GIS_Comercial.pdf) | Este manual em PDF, com os prints |
 
 Todas as camadas estão em **SIRGAS 2000 / UTM zona 25S (EPSG:31985)**.
 
@@ -291,7 +291,7 @@ C:\Python314\python.exe -m http.server 8791 --directory C:\Users\tecgeo-jordy\De
 C:\Python314\python.exe -I build\capturar_prints.py http://localhost:8791
 ```
 
-O script regrava os prints em `docs/img/` e o `dados/Manual_CONIAPE_PE.pdf`, gerado a partir de `manual.html`. Os prints de celular saem numa moldura de 390 × 844 px (`build/moldura_celular.html`).
+O script regrava os prints em `docs/img/` e o `dados/Manual_GIS_Comercial.pdf`, gerado a partir de `manual.html`. Os prints de celular saem numa moldura de 390 × 844 px (`build/moldura_celular.html`).
 
 ### Publicar
 
