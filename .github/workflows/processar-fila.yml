@@ -1,12 +1,11 @@
 name: Processar fila do GIS Comercial
 
-# Gera os municípios pedidos no mapa. Roda a cada 5 minutos (e na hora, se a função gc-solicitar tiver o
-# segredo GITHUB_DISPATCH_TOKEN). Sem pedido na fila, termina em segundos sem instalar nada.
+# Processa a fila do mapa: gera municípios, atualiza e confere as fontes (OpenStreetMap). Roda a cada 5 minutos
+# (e na hora, se a função gc-solicitar tiver o segredo GITHUB_DISPATCH_TOKEN). Sem pedido na fila, termina em
+# segundos sem instalar nada.
 on:
-  # AGENDAMENTO DESLIGADO até o servidor existir (supabase/IMPLANTAR.md, passo 7): sem ele só encheria o histórico.
-  # Para ligar, descomente as duas linhas abaixo.
-  # schedule:
-  #   - cron: "*/5 * * * *"
+  schedule:
+    - cron: "*/5 * * * *"
   workflow_dispatch:
 
 concurrency:

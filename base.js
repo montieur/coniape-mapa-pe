@@ -158,13 +158,17 @@
     if (!SERVIDOR || !m?.co) return;
     if (acao === 'consultar' && m.verif?.estado === 'ok') return;       // já sabe
     m.verif = {estado: 'verificando'}; redesenhar(cd);
-    try {
-      const r = await api.solicitar(cd, acao);
-      const ativo = r.pedido && ['fila', 'processando'].includes(r.estado);
-      m.verif = {estado: ativo ? 'andamento' : 'ok', verificacao: r.verificacao, mensagem: r.mensagem};
-      if (ativo) acompanhar(cd, r.pedido.id, 'atualizar');
-    } catch (e) { m.verif = {estado: 'erro', mensagem: e.message}; }
+    try { aplicarResposta(cd, await api.solicitar(cd, acao)); }
+    catch (e) { m.verif = {estado: 'erro', mensagem: e.message}; }
     redesenhar(cd);
+  }
+  /* resposta do servidor sobre um município da base: resultado da conferência ou pedido em andamento
+     ('verificar' = conferindo o OpenStreetMap; 'atualizar' = gerando de novo) */
+  function aplicarResposta(cd, r) {
+    const ativo = r.pedido && ['fila', 'processando'].includes(r.estado);
+    const tipo = r.pedido?.tipo || 'atualizar';
+    byCode[cd].verif = {estado: ativo ? (tipo === 'verificar' ? 'conferindo' : 'andamento') : 'ok', verificacao: r.verificacao, mensagem: r.mensagem};
+    if (ativo) acompanhar(cd, r.pedido.id, tipo);
   }
   window.cartaoFontes = m => {
     if (!SERVIDOR) return '';                    // sem servidor ativo o detalhe fica como era
@@ -177,6 +181,7 @@
     if (!SERVIDOR) corpo = 'A conferência automática de atualização fica disponível quando o servidor do GIS Comercial estiver ativo.';
     else if (!v || v.estado === 'verificando') { cls = 'carregando'; corpo = 'Conferindo se as fontes mudaram…'; }
     else if (v.estado === 'erro') { cls = 'aviso'; corpo = `Não consegui conferir agora: ${esc(v.mensagem)}`; acoes = `<button class="btn" data-fonte="verificar">Tentar de novo</button>`; }
+    else if (v.estado === 'conferindo') { cls = 'carregando'; corpo = `${esc(v.verificacao?.resumo || 'Conferindo no OpenStreetMap…')} <small>Pode levar alguns minutos; pode continuar usando o mapa.</small>`; }
     else if (v.estado === 'andamento') { cls = 'carregando'; corpo = 'Atualização em andamento. Pode continuar usando o mapa: os dados novos entram sozinhos quando ficarem prontos.'; }
     else {
       const vv = v.verificacao;
@@ -197,12 +202,8 @@
     if (b.dataset.fonte === 'verificar') consultarFontes(cd, 'verificar');
     else if (b.dataset.fonte === 'atualizar') {
       const m = byCode[cd]; m.verif = {estado: 'verificando'}; redesenhar(cd);
-      try {
-        const r = await api.solicitar(cd, 'atualizar');
-        const ativo = r.pedido && ['fila', 'processando'].includes(r.estado);
-        m.verif = {estado: ativo ? 'andamento' : 'ok', verificacao: r.verificacao, mensagem: r.mensagem};
-        if (ativo) acompanhar(cd, r.pedido.id, 'atualizar');
-      } catch (err) { m.verif = {estado: 'erro', mensagem: err.message}; }
+      try { aplicarResposta(cd, await api.solicitar(cd, 'atualizar')); }
+      catch (err) { m.verif = {estado: 'erro', mensagem: err.message}; }
       redesenhar(cd);
     }
   });
@@ -233,6 +234,10 @@
   }
   async function concluir(cd, tipo) {
     marcarPendente(cd, null);
+    if (tipo === 'verificar') {                          // só conferência: relê o resultado, sem baixar o município de novo
+      try { delete byCode[cd].verif; await consultarFontes(cd, 'consultar'); } catch { /* o cartão mostra o erro */ }
+      return;
+    }
     try {
       const [row] = await api.catalogo(cd);
       const m = incluirNaBase(montar(row)) || byCode[cd];

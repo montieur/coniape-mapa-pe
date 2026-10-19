@@ -65,14 +65,19 @@ export async function checarOsm(f: Fontes["osm"], endpoints: string[] = ENDPOINT
 
 const dataBr = (iso?: string | null) => (iso ? new Date(iso).toLocaleDateString("pt-BR", { timeZone: "America/Recife" }) : "?");
 
-export async function verificarFontes(
-  fontes: Fontes, geradoEm?: string | null, endpoints: string[] = ENDPOINTS,
-): Promise<Verificacao> {
-  const [ibge, osm] = await Promise.all([checarIbge(fontes.ibge_setores), checarOsm(fontes.osm, endpoints)]);
+/** Junta o resultado do IBGE e do OSM (o do OSM pode vir guardado pela automação) e monta o texto para o usuário. */
+export function combinar(
+  ibge: Verificacao["ibge"], osm: Verificacao["osm"] & { pendente?: boolean }, geradoEm?: string | null,
+  baseOsm?: string | null, verificadoEm?: string,
+): Verificacao {
   const mudou = ibge.mudou === true || osm.mudou === true ? true : (ibge.mudou === null || osm.mudou === null ? null : false);
-  const desde = dataBr(geradoEm ?? fontes.osm?.base);
+  const desde = dataBr(geradoEm ?? baseOsm);
   let resumo: string;
-  if (mudou === false) resumo = `Sem atualização nas fontes desde ${desde}. Os dados já estão atualizados.`;
+  if (osm.pendente) {
+    resumo = ibge.mudou === true
+      ? "Os setores censitários do IBGE foram republicados. Conferindo também o OpenStreetMap…"
+      : "Conferindo se o OpenStreetMap mudou na área…";
+  } else if (mudou === false) resumo = `Sem atualização nas fontes desde ${desde}. Os dados já estão atualizados.`;
   else if (mudou === true) {
     const partes: string[] = [];
     if (ibge.mudou) partes.push("os setores censitários do IBGE foram republicados");
@@ -82,5 +87,13 @@ export async function verificarFontes(
     }
     resumo = `Há atualização desde ${desde}: ${partes.join(" e ")}.`;
   } else resumo = `Não foi possível confirmar se há atualização (${ibge.erro ?? osm.erro ?? "fonte indisponível"}).`;
-  return { verificado_em: new Date().toISOString(), mudou, ibge, osm, resumo };
+  return { verificado_em: verificadoEm ?? new Date().toISOString(), mudou, ibge, osm, resumo };
+}
+
+/** Confere as duas fontes na hora (usado nos testes locais; no Supabase o OSM é conferido pela automação). */
+export async function verificarFontes(
+  fontes: Fontes, geradoEm?: string | null, endpoints: string[] = ENDPOINTS,
+): Promise<Verificacao> {
+  const [ibge, osm] = await Promise.all([checarIbge(fontes.ibge_setores), checarOsm(fontes.osm, endpoints)]);
+  return combinar(ibge, osm, geradoEm, fontes.osm?.base);
 }

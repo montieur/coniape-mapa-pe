@@ -1,18 +1,25 @@
 // GIS Comercial · gc-solicitar
 // Recebe o pedido do mapa para um município (código IBGE):
-//   - município já existe  -> verifica se as fontes (IBGE e OSM) mudaram e avisa; "atualizar" enfileira a regeneração
-//   - município não existe -> valida no IBGE, limita abuso e enfileira a geração
-// A geração em si roda na automação (GitHub Actions), que lê a fila e grava o resultado.
+//   - município já existe  -> confere o IBGE na hora e lê a conferência do OSM guardada pela automação; se ela estiver
+//                              velha ou ausente, enfileira um pedido "verificar". "atualizar" enfileira a regeneração.
+//   - município não existe -> valida no IBGE, limita abuso e enfileira a geração.
+// A geração e a conferência do OSM rodam na automação (GitHub Actions): os servidores do Overpass recusam o ambiente
+// das Edge Functions (403/406/timeout), mas respondem às máquinas do GitHub.
 import { createClient } from "npm:@supabase/supabase-js@2";
-import { verificarFontes } from "../_shared/verificar.ts";
+import { checarIbge, combinar } from "../_shared/verificar.ts";
 
 const ORIGENS = ["https://montieur.github.io", "http://localhost:8791", "http://localhost:8765"];
-const LIMITE_POR_IP_HORA = 5;      // pedidos novos por visitante por hora
-const LIMITE_POR_DIA = 150;        // pedidos novos no total por dia
-const REVERIFICAR_APOS_MIN = 60;   // não consulta o OSM de novo se a última checagem for mais recente que isso
+const LIMITE_GERAR_POR_IP_HORA = 5;     // geração/atualização: pedidos novos por visitante por hora
+const LIMITE_GERAR_POR_DIA = 150;       // geração/atualização: total por dia
+const LIMITE_VERIFICAR_POR_IP_HORA = 40;// conferência é barata
+const OSM_VALIDADE_MIN = 24 * 60;       // a conferência do OSM vale 24 h
+const OSM_VALIDADE_ERRO_MIN = 30;       // se a última conferência falhou, tenta de novo em 30 min
 
 const GITHUB_REPO = "montieur/coniape-mapa-pe";
 const GITHUB_WORKFLOW = "processar-fila.yml";
+
+type Db = ReturnType<typeof createClient>;
+type Tipo = "gerar" | "atualizar" | "verificar";
 
 Deno.serve(async (req) => {
   const origem = req.headers.get("origin") ?? "";
@@ -31,7 +38,7 @@ Deno.serve(async (req) => {
   let corpo: { cd?: string; acao?: string; forcar?: boolean };
   try { corpo = await req.json(); } catch { return json({ erro: "Corpo inválido." }, 400); }
   const cd = String(corpo.cd ?? "");
-  // consultar: usa a verificação recente · verificar: força checagem nova · atualizar: checa e enfileira se mudou
+  // consultar: usa a conferência guardada · verificar: pede conferência nova · atualizar: regenera se houve mudança
   const acao = corpo.acao === "atualizar" || corpo.acao === "verificar" ? corpo.acao : "consultar";
   if (!/^\d{7}$/.test(cd)) return json({ erro: "Código IBGE inválido (7 dígitos)." }, 400);
 
@@ -49,35 +56,62 @@ Deno.serve(async (req) => {
   }
 
   const { data: mun } = await db.from("gc_municipios").select("*").eq("cd_mun", cd).maybeSingle();
-  const { data: ativo } = await db.from("gc_pedidos").select("id,tipo,status,criado_em")
+  let { data: ativo } = await db.from("gc_pedidos").select("id,tipo,status,criado_em")
     .eq("cd_mun", cd).in("status", ["fila", "processando"]).maybeSingle();
+  const ip = await ipHash(req);
 
-  // 2) já existe: verificar as fontes
-  if (mun) {
-    let verificacao = mun.verificacao;
-    const velha = !mun.verificado_em || Date.now() - new Date(mun.verificado_em).getTime() > REVERIFICAR_APOS_MIN * 60000;
-    if (acao !== "consultar" || velha || !verificacao) {
-      verificacao = await verificarFontes(mun.fontes, mun.gerado_em);
-      await db.from("gc_municipios").update({ verificado_em: verificacao.verificado_em, verificacao }).eq("cd_mun", cd);
-    }
-    const resp = {
-      existe: true, estado: ativo ? ativo.status : "pronto",
-      municipio: { cd, nome: mun.nome, uf: mun.uf, gerado_em: mun.gerado_em, origem: mun.origem },
-      verificacao, pedido: ativo ?? null, mensagem: verificacao.resumo,
-    };
-    if (acao !== "atualizar") return json(resp);   // consultar / verificar só informam
-    if (ativo) return json({ ...resp, mensagem: "Já existe uma atualização em andamento para este município." });
-    if (verificacao.mudou !== true && !corpo.forcar) {
-      return json({ ...resp, mensagem: verificacao.mudou === false
-        ? "Nada a atualizar: as fontes não mudaram desde a última geração." : verificacao.resumo });
-    }
-    return await enfileirar(db, req, cd, "atualizar", json, { ...resp, existe: true });
+  // 2) não existe: já há pedido ativo? senão, enfileira a geração
+  if (!mun) {
+    if (ativo) return json({ existe: false, estado: ativo.status, pedido: ativo, mensagem: ativo.status === "fila"
+      ? "Este município já está na fila de geração." : "Este município está sendo gerado agora." });
+    const r = await registrar(db, ip, cd, "gerar");
+    if ("erro" in r) return json({ erro: r.erro }, r.status);
+    return json({ existe: false, estado: "fila", pedido: r.pedido, mensagem: "Pedido registrado. Os dados serão gerados em alguns minutos." });
   }
 
-  // 3) não existe: já há pedido ativo? senão, enfileira
-  if (ativo) return json({ existe: false, estado: ativo.status, pedido: ativo, mensagem: ativo.status === "fila"
-    ? "Este município já está na fila de geração." : "Este município está sendo gerado agora." });
-  return await enfileirar(db, req, cd, "gerar", json, { existe: false });
+  // 3) já existe: IBGE na hora + OSM guardado pela automação
+  const ibge = await checarIbge(mun.fontes?.ibge_setores);
+  const guardada = mun.verificacao?.osm ?? null;
+  const idadeMin = mun.verificado_em ? (Date.now() - new Date(mun.verificado_em).getTime()) / 60000 : Infinity;
+  const validade = guardada && guardada.mudou !== null ? OSM_VALIDADE_MIN : OSM_VALIDADE_ERRO_MIN;
+  const velha = !guardada || idadeMin > validade;
+  const montar = (extra: Record<string, unknown> = {}, osmPendente = false) => {
+    const osm = osmPendente || !guardada ? { mudou: null, vias_alteradas: null, desde: mun.fontes?.osm?.base ?? null, pendente: true } : guardada;
+    const verificacao = combinar(ibge, osm, mun.gerado_em, mun.fontes?.osm?.base, mun.verificado_em ?? undefined);
+    return {
+      existe: true, estado: ativo ? ativo.status : "pronto", pedido: ativo ?? null,
+      municipio: { cd, nome: mun.nome, uf: mun.uf, gerado_em: mun.gerado_em, origem: mun.origem },
+      verificacao, mensagem: verificacao.resumo, ...extra,
+    };
+  };
+
+  if (ativo) {
+    const doTipo = ativo.tipo === "verificar" ? "Conferindo no OpenStreetMap. Isso pode levar alguns minutos."
+      : "Já existe uma atualização em andamento para este município.";
+    return json(montar({ mensagem: doTipo }, ativo.tipo === "verificar"));
+  }
+
+  if (acao === "atualizar") {
+    const mudou = ibge.mudou === true || guardada?.mudou === true;
+    if (mudou || corpo.forcar) {
+      const r = await registrar(db, ip, cd, "atualizar");
+      if ("erro" in r) return json({ erro: r.erro }, r.status);
+      ativo = r.pedido;
+      return json(montar({ mensagem: "Atualização registrada. Os dados novos entram em alguns minutos." }));
+    }
+    if (!velha) return json(montar({ mensagem: "Nada a atualizar: as fontes não mudaram desde a última geração." }));
+    // sem conferência recente: confere primeiro
+  }
+
+  if (acao !== "consultar" || velha) {
+    const r = await registrar(db, ip, cd, "verificar");
+    if (!("erro" in r)) {
+      ativo = r.pedido;
+      return json(montar({ mensagem: "Conferindo no OpenStreetMap. Isso pode levar alguns minutos." }, true));
+    }
+    // limite de conferências atingido: devolve o que está guardado, sem erro
+  }
+  return json(montar());
 });
 
 async function ipHash(req: Request): Promise<string> {
@@ -87,32 +121,31 @@ async function ipHash(req: Request): Promise<string> {
   return Array.from(new Uint8Array(h)).slice(0, 12).map((b) => b.toString(16).padStart(2, "0")).join("");
 }
 
-async function enfileirar(
-  db: ReturnType<typeof createClient>, req: Request, cd: string, tipo: "gerar" | "atualizar",
-  json: (c: unknown, s?: number) => Response, base: Record<string, unknown>,
-) {
-  const ip = await ipHash(req);
+async function registrar(db: Db, ip: string, cd: string, tipo: Tipo) {
   const hora = new Date(Date.now() - 3600_000).toISOString(), dia = new Date(Date.now() - 86400_000).toISOString();
+  const tipos = tipo === "verificar" ? ["verificar"] : ["gerar", "atualizar"];
   const [{ count: porIp }, { count: total }] = await Promise.all([
-    db.from("gc_pedidos").select("id", { count: "exact", head: true }).eq("ip_hash", ip).gte("criado_em", hora),
-    db.from("gc_pedidos").select("id", { count: "exact", head: true }).gte("criado_em", dia),
+    db.from("gc_pedidos").select("id", { count: "exact", head: true }).eq("ip_hash", ip).in("tipo", tipos).gte("criado_em", hora),
+    db.from("gc_pedidos").select("id", { count: "exact", head: true }).in("tipo", tipos).gte("criado_em", dia),
   ]);
-  if ((porIp ?? 0) >= LIMITE_POR_IP_HORA) return json({ erro: "Muitos pedidos seus na última hora. Tente mais tarde." }, 429);
-  if ((total ?? 0) >= LIMITE_POR_DIA) return json({ erro: "Limite diário de gerações atingido. Tente amanhã." }, 429);
-
+  if (tipo === "verificar") {
+    if ((porIp ?? 0) >= LIMITE_VERIFICAR_POR_IP_HORA) return { erro: "Muitas conferências na última hora.", status: 429 };
+  } else {
+    if ((porIp ?? 0) >= LIMITE_GERAR_POR_IP_HORA) return { erro: "Muitos pedidos seus na última hora. Tente mais tarde.", status: 429 };
+    if ((total ?? 0) >= LIMITE_GERAR_POR_DIA) return { erro: "Limite diário de gerações atingido. Tente amanhã.", status: 429 };
+  }
   const { data: novo, error } = await db.from("gc_pedidos").insert({ cd_mun: cd, tipo, ip_hash: ip })
     .select("id,tipo,status,criado_em").single();
   if (error) {
     if (error.code === "23505") {   // outro visitante enfileirou no mesmo instante
       const { data: ativo } = await db.from("gc_pedidos").select("id,tipo,status,criado_em")
         .eq("cd_mun", cd).in("status", ["fila", "processando"]).maybeSingle();
-      return json({ ...base, estado: ativo?.status ?? "fila", pedido: ativo, mensagem: "Este município já está na fila." });
+      if (ativo) return { pedido: ativo };
     }
-    return json({ erro: "Não consegui registrar o pedido." }, 500);
+    return { erro: "Não consegui registrar o pedido.", status: 500 };
   }
   await acordarAutomacao();
-  return json({ ...base, estado: "fila", pedido: novo,
-    mensagem: tipo === "gerar" ? "Pedido registrado. Os dados serão gerados em alguns minutos." : "Atualização registrada." });
+  return { pedido: novo };
 }
 
 // Opcional: se existir o segredo GITHUB_DISPATCH_TOKEN, dispara a automação na hora (senão ela roda a cada 5 minutos).
