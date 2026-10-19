@@ -376,7 +376,7 @@ def gerar(cd, cache, saida=None, exportar_em=None, reutilizar=None):
             "limite_municipal": gpd.GeoDataFrame([{**cols, "UF": meta["uf"], "AREA_KM2": round(area_terr, 3), "geometry": territorio}], crs=crs),
             "area_urbana": gpd.GeoDataFrame([{**cols, "MANCHA": m["nome"], "AREA_KM2": round(m["geom"].area / 1e6, 4),
                                               "VIAS_KM": round(km_mancha.get(m["nome"], 0.0), 2), "geometry": m["geom"]} for m in manchas], crs=crs),
-            "area_rural": gpd.GeoDataFrame([{**cols, "AREA_KM2": round(area_rural_geo, 3), "geometry": rural_utm}] if not rural_utm.is_empty else [], crs=crs),
+            "area_rural": gpd.GeoDataFrame([{**cols, "AREA_KM2": round(area_rural_geo, 3), "geometry": rural_utm}], crs=crs) if not rural_utm.is_empty else None,
             "vias_urbanas": gpd.GeoDataFrame(reg_urb, crs=crs) if reg_urb else None,
             "vias_rurais": gpd.GeoDataFrame(reg_rur, crs=crs) if reg_rur else None,
         }
