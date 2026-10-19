@@ -1,0 +1,20 @@
+name: Diagnostico Overpass (temporario)
+on: workflow_dispatch
+jobs:
+  testar:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Testar cada servidor do Overpass a partir do GitHub
+        run: |
+          Q='data=%5Bout%3Ajson%5D%5Btimeout%3A25%5D%3Bway%5B%22highway%22%3D%22residential%22%5D(-8.28%2C-35.98%2C-8.27%2C-35.97)%3Bout%20count%3B'
+          for ep in overpass.openstreetmap.fr z.overpass-api.de lz4.overpass-api.de overpass-api.de overpass.kumi.systems overpass.private.coffee maps.mail.ru/osm/tools/overpass/api overpass.osm.ch; do
+            base=$ep; case "$ep" in */*) url="https://$ep/interpreter";; *) url="https://$ep/api/interpreter";; esac
+            r=$(curl -s -m 30 -o /tmp/o.txt -w "%{http_code} %{time_total}s" -A "GIS-Comercial/1.0 (+https://montieur.github.io/coniape-mapa-pe/)" -X POST -d "$Q" "$url")
+            echo "$ep -> $r -> $(head -c 60 /tmp/o.txt | tr '\n' ' ')"
+          done
+      - name: Geofabrik (extrato do OSM)
+        run: |
+          curl -sI -m 30 https://download.geofabrik.de/south-america/brazil/nordeste-latest.osm.pbf | grep -i -E "^(HTTP|content-length|last-modified)"
+      - name: OSM API
+        run: |
+          curl -s -m 30 -A "GIS-Comercial/1.0 (+https://montieur.github.io/coniape-mapa-pe/)" -o /tmp/c.xml -w "api.openstreetmap.org changesets: %{http_code}\n" "https://api.openstreetmap.org/api/0.6/changesets?bbox=-36.05,-8.35,-35.85,-8.20&time=2026-10-19T00:00:00Z&closed=true"; head -c 200 /tmp/c.xml
