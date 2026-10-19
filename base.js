@@ -28,7 +28,7 @@
     return r.json();
   }
   const api = {
-    catalogo: cd => rest('gc_municipios?select=cd_mun,nome,uf,rgi,rgint,origem,resumo,contorno,fontes,gerado_em,verificado_em,verificacao'
+    catalogo: cd => rest('gc_municipios?select=cd_mun,nome,uf,rgi,rgint,origem,resumo,contorno,fontes,gerado_em,verificado_em,verificacao,arquivos'
       + (cd ? `&cd_mun=eq.${cd}` : '') + '&order=nome'),
     async pacote(cd, versao) {
       const r = await fetch(`${CFG.supabaseUrl}/storage/v1/object/public/${BUCKET}/${cd}.json?v=${encodeURIComponent(versao || '')}`);
@@ -91,7 +91,7 @@
     return {c: r.cd_mun, n: r.nome, uf: r.uf, rgi: r.rgi, rgint: r.rgint, co: true, origem: r.origem, pdf: null,
       aI: s.aI, aU: s.aU, urb: s.urb, rur: s.rur, vias: s.vias, perc: s.perc, dens: s.dens, set: s.set, dist: s.dist,
       fonte: 'IBGE setores 2022 + vias OSM transitáveis (GIS Comercial)', g: r.contorno,
-      fontes: r.fontes, gerado_em: r.gerado_em, verificado_em: r.verificado_em, verificacao: r.verificacao, detalhe: false};
+      fontes: r.fontes, gerado_em: r.gerado_em, verificado_em: r.verificado_em, verificacao: r.verificacao, arquivos: r.arquivos || null, detalhe: false};
   }
   function rotulo(m) {
     labels.addLayer(L.tooltip({permanent: true, direction: 'center', className: 'mlabel', interactive: false})
@@ -107,7 +107,7 @@
     } else if (!alvo.co) {                                  // município de PE que estava em cinza: ganha dados
       Object.assign(alvo, m, {g: alvo.g || m.g});
     } else {                                                // já era da base (os do CONIAPE): só anota a procedência
-      alvo.gerado_em ??= m.gerado_em; alvo.verificado_em ??= m.verificado_em; alvo.verificacao ??= m.verificacao; alvo.fontes ??= m.fontes;
+      alvo.gerado_em ??= m.gerado_em; alvo.verificado_em ??= m.verificado_em; alvo.verificacao ??= m.verificacao; alvo.fontes ??= m.fontes; alvo.arquivos = m.arquivos || alvo.arquivos || null;
       return alvo;
     }
     if (!CO.includes(alvo)) CO.push(alvo);
@@ -123,7 +123,7 @@
   function aplicarPacote(cd, p) {
     const m = byCode[cd], n = p.mun;
     for (const k of ['aI', 'aU', 'urb', 'rur', 'vias', 'perc', 'dens', 'set', 'dist']) m[k] = n[k];
-    Object.assign(m, {excl: p.excluidas_km, por_tipo: p.por_tipo_km, zona: zonaDe(p.crs_medicao), gerado_em: p.gerado_em, fontes: p.fontes, detalhe: true});
+    Object.assign(m, {excl: p.excluidas_km, por_tipo: p.por_tipo_km, zona: zonaDe(p.crs_medicao), areaRur: n.areaRur, viasRur: n.viasRur, gerado_em: p.gerado_em, fontes: p.fontes, detalhe: true});
     urbLayer.getLayers().filter(l => l.feature.properties.c === cd).forEach(l => urbLayer.removeLayer(l));
     D.urb = D.urb.filter(u => u.c !== cd).concat(p.urb);
     p.urb.forEach(u => urbLayer.addData({type: 'Feature', properties: u, geometry: u.g}));
@@ -167,11 +167,55 @@
   function aplicarResposta(cd, r) {
     const ativo = r.pedido && ['fila', 'processando'].includes(r.estado);
     const tipo = r.pedido?.tipo || 'atualizar';
+    const m = byCode[cd];
+    if (r.municipio && 'arquivos' in r.municipio) m.arquivos = r.municipio.arquivos;
+    if (tipo === 'exportar') {                           // preparar arquivos não impede a conferência das fontes
+      m.arq = ativo ? {estado: 'preparando'} : null;
+      m.verif = {estado: 'ok', verificacao: r.verificacao, mensagem: r.mensagem};
+      if (ativo) acompanhar(cd, r.pedido.id, tipo);
+      return;
+    }
+    if (!ativo && m.arq?.estado === 'preparando') m.arq = null;
     byCode[cd].verif = {estado: ativo ? (tipo === 'verificar' ? 'conferindo' : 'andamento') : 'ok', verificacao: r.verificacao, mensagem: r.mensagem};
     if (ativo) acompanhar(cd, r.pedido.id, tipo);
   }
+  /* ================= cartão "Baixar dados GIS" (SHP, KML, KMZ) ================= */
+  const tamanho = b => b >= 1e6 ? (b / 1e6).toFixed(1).replace('.', ',') + ' MB' : Math.max(1, Math.round(b / 1e3)) + ' KB';
+  const NOMES_CAMADAS = {limite_municipal: 'Limite do município', area_urbana: 'Área urbana', area_rural: 'Área rural', vias_urbanas: 'Vias urbanas', vias_rurais: 'Vias rurais'};
+  function cartaoArquivos(m) {
+    const a = m.arquivos;
+    let corpo, acoes = '', cls = 'neutro';
+    if (m.arq?.estado === 'preparando') { cls = 'carregando'; corpo = '<i class="spin"></i><span>Preparando os arquivos GIS. Leva alguns minutos; pode continuar usando o mapa.</span>'; }
+    else if (!a) {
+      corpo = `<span>Limite, área urbana, área rural e vias (urbanas e rurais) em Shapefile, KML e KMZ.${m.arq?.estado === 'erro' ? ` <b>Não deu certo:</b> ${esc(m.arq.mensagem)}` : ''}</span>`;
+      acoes = `<button class="btn primary" data-arq="preparar">Preparar arquivos GIS</button>`;
+    } else {
+      const url = c => `${CFG.supabaseUrl}/storage/v1/object/public/${BUCKET}/${a[c]}?download=${encodeURIComponent(a[c].split('/').pop())}`;
+      const t = a.tamanhos || {};
+      cls = 'ok';
+      corpo = `<span>${Object.entries(a.camadas || {}).map(([k, v]) => `${NOMES_CAMADAS[k] || k}: ${v.km2 != null ? fmt(v.km2) + ' km²' : fmt(v.km) + ' km'}`).join(' · ')}</span>`;
+      acoes = `<a class="btn primary" href="${url('shp')}" download>Shapefile (.zip)${t.shp ? ` · ${tamanho(t.shp)}` : ''}</a>`
+        + `<a class="btn" href="${url('kmz')}" download>KMZ${t.kmz ? ` · ${tamanho(t.kmz)}` : ''}</a>`
+        + `<a class="btn" href="${url('kml')}" download>KML${t.kml ? ` · ${tamanho(t.kml)}` : ''}</a>`;
+    }
+    return `<div class="fontes arquivos ${cls}" data-cd="${m.c}">
+      <div class="fh"><b>Baixar dados GIS</b><small>SHP em UTM · KML/KMZ em WGS 84</small></div>
+      <div class="fv">${corpo}</div>
+      ${acoes ? `<div class="fa">${acoes}</div>` : ''}
+      ${a ? '<div class="fl">Vias © colaboradores do OpenStreetMap (ODbL); limites e áreas: IBGE.</div>' : ''}</div>`;
+  }
+  async function prepararArquivos(cd) {
+    const m = byCode[cd]; m.arq = {estado: 'preparando'}; redesenhar(cd);
+    try { aplicarResposta(cd, await api.solicitar(cd, 'exportar'));
+      if (m.arq?.estado === 'preparando' && !pendentes()[cd]) m.arq = null; }
+    catch (err) { m.arq = {estado: 'erro', mensagem: err.message}; }
+    redesenhar(cd);
+  }
   window.cartaoFontes = m => {
     if (!SERVIDOR) return '';                    // sem servidor ativo o detalhe fica como era
+    return cartaoFontesBase(m) + cartaoArquivos(m);
+  };
+  const cartaoFontesBase = m => {
     const gerado = m.gerado_em || m.rev?.data;
     const f = m.fontes;
     const linhaFontes = `IBGE: setores censitários 2022${f?.ibge_setores?.last_modified ? ` (arquivo de ${dataBr(f.ibge_setores.last_modified)})` : ''} · `
@@ -197,6 +241,8 @@
       ${acoes ? `<div class="fa">${acoes}</div>` : ''}</div>`;
   };
   el('detail').addEventListener('click', async e => {
+    const ba = e.target.closest('[data-arq]');
+    if (ba) { prepararArquivos(ba.closest('.arquivos').dataset.cd); return; }
     const b = e.target.closest('[data-fonte]'); if (!b) return;
     const cd = b.closest('.fontes').dataset.cd;
     if (b.dataset.fonte === 'verificar') consultarFontes(cd, 'verificar');
@@ -223,6 +269,7 @@
         if (p.status === 'pronto') return concluir(cd, tipo);
         if (p.status === 'erro') {
           marcarPendente(cd, null);
+          if (tipo === 'exportar' && byCode[cd]) { byCode[cd].arq = {estado: 'erro', mensagem: p.mensagem || 'erro ao preparar'}; redesenhar(cd); return; }
           if (pesquisaAtual?.cd === cd) { pesquisaAtual.estado = 'erro'; pesquisaAtual.mensagem = p.mensagem || 'A geração não deu certo.'; renderPesquisa(); }
           else toast(`Não consegui gerar ${nome || byCode[cd]?.n || cd}: ${p.mensagem || 'erro na geração'}`, 6000);
           return;
@@ -244,7 +291,8 @@
       if (m.detalhe) m.detalhe = false;                  // força baixar a versão nova
       delete m.verif;
       await carregarDetalhe(cd);
-      toast(`${m.n}: dados ${tipo === 'atualizar' ? 'atualizados' : 'gerados'} e guardados na base.`, 5000);
+      if (tipo === 'exportar') { m.arq = null; m.arquivos = row.arquivos || null; }
+      toast(`${m.n}: ${tipo === 'exportar' ? 'arquivos GIS prontos para baixar' : tipo === 'atualizar' ? 'dados atualizados' : 'dados gerados e guardados na base'}.`, 5000);
       if (pesquisaAtual?.cd === cd || selected === cd) { pesquisaAtual = null; window.abrirMunicipio(cd, true); }
     } catch (e) { console.error('Falha ao carregar o município pronto:', e); toast('Os dados ficaram prontos, mas não consegui carregá-los agora. Recarregue a página.', 6000); }
   }

@@ -66,6 +66,13 @@ urb = [{"c": f["properties"]["CD_MUN"], "n": f["properties"]["NOME"],
         "g": {"type": f["geometry"]["type"], "coordinates": rnd(f["geometry"]["coordinates"], 5)}}
        for f in load("web_urb.geojson")]
 
+def _hav(x1, y1, x2, y2):
+    """Distância em km entre dois pontos lon/lat (haversine)."""
+    from math import asin, cos, radians, sin, sqrt
+    a = sin(radians(y2 - y1) / 2) ** 2 + cos(radians(y1)) * cos(radians(y2)) * sin(radians(x2 - x1) / 2) ** 2
+    return 12742 * asin(sqrt(a))
+
+
 # vias: agrupadas por município, nomes deduplicados, coordenadas planas com 5 casas
 names, name_idx, vias = [], {}, {}
 for f in load("web_vias.geojson"):
@@ -80,7 +87,9 @@ for f in load("web_vias.geojson"):
         flat = []
         for x, y in (pt[:2] for pt in part):
             flat += [round(x, 5), round(y, 5)]
-        vias.setdefault(p["CD_MUN"], []).append([name_idx[nm], round(p["COMP_KM"], 3), flat])
+        # km de CADA parte (antes repetia o km da via inteira em todas as partes de uma via com várias partes)
+        km = sum(_hav(flat[i], flat[i + 1], flat[i + 2], flat[i + 3]) for i in range(0, len(flat) - 3, 2))
+        vias.setdefault(p["CD_MUN"], []).append([name_idx[nm], round(km, 3), flat])
 
 distritos = json.loads((DADOS / "distritos.json").read_text(encoding="utf-8"))
 urb_nomes = {}

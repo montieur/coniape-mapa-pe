@@ -52,3 +52,7 @@ aside.pesquisa .dfoot{display:none}      /* tela "gerar dados": sem baixar relat
 #detail .acts{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
 #detail p{margin:0 0 10px}
 #detail .dtitle p{margin:2px 0 14px}
+
+.fontes.arquivos .fa{flex-wrap:wrap}
+.fontes.arquivos a.btn{text-decoration:none;display:inline-block}
+.fontes.arquivos .fv{align-items:flex-start}

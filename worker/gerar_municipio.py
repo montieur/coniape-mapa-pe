@@ -16,8 +16,9 @@ import geopandas as gpd
 import requests
 from pyproj import Transformer
 from shapely import STRtree
-from shapely.geometry import LineString, MultiLineString, MultiPolygon, Polygon, box, mapping
+from shapely.geometry import LineString, MultiLineString, MultiPolygon, Polygon, box, mapping, shape
 from shapely.ops import transform, unary_union
+from shapely.prepared import prep
 
 VERSAO = 1
 UA = {"User-Agent": "GIS-Comercial/1.0 (TECGEO; geoprocessamento)"}
@@ -32,7 +33,9 @@ OVERPASS = ("https://overpass.openstreetmap.fr/api/interpreter", "https://z.over
 TIPOS = ("motorway|motorway_link|trunk|trunk_link|primary|primary_link|secondary|secondary_link|"
          "tertiary|tertiary_link|unclassified|residential|living_street|service|road|track")
 TAGS = ("highway", "name", "service", "access", "motor_vehicle", "vehicle")
-TILE = 0.05          # graus (~5,5 km): cada consulta ao Overpass cobre um quadrado deste tamanho
+TILE = 0.05          # graus (~5,5 km): cada consulta ao Overpass cobre um quadrado deste tamanho (áreas urbanas)
+TILE_RURAL = 0.1     # graus (~11 km): quadrados maiores nas áreas rurais, onde as vias são mais esparsas
+MAX_TILES_RURAIS = 150  # município enorme (ex.: Amazônia): não gera vias rurais, para não sobrecarregar o Overpass
 MIN_MANCHA_M2 = 200  # descarta migalhas de polígono
 
 
@@ -160,38 +163,44 @@ def overpass(consulta, tentativas=5):
     raise RuntimeError(f"Overpass indisponível ({ultimo})")
 
 
-def tiles_das_manchas(manchas_wgs):
-    """Quadrados de TILE graus que tocam alguma mancha (evita consultar o vazio entre manchas distantes)."""
+def tiles_de(geoms_wgs, passo):
+    """Quadrados de `passo` graus que tocam alguma das geometrias (não consulta o vazio entre manchas distantes)."""
     achados = set()
-    for m in manchas_wgs:
-        w, s, e, n = m.bounds
-        for i in range(math.floor(w / TILE), math.floor(e / TILE) + 1):
-            for j in range(math.floor(s / TILE), math.floor(n / TILE) + 1):
-                if box(i * TILE, j * TILE, (i + 1) * TILE, (j + 1) * TILE).intersects(m):
-                    achados.add((i, j))
+    for g in geoms_wgs:
+        for p in poligonos(g):
+            pp = prep(p)
+            w, s, e, n = p.bounds
+            for i in range(math.floor(w / passo), math.floor(e / passo) + 1):
+                for j in range(math.floor(s / passo), math.floor(n / passo) + 1):
+                    if pp.intersects(box(i * passo, j * passo, (i + 1) * passo, (j + 1) * passo)):
+                        achados.add((i, j))
     return sorted(achados)
 
 
-def baixar_vias(manchas_wgs):
-    tiles = tiles_das_manchas(manchas_wgs)
-    log(f"vias OSM: {len(tiles)} consulta(s) ao Overpass")
+def baixar_vias(manchas_wgs, rural_wgs=None):
+    """Vias OSM transitáveis dos quadrados que tocam as manchas urbanas e (se informado) a área rural."""
+    trabalho = [(TILE, t) for t in tiles_de(manchas_wgs, TILE)]
+    if rural_wgs:
+        trabalho += [(TILE_RURAL, t) for t in tiles_de(rural_wgs, TILE_RURAL)]
+    log(f"vias OSM: {len(trabalho)} consulta(s) ao Overpass")
     vias, bases, ep_usado = {}, [], None
-    for k, (i, j) in enumerate(tiles, 1):
-        s, w, n, e = j * TILE, i * TILE, (j + 1) * TILE, (i + 1) * TILE
+    for k, (passo, (i, j)) in enumerate(trabalho, 1):
+        s, w, n, e = j * passo, i * passo, (j + 1) * passo, (i + 1) * passo
         q = f'[out:json][timeout:180];way["highway"~"^({TIPOS})$"]({s:.5f},{w:.5f},{n:.5f},{e:.5f});out tags geom;'
         dados, ep_usado = overpass(q)
         bases.append((dados.get("osm3s") or {}).get("timestamp_osm_base"))
         for el in dados.get("elements", []):
             if el.get("geometry"):
                 vias[el["id"]] = el
-        log(f"  tile {k}/{len(tiles)}: {len(dados.get('elements', []))} vias")
+        log(f"  consulta {k}/{len(trabalho)}: {len(dados.get('elements', []))} vias")
         time.sleep(1.2)
     bases = [b for b in bases if b]
-    return vias, {"base": min(bases) if bases else None, "consultado_em": agora(), "endpoint": ep_usado,
-                  "tiles": len(tiles), "vias_total": len(vias), "bbox": [round(min(m.bounds[0] for m in manchas_wgs), 5),
-                                                round(min(m.bounds[1] for m in manchas_wgs), 5),
-                                                round(max(m.bounds[2] for m in manchas_wgs), 5),
-                                                round(max(m.bounds[3] for m in manchas_wgs), 5)]}
+    fonte = {"base": min(bases) if bases else None, "consultado_em": agora(), "endpoint": ep_usado,
+             "tiles": len(trabalho), "vias_total": len(vias)}
+    if manchas_wgs:     # área onde a conferência de atualização procura mudanças (só a urbana)
+        fonte["bbox"] = [round(min(m.bounds[0] for m in manchas_wgs), 5), round(min(m.bounds[1] for m in manchas_wgs), 5),
+                         round(max(m.bounds[2] for m in manchas_wgs), 5), round(max(m.bounds[3] for m in manchas_wgs), 5)]
+    return vias, fonte
 
 
 def motivo_exclusao(t):
@@ -204,11 +213,21 @@ def motivo_exclusao(t):
     return None
 
 
+def _limpar(g):
+    """Polígono válido, sem migalhas."""
+    g = g.buffer(0)
+    ps = [p for p in poligonos(g) if p.area >= MIN_MANCHA_M2]
+    return unary_union(ps) if ps else Polygon()
+
+
 # ------------------------------------------------------------------ geração
-def gerar(cd, cache, saida=None):
+def gerar(cd, cache, saida=None, exportar_em=None, reutilizar=None):
+    """Gera o município. exportar_em: pasta onde gravar SHP/KML/KMZ. reutilizar: pacote já publicado; mantém a parte
+    urbana (números e vias) e só acrescenta a área rural, as vias rurais e os arquivos."""
+    from exportar import exportar as exportar_arquivos
     cd = str(cd).zfill(7)
     meta = meta_ibge(cd)
-    log(f"{meta['nome']} - {meta['uf']} ({cd})")
+    log(f"{meta['nome']} - {meta['uf']} ({cd})" + ("  [reaproveitando a parte urbana]" if reutilizar else ""))
     gpkg, fonte_setores = baixar_setores(meta["uf"], cache)
 
     setores = gpd.read_file(gpkg, where=f"CD_MUN = '{cd}'", engine="pyogrio")
@@ -216,6 +235,8 @@ def gerar(cd, cache, saida=None):
         raise ValueError("Nenhum setor censitário encontrado para este município")
     lon_c = float(setores.geometry.union_all().centroid.x)
     epsg = epsg_utm(lon_c)
+    if reutilizar and reutilizar.get("crs_medicao"):
+        epsg = int(str(reutilizar["crs_medicao"]).split(":")[1])
     s_utm = setores.to_crs(epsg)
     to_wgs = Transformer.from_crs(epsg, 4326, always_xy=True).transform
     to_utm = Transformer.from_crs(4326, epsg, always_xy=True).transform
@@ -223,7 +244,10 @@ def gerar(cd, cache, saida=None):
     urb = s_utm[s_utm["CD_SIT"].isin(["1", "2", "3"])]
     rur = s_utm[~s_utm["CD_SIT"].isin(["1", "2", "3"])]
     territorio = unary_union(list(s_utm.geometry)).buffer(1).buffer(-1)
-    manchas = manchas_urbanas(urb)
+    if reutilizar:      # as manchas publicadas (as mesmas da tela)
+        manchas = [{"nome": u["n"], "geom": transform(to_utm, shape(u["g"]))} for u in reutilizar["urb"]]
+    else:
+        manchas = manchas_urbanas(urb)
     log(f"{len(urb)} setores urbanos -> {len(manchas)} mancha(s); {len(rur)} rurais")
     if not manchas:
         raise ValueError("O município não tem setores urbanos (CD_SIT 1, 2 ou 3)")
@@ -232,83 +256,153 @@ def gerar(cd, cache, saida=None):
     polys_wgs = [transform(to_wgs, p) for p in polys_utm]
     uniao_utm = unary_union(polys_utm)
     arvore = STRtree(polys_utm)
+    rural_utm = _limpar(territorio.difference(uniao_utm))
+    rural_wgs = [transform(to_wgs, rural_utm)] if not rural_utm.is_empty else []
+    vias_rurais_geradas = True
+    if rural_wgs:
+        n_rurais = len(tiles_de(rural_wgs, TILE_RURAL))
+        if n_rurais > MAX_TILES_RURAIS:
+            log(f"área rural grande demais ({n_rurais} consultas): as vias rurais não serão geradas")
+            rural_wgs, vias_rurais_geradas = [], False
 
-    vias_osm, fonte_osm = baixar_vias(polys_wgs)
+    vias_osm, fonte_osm = baixar_vias([] if reutilizar else polys_wgs, rural_wgs)
 
-    nomes, idx_nome = [], {}
-    segs = []                                  # [índice do nome, km, [x,y,x,y...]]
+    nomes, idx_nome, tipos, idx_tipo = [], {}, [], {}
+    segs = []                                  # [índice do nome, km, [x,y,x,y...], índice do tipo]
+    reg_urb, reg_rur = [], []
     km_mancha, n_mancha = defaultdict(float), defaultdict(int)
-    km_tipo, excl = defaultdict(float), defaultdict(float)
+    km_tipo, excl, excl_rur = defaultdict(float), defaultdict(float), defaultdict(float)
+    cols = {"CD_MUN": cd, "NM_MUN": meta["nome"]}
+
+    if reutilizar:      # vias urbanas já publicadas: viram camada sem recalcular
+        nomes_pub = reutilizar.get("viaNames", [])
+        tipos_pub = reutilizar.get("tipos") or []
+        for ni, km, flat, *resto in reutilizar["vias"]:
+            linha = transform(to_utm, LineString(list(zip(flat[0::2], flat[1::2]))))
+            ponto = linha.interpolate(.5, normalized=True)
+            ks = [k for k in arvore.query(ponto) if polys_utm[k].contains(ponto)] or [int(arvore.nearest(ponto))]
+            nome_m = manchas[ks[0]]["nome"]
+            tipo = tipos_pub[resto[0]] if resto and resto[0] < len(tipos_pub) else ""
+            km_real = linha.length / 1000      # mede pela geometria: o km guardado nos pacotes antigos repetia o da via inteira nas partes
+            reg_urb.append({**cols, "NOME": nomes_pub[ni], "TIPO": tipo, "COMP_KM": round(km_real, 3), "MANCHA": nome_m, "geometry": linha})
+            km_mancha[nome_m] += km_real
+        segs = reutilizar["vias"]
+
+    rural_prep = prep(rural_utm) if not rural_utm.is_empty else None
     for el in vias_osm.values():
         tags = el.get("tags") or {}
         linha = transform(to_utm, LineString([(p["lon"], p["lat"]) for p in el["geometry"]]))
         motivo = motivo_exclusao(tags)
-        for k in arvore.query(linha, predicate="intersects"):
-            for parte in partes_linha(linha.intersection(polys_utm[k])):
+        nome = tags.get("name") or tags.get("highway") or ""
+        tipo = tags.get("highway", "")
+        if not reutilizar:                                      # urbanas (cálculo completo)
+            for k in arvore.query(linha, predicate="intersects"):
+                for parte in partes_linha(linha.intersection(polys_utm[k])):
+                    km = parte.length / 1000
+                    if km <= 0:
+                        continue
+                    if motivo:
+                        excl[motivo] += km
+                        continue
+                    if nome not in idx_nome:
+                        idx_nome[nome] = len(nomes); nomes.append(nome)
+                    if tipo not in idx_tipo:
+                        idx_tipo[tipo] = len(tipos); tipos.append(tipo)
+                    flat = []
+                    for x, y in transform(to_wgs, parte).coords:
+                        flat += [round(x, 5), round(y, 5)]
+                    segs.append([idx_nome[nome], round(km, 3), flat, idx_tipo[tipo]])
+                    reg_urb.append({**cols, "NOME": nome, "TIPO": tipo, "COMP_KM": round(km, 3), "MANCHA": manchas[k]["nome"], "geometry": parte})
+                    km_mancha[manchas[k]["nome"]] += km; n_mancha[manchas[k]["nome"]] += 1
+                    km_tipo[tipo] += km
+        if rural_prep and rural_prep.intersects(linha):         # rurais
+            for parte in partes_linha(linha.intersection(rural_utm)):
                 km = parte.length / 1000
                 if km <= 0:
                     continue
                 if motivo:
-                    excl[motivo] += km
+                    excl_rur[motivo] += km
                     continue
-                nome = tags.get("name") or tags.get("highway") or ""
-                if nome not in idx_nome:
-                    idx_nome[nome] = len(nomes); nomes.append(nome)
-                flat = []
-                for x, y in transform(to_wgs, parte).coords:
-                    flat += [round(x, 5), round(y, 5)]
-                segs.append([idx_nome[nome], round(km, 3), flat])
-                km_mancha[manchas[k]["nome"]] += km; n_mancha[manchas[k]["nome"]] += 1
-                km_tipo[tags.get("highway", "")] += km
+                reg_rur.append({**cols, "NOME": nome, "TIPO": tipo, "COMP_KM": round(km, 3), "geometry": parte})
 
-    vias_km = sum(km_mancha.values())
-    area_urb = uniao_utm.area / 1e6
-    area_rur = sum(g.area for g in rur.geometry) / 1e6
     area_terr = territorio.area / 1e6
-    a_ibge = area_oficial(cd) or float(setores["AREA_KM2"].sum())
-    log(f"urbana {area_urb:.2f} km2 | vias {vias_km:.2f} km | {len(segs)} trechos")
+    area_rural_geo = rural_utm.area / 1e6 if not rural_utm.is_empty else 0.0
+    km_rural = sum(r["COMP_KM"] for r in reg_rur)
+    crs = f"EPSG:{epsg}"
+    if reutilizar:
+        pacote = json.loads(json.dumps(reutilizar))
+        pacote["mun"].update({"viasRur": round(km_rural, 2) if vias_rurais_geradas else None, "areaRur": round(area_rural_geo, 2)})
+        pacote.setdefault("fontes", {})["osm_rural"] = {k: fonte_osm[k] for k in ("base", "consultado_em", "endpoint", "tiles")}
+        pacote["excluidas_rurais_km"] = {k: round(v, 2) for k, v in excl_rur.items()}
+        pacote["rurais_geradas"] = vias_rurais_geradas
+        vias_km = pacote["mun"]["vias"]; area_urb = pacote["mun"]["urb"]
+    else:
+        vias_km = sum(km_mancha.values())
+        area_urb = uniao_utm.area / 1e6
+        area_rur = sum(g.area for g in rur.geometry) / 1e6
+        a_ibge = area_oficial(cd) or float(setores["AREA_KM2"].sum())
+        contorno = transform(to_wgs, territorio.simplify(40))
+        pacote = {
+            "versao": VERSAO, "gerado_em": agora(),
+            "mun": {
+                "c": cd, "n": meta["nome"], "uf": meta["uf"], "rgi": meta["rgi"], "rgint": meta["rgint"],
+                "co": False, "origem": "pesquisa",
+                "aI": round(a_ibge, 3), "aU": round(area_terr, 3), "urb": round(area_urb, 2), "rur": round(area_rur, 2),
+                "vias": round(vias_km, 2), "perc": round(area_urb / a_ibge * 100, 2),
+                "dens": round(vias_km / area_urb, 2) if area_urb else None,
+                "set": int(len(urb)), "dist": len(manchas), "pdf": None,
+                "viasRur": round(km_rural, 2) if vias_rurais_geradas else None, "areaRur": round(area_rural_geo, 2),
+                "fonte": "IBGE setores 2022 + vias OSM transitáveis (gerado pelo GIS Comercial)",
+                "g": {"type": contorno.geom_type, "coordinates": arredondar(mapping(contorno)["coordinates"], 4)},
+            },
+            "urb": [{"c": cd, "n": m["nome"], "a": round(m["geom"].area / 1e6, 4),
+                     "g": {"type": "Polygon", "coordinates": arredondar(mapping(transform(to_wgs, m["geom"]))["coordinates"], 5)}}
+                    for m in manchas],
+            "viaNames": nomes, "tipos": tipos, "vias": segs,
+            "distritos": [{"CD_MUN": cd, "municipio": meta["nome"], "distrito": m["nome"],
+                           "area_km2": round(m["geom"].area / 1e6, 2), "vias_km": round(km_mancha[m["nome"]], 2)}
+                          for m in manchas],
+            "por_tipo_km": {k: round(v, 2) for k, v in sorted(km_tipo.items(), key=lambda x: -x[1])},
+            "excluidas_km": {k: round(v, 2) for k, v in excl.items()},
+            "excluidas_rurais_km": {k: round(v, 2) for k, v in excl_rur.items()}, "rurais_geradas": vias_rurais_geradas,
+            "crs_medicao": crs,
+            "fontes": {"ibge_setores": dict(fonte_setores, baixado_em=agora()), "osm": fonte_osm,
+                       "criterio": "Vias transitáveis por veículo (OSM), recortadas nas manchas urbanas IBGE 2022 (CD_SIT 1-3)"},
+        }
+    log(f"urbana {area_urb:.2f} km2 | vias urbanas {vias_km:.2f} km | rural {area_rural_geo:.2f} km2 | vias rurais {km_rural:.2f} km")
 
-    contorno = transform(to_wgs, territorio.simplify(40))
-    resultado = {
-        "versao": VERSAO, "gerado_em": agora(),
-        "mun": {
-            "c": cd, "n": meta["nome"], "uf": meta["uf"], "rgi": meta["rgi"], "rgint": meta["rgint"],
-            "co": False, "origem": "pesquisa",
-            "aI": round(a_ibge, 3), "aU": round(area_terr, 3), "urb": round(area_urb, 2), "rur": round(area_rur, 2),
-            "vias": round(vias_km, 2), "perc": round(area_urb / a_ibge * 100, 2),
-            "dens": round(vias_km / area_urb, 2) if area_urb else None,
-            "set": int(len(urb)), "dist": len(manchas), "pdf": None,
-            "fonte": "IBGE setores 2022 + vias OSM transitáveis (gerado pelo GIS Comercial)",
-            "g": {"type": contorno.geom_type, "coordinates": arredondar(mapping(contorno)["coordinates"], 4)},
-        },
-        "urb": [{"c": cd, "n": m["nome"], "a": round(m["geom"].area / 1e6, 4),
-                 "g": {"type": "Polygon", "coordinates": arredondar(mapping(transform(to_wgs, m["geom"]))["coordinates"], 5)}}
-                for m in manchas],
-        "viaNames": nomes, "vias": segs,
-        "distritos": [{"CD_MUN": cd, "municipio": meta["nome"], "distrito": m["nome"],
-                       "area_km2": round(m["geom"].area / 1e6, 2), "vias_km": round(km_mancha[m["nome"]], 2)}
-                      for m in manchas],
-        "por_tipo_km": {k: round(v, 2) for k, v in sorted(km_tipo.items(), key=lambda x: -x[1])},
-        "excluidas_km": {k: round(v, 2) for k, v in excl.items()},
-        "crs_medicao": f"EPSG:{epsg}",
-        "fontes": {"ibge_setores": dict(fonte_setores, baixado_em=agora()), "osm": fonte_osm,
-                   "criterio": "Vias transitáveis por veículo (OSM), recortadas nas manchas urbanas IBGE 2022 (CD_SIT 1-3)"},
-    }
+    if exportar_em:
+        camadas = {
+            "limite_municipal": gpd.GeoDataFrame([{**cols, "UF": meta["uf"], "AREA_KM2": round(area_terr, 3), "geometry": territorio}], crs=crs),
+            "area_urbana": gpd.GeoDataFrame([{**cols, "MANCHA": m["nome"], "AREA_KM2": round(m["geom"].area / 1e6, 4),
+                                              "VIAS_KM": round(km_mancha.get(m["nome"], 0.0), 2), "geometry": m["geom"]} for m in manchas], crs=crs),
+            "area_rural": gpd.GeoDataFrame([{**cols, "AREA_KM2": round(area_rural_geo, 3), "geometry": rural_utm}] if not rural_utm.is_empty else [], crs=crs),
+            "vias_urbanas": gpd.GeoDataFrame(reg_urb, crs=crs) if reg_urb else None,
+            "vias_rurais": gpd.GeoDataFrame(reg_rur, crs=crs) if reg_rur else None,
+        }
+        pacote["_exportacao"] = exportar_arquivos(dict(meta, cd=cd), epsg, camadas, pacote["fontes"], exportar_em)
+        log("arquivos gerados:", {k: (v.name if hasattr(v, "name") else v) for k, v in pacote["_exportacao"].items() if k != "camadas"})
     if saida:
         Path(saida).parent.mkdir(parents=True, exist_ok=True)
-        Path(saida).write_text(json.dumps(resultado, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
+        gravavel = {k: v for k, v in pacote.items() if not k.startswith("_")}
+        Path(saida).write_text(json.dumps(gravavel, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
         log(f"gravado: {saida} ({Path(saida).stat().st_size / 1e3:.0f} KB)")
-    return resultado
+    return pacote
 
 
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("codigo")
     ap.add_argument("--saida")
+    ap.add_argument("--exportar", help="pasta onde gravar SHP, KML e KMZ")
+    ap.add_argument("--reutilizar", help="pacote .json já publicado: mantém a parte urbana e só acrescenta rural e arquivos")
     ap.add_argument("--cache", default=str(Path(__file__).resolve().parent / ".cache"))
     a = ap.parse_args()
-    r = gerar(a.codigo, a.cache, a.saida)
+    antigo = json.loads(Path(a.reutilizar).read_text(encoding="utf-8")) if a.reutilizar else None
+    r = gerar(a.codigo, a.cache, a.saida, a.exportar, antigo)
     m = r["mun"]
-    print(json.dumps({k: m[k] for k in ("n", "uf", "aI", "urb", "vias", "dens", "dist")}, ensure_ascii=False))
+    print(json.dumps({k: m.get(k) for k in ("n", "uf", "aI", "urb", "vias", "dens", "dist", "areaRur", "viasRur")}, ensure_ascii=False))
     for d in r["distritos"]:
         print(f"  {d['distrito']:<28} {d['area_km2']:>7} km2 {d['vias_km']:>9} km")
+    if "_exportacao" in r:
+        print("camadas:", json.dumps(r["_exportacao"]["camadas"], ensure_ascii=False))

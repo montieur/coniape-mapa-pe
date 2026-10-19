@@ -7,6 +7,7 @@ atualiza gc_municipios e marca o pedido como 'pronto' (ou 'erro', com a mensagem
 import json
 import os
 import sys
+import tempfile
 import time
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -59,12 +60,51 @@ def reservar():
     return p if ok else None      # lista vazia = outra execução reservou primeiro
 
 
-def guardar(cd, pacote):
-    corpo = json.dumps(pacote, ensure_ascii=False, separators=(",", ":")).encode("utf-8")
-    r = requests.post(f"{URL}/storage/v1/object/gc-municipios/{cd}.json", data=corpo, timeout=180,
-                      headers=dict(H, **{"Content-Type": "application/json", "x-upsert": "true", "Cache-Control": "max-age=300"}))
+TIPOS_ARQUIVO = {"shp": "application/zip", "kml": "application/vnd.google-earth.kml+xml", "kmz": "application/vnd.google-earth.kmz"}
+
+
+def subir(caminho, dados, content_type):
+    r = requests.post(f"{URL}/storage/v1/object/gc-municipios/{caminho}", data=dados, timeout=300,
+                      headers=dict(H, **{"Content-Type": content_type, "x-upsert": "true", "Cache-Control": "max-age=300"}))
     if r.status_code >= 400:
         raise RuntimeError(f"Storage: HTTP {r.status_code} {r.text[:200]}")
+
+
+def subir_arquivos(cd, exp):
+    """SHP, KML e KMZ do município no Storage (arquivos/<código>/…); devolve os caminhos para o catálogo."""
+    caminhos = {"camadas": exp["camadas"], "gerado_em": agora().isoformat(), "tamanhos": {}}
+    for chave, ct in TIPOS_ARQUIVO.items():
+        f = Path(exp[chave])
+        subir(f"arquivos/{cd}/{f.name}", f.read_bytes(), ct)
+        caminhos[chave] = f"arquivos/{cd}/{f.name}"
+        caminhos["tamanhos"][chave] = f.stat().st_size
+        log(f"  enviado {f.name} ({f.stat().st_size / 1e6:.1f} MB)")
+    return caminhos
+
+
+def baixar_pacote(cd):
+    r = requests.get(f"{URL}/storage/v1/object/public/gc-municipios/{cd}.json", timeout=120)
+    if r.status_code != 200:
+        raise RuntimeError(f"Pacote do município indisponível (HTTP {r.status_code})")
+    return r.json()
+
+
+def guardar_json(cd, pacote):
+    limpo = {k: v for k, v in pacote.items() if not k.startswith("_")}
+    subir(f"{cd}.json", json.dumps(limpo, ensure_ascii=False, separators=(",", ":")).encode("utf-8"), "application/json")
+
+
+def guardar_exportacao(cd, pacote):
+    """Pedido 'exportar': guarda os arquivos e o pacote enriquecido (área e vias rurais) sem mexer no resto do município."""
+    arquivos = subir_arquivos(cd, pacote["_exportacao"])
+    guardar_json(cd, pacote)
+    rest("PATCH", f"gc_municipios?cd_mun=eq.{cd}", json={"arquivos": arquivos, "atualizado_em": agora().isoformat()},
+         headers={"Content-Type": "application/json"})
+
+
+def guardar(cd, pacote):
+    arquivos = subir_arquivos(cd, pacote["_exportacao"]) if pacote.get("_exportacao") else None
+    guardar_json(cd, pacote)
     m = pacote["mun"]
     anterior = rest("GET", f"gc_municipios?cd_mun=eq.{cd}&select=origem") or []
     linha = {
@@ -74,6 +114,7 @@ def guardar(cd, pacote):
         "contorno": m["g"],
         "fontes": pacote["fontes"], "arquivo": f"{cd}.json", "versao": pacote["versao"],
         "gerado_em": pacote["gerado_em"], "verificado_em": None, "verificacao": None, "atualizado_em": agora().isoformat(),
+        "arquivos": arquivos,
     }
     rest("POST", "gc_municipios?on_conflict=cd_mun", json=linha,
          headers={"Prefer": "resolution=merge-duplicates", "Content-Type": "application/json"})
@@ -103,9 +144,15 @@ def main():
         try:
             if p["tipo"] == "verificar":
                 conferir(cd)
+            elif p["tipo"] == "exportar":      # município já na base: mantém os números urbanos e acrescenta rural e arquivos
+                with tempfile.TemporaryDirectory() as tmp:
+                    pacote = gerar(cd, CACHE, exportar_em=tmp, reutilizar=baixar_pacote(cd))
+                    guardar_exportacao(cd, pacote)
+                log(f"arquivos prontos: {pacote['mun']['n']} - rural {pacote['mun'].get('areaRur')} km2, vias rurais {pacote['mun'].get('viasRur')} km")
             else:
-                pacote = gerar(cd, CACHE)
-                guardar(cd, pacote)
+                with tempfile.TemporaryDirectory() as tmp:
+                    pacote = gerar(cd, CACHE, exportar_em=tmp)
+                    guardar(cd, pacote)
                 log(f"pronto: {pacote['mun']['n']} - {pacote['mun']['urb']} km2 urbanos, {pacote['mun']['vias']} km de vias")
             rest("PATCH", f"gc_pedidos?id=eq.{p['id']}", json={
                 "status": "pronto", "concluido_em": agora().isoformat(), "mensagem": None},

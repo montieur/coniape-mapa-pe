@@ -19,7 +19,7 @@ const GITHUB_REPO = "montieur/coniape-mapa-pe";
 const GITHUB_WORKFLOW = "processar-fila.yml";
 
 type Db = ReturnType<typeof createClient>;
-type Tipo = "gerar" | "atualizar" | "verificar";
+type Tipo = "gerar" | "atualizar" | "verificar" | "exportar";
 
 Deno.serve(async (req) => {
   const origem = req.headers.get("origin") ?? "";
@@ -39,7 +39,8 @@ Deno.serve(async (req) => {
   try { corpo = await req.json(); } catch { return json({ erro: "Corpo inválido." }, 400); }
   const cd = String(corpo.cd ?? "");
   // consultar: usa a conferência guardada · verificar: pede conferência nova · atualizar: regenera se houve mudança
-  const acao = corpo.acao === "atualizar" || corpo.acao === "verificar" ? corpo.acao : "consultar";
+  // exportar: prepara os arquivos GIS (SHP, KML, KMZ) de um município que já está na base
+  const acao = ["atualizar", "verificar", "exportar"].includes(corpo.acao ?? "") ? corpo.acao! : "consultar";
   if (!/^\d{7}$/.test(cd)) return json({ erro: "Código IBGE inválido (7 dígitos)." }, 400);
 
   const db = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
@@ -80,15 +81,24 @@ Deno.serve(async (req) => {
     const verificacao = combinar(ibge, osm, mun.gerado_em, mun.fontes?.osm?.base, mun.verificado_em ?? undefined);
     return {
       existe: true, estado: ativo ? ativo.status : "pronto", pedido: ativo ?? null,
-      municipio: { cd, nome: mun.nome, uf: mun.uf, gerado_em: mun.gerado_em, origem: mun.origem },
+      municipio: { cd, nome: mun.nome, uf: mun.uf, gerado_em: mun.gerado_em, origem: mun.origem, arquivos: mun.arquivos ?? null },
       verificacao, mensagem: verificacao.resumo, ...extra,
     };
   };
 
   if (ativo) {
     const doTipo = ativo.tipo === "verificar" ? "Conferindo no OpenStreetMap. Isso pode levar alguns minutos."
+      : ativo.tipo === "exportar" ? "Preparando os arquivos GIS. Isso pode levar alguns minutos."
       : "Já existe uma atualização em andamento para este município.";
     return json(montar({ mensagem: doTipo }, ativo.tipo === "verificar"));
+  }
+
+  if (acao === "exportar") {
+    if (mun.arquivos && !corpo.forcar) return json(montar({ mensagem: "Os arquivos GIS deste município já estão prontos." }));
+    const r = await registrar(db, ip, cd, "exportar");
+    if ("erro" in r) return json({ erro: r.erro }, r.status);
+    ativo = r.pedido;
+    return json(montar({ mensagem: "Preparando os arquivos GIS. Isso pode levar alguns minutos." }));
   }
 
   if (acao === "atualizar") {
@@ -123,7 +133,7 @@ async function ipHash(req: Request): Promise<string> {
 
 async function registrar(db: Db, ip: string, cd: string, tipo: Tipo) {
   const hora = new Date(Date.now() - 3600_000).toISOString(), dia = new Date(Date.now() - 86400_000).toISOString();
-  const tipos = tipo === "verificar" ? ["verificar"] : ["gerar", "atualizar"];
+  const tipos = tipo === "verificar" ? ["verificar"] : ["gerar", "atualizar", "exportar"];
   const [{ count: porIp }, { count: total }] = await Promise.all([
     db.from("gc_pedidos").select("id", { count: "exact", head: true }).eq("ip_hash", ip).in("tipo", tipos).gte("criado_em", hora),
     db.from("gc_pedidos").select("id", { count: "exact", head: true }).in("tipo", tipos).gte("criado_em", dia),
