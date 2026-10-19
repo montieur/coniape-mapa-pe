@@ -18,6 +18,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 <link rel="stylesheet" href="manual.css">
+<link rel="stylesheet" href="base.css">
 <script src="manual.js"></script>
 <script src="data.js?v=cb030633"></script>
 <style>
@@ -248,7 +249,7 @@ dialog.manual article{overflow:auto;flex:1;padding:22px 28px 40px}
   <aside id="painel">
     <div class="grab" id="grab" role="button" tabindex="0" aria-label="Expandir ou recolher o painel"><span></span></div>
     <section class="summary">
-      <p class="eyebrow">Total CONIAPE em PE</p>
+      <p class="eyebrow">Total na base</p>
       <div class="kpis">
         <div class="kpi"><b class="num" id="kMun">–</b><span>municípios</span></div>
         <div class="kpi"><b class="num" id="kUrb">–</b><span>km² urbanos</span></div>
@@ -343,13 +344,21 @@ const M = {
   dens: {label: 'Densidade de vias', unit: 'km/km²', short: 'Densidade', d: 1},
   perc: {label: 'Área urbana / território', unit: '%', short: '% urbano', d: 1},
 };
-/* posição de cada município em cada indicador (1 = maior) */
+/* posição de cada município em cada indicador (1 = maior); recalculada quando a base cresce */
 const RANK = {};
-Object.keys(M).forEach(k => [...CO].sort((a, b) => b[k] - a[k]).forEach((m, i) => (RANK[m.c] ??= {})[k] = i + 1));
-
-$('kMun').textContent = CO.length;
-$('kUrb').textContent = fmt(CO.reduce((s, m) => s + m.urb, 0), 1);
-$('kVias').textContent = fmt(CO.reduce((s, m) => s + m.vias, 0), 0);
+function calcularRanks() {
+  Object.keys(RANK).forEach(c => delete RANK[c]);
+  Object.keys(M).forEach(k => [...CO].sort((a, b) => b[k] - a[k]).forEach((m, i) => (RANK[m.c] ??= {})[k] = i + 1));
+}
+function atualizarKpis() {
+  $('kMun').textContent = CO.length;
+  $('kUrb').textContent = fmt(CO.reduce((s, m) => s + m.urb, 0), 1);
+  $('kVias').textContent = fmt(CO.reduce((s, m) => s + m.vias, 0), 0);
+}
+calcularRanks(); atualizarKpis();
+/* abrir um município da base: o base.js troca por uma versão que carrega o detalhe sob demanda */
+function abrirMunicipio(cd, zoom = true) { select(cd, zoom); }
+function abrirPesquisa() {}   // idem: tela de "gerar dados" para município que ainda não está na base
 
 /* ===== Mapa ===== */
 // no celular, zoom só em níveis inteiros: zoom fracionário deixa emendas brancas entre os tiles
@@ -384,18 +393,17 @@ const munLayer = L.geoJSON({type: 'FeatureCollection', features: D.mun.map(m => 
     const m = byCode[f.properties.c];
     l.bindTooltip(() => m.co
       ? `<div class="tip"><b>${m.n}</b><br>${M[metric].label}: <b>${fmt(m[metric], M[metric].d)} ${M[metric].unit}</b><br><span>Clique para ver detalhes</span></div>`
-      : `<div class="tip"><b>${m.n}</b><br><span>Fora do CONIAPE · ${fmt(m.aI, 1)} km²</span></div>`, {sticky: true, direction: 'top', offset: [0, -6]});
-    l.on('click', () => m.co ? select(m.c, true) : toast(`${m.n} não faz parte do CONIAPE`));
-    if (m.co) {
-      l.on('mouseover', () => { hovered = m.c; l.setStyle(styleMun(f)); l.bringToFront(); if (selected) layerByCode[selected].bringToFront(); });
-      l.on('mouseout', () => { hovered = null; l.setStyle(styleMun(f)); });
-    }
+      : `<div class="tip"><b>${m.n}</b><br><span>Sem dados · clique para gerar · ${fmt(m.aI, 1)} km²</span></div>`, {sticky: true, direction: 'top', offset: [0, -6]});
+    l.on('click', () => m.co ? abrirMunicipio(m.c, true) : abrirPesquisa(m.c));
+    // sempre registrado: um município sem dados pode entrar na base depois (m.co passa a true)
+    l.on('mouseover', () => { if (!m.co) return; hovered = m.c; l.setStyle(styleMun(f)); l.bringToFront(); if (selected) layerByCode[selected].bringToFront(); });
+    l.on('mouseout', () => { if (!m.co) return; hovered = null; l.setStyle(styleMun(f)); });
   },
 }).addTo(map);
 const layerByCode = {}; munLayer.eachLayer(l => layerByCode[l.feature.properties.c] = l);
 const munBounds = {}; CO.forEach(m => munBounds[m.c] = layerByCode[m.c].getBounds());
 
-/* nomes dos municípios do CONIAPE (aparecem a partir do zoom 9) */
+/* nomes dos municípios da base (aparecem a partir do zoom 9) */
 const labels = L.layerGroup(CO.map(m => L.tooltip({permanent: true, direction: 'center', className: 'mlabel', interactive: false})
   .setLatLng(layerByCode[m.c].getCenter()).setContent(m.n)));
 let labelsOn = true;   // o usuário pode desligar no controle de camadas
@@ -459,7 +467,7 @@ function drawLegend() {
   $('lgBody').innerHTML = `
     <div class="ramp">${RAMP.map(c => `<i style="background:${css(c)}"></i>`).join('')}</div>
     <div class="ticks num"><span>menor</span>${e.map(v => `<span>${fmt(v, d)}</span>`).join('')}<span>maior</span></div>
-    <div class="it"><span class="sw" style="background:${css('--off-fill')};opacity:.6"></span>Fora do CONIAPE</div>
+    <div class="it"><span class="sw" style="background:${css('--off-fill')};opacity:.6"></span>Sem dados (pesquise para gerar)</div>
     <div class="it"><span class="sw" style="background:${css('--urb')};opacity:.75"></span>Área urbana</div>
     <div class="it"><span class="sw" style="height:3px;background:${css('--via')}"></span>Vias transitáveis (zoom ≥ 11)</div>`;
 }
@@ -539,9 +547,9 @@ function renderList() {
       <span class="rk num">${RANK[m.c][metric]}º</span>
       <span class="nm">${m.n}<small>${metric === 'vias' ? fmt(m.urb) + ' km² urbanos' : fmt(m.vias, 0) + ' km de vias'}</small></span>
       <span class="val num">${fmt(m[metric], M[metric].d)}<div class="bar"><i style="width:${(m[metric] / max * 100).toFixed(1)}%;background:${colorFor(m[metric])}"></i></div></span>
-    </button>`).join('') : `<div class="empty">Nenhum município do CONIAPE com esse nome.</div>`;
+    </button>`).join('') : `<div class="empty">Nenhum município da base com esse nome.${window.GC_CONFIG?.supabaseUrl ? ' Veja as sugestões abaixo da busca para gerar os dados.' : ''}</div>`;
 }
-$('list').onclick = e => { const r = e.target.closest('.row'); if (r) select(r.dataset.c, true); };
+$('list').onclick = e => { const r = e.target.closest('.row'); if (r) abrirMunicipio(r.dataset.c, true); };
 $('list').onmouseover = e => { const r = e.target.closest('.row'); const c = r?.dataset.c ?? null; if (c !== hovered) { const old = hovered; hovered = c; [old, c].forEach(k => k && layerByCode[k].setStyle(styleMun(layerByCode[k].feature))); } };
 $('list').onmouseleave = () => { const old = hovered; hovered = null; if (old) layerByCode[old].setStyle(styleMun(layerByCode[old].feature)); };
 $('busca').oninput = () => { if (selected) closeDetail(); renderList(); };
@@ -570,6 +578,7 @@ function select(code, zoom) {
 }
 function closeDetail() {
   selected = null; limparMancha(); munLayer.setStyle(styleMun); refreshVias();
+  if (typeof limparPesquisa === 'function') limparPesquisa();
   $('viewDetail').hidden = true; $('viewList').hidden = false;
   document.querySelector('aside').classList.remove('detail-open');
 }
@@ -580,19 +589,22 @@ function renderDetail(m) {
   $('detail').innerHTML = `
     <div class="dtop"><button class="btn ghost" id="btnBack">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>Todos os municípios</button></div>
-    <div class="dtitle"><h2>${m.n}</h2><p>Código IBGE ${m.c}<br>Região imediata de ${m.rgi} · Região intermediária de ${m.rgint}</p></div>
+    <div class="dtitle"><h2>${m.n}${m.uf ? ' · ' + m.uf : ''}</h2>
+      <p><span class="chip ${m.origem === 'pesquisa' ? 'pesq' : ''}">${m.origem === 'pesquisa' ? 'Pesquisa' : 'CONIAPE'}</span>
+        Código IBGE ${m.c}<br>${m.rgi ? `Região imediata de ${m.rgi}` : ''}${m.rgint ? ` · Região intermediária de ${m.rgint}` : ''}</p></div>
     <div class="hero">
-      <div><span>Área urbana</span><b class="num">${fmt(m.urb)} km²</b><small>${RANK[m.c].urb}º de ${n} no CONIAPE</small></div>
-      <div><span>Vias transitáveis</span><b class="num">${fmt(m.vias)} km</b><small>${RANK[m.c].vias}º de ${n} no CONIAPE</small></div>
+      <div><span>Área urbana</span><b class="num">${fmt(m.urb)} km²</b><small>${RANK[m.c].urb}º de ${n} na base</small></div>
+      <div><span>Vias transitáveis</span><b class="num">${fmt(m.vias)} km</b><small>${RANK[m.c].vias}º de ${n} na base</small></div>
     </div>
     ${m.rev?.motivo ? `<div class="alert"><b>Atenção:</b> ${m.rev.motivo} O valor atual vem de nova extração do OpenStreetMap.</div>` : ''}
+    ${typeof cartaoFontes === 'function' ? cartaoFontes(m) : ''}
     <div class="stats">
       <div><span>Vias – critério CONIAPE original</span><b class="num">${m.rev ? fmt(m.rev.orig) + ' km' : '–'}</b></div>
-      <div><span>Não transitáveis excluídas</span><b class="num">${m.rev ? fmt(Object.values(m.rev.excl).reduce((a, b) => a + b, 0)) + ' km' : '–'}</b></div>
+      <div><span>Não transitáveis excluídas</span><b class="num">${(m.excl || m.rev?.excl) ? fmt(Object.values(m.excl || m.rev.excl).reduce((a, b) => a + b, 0)) + ' km' : '–'}</b></div>
       <div><span>Densidade de vias</span><b class="num">${fmt(m.dens)} km/km²</b></div>
       <div><span>Área urbana / território</span><b class="num">${fmt(m.perc)} %</b></div>
       <div><span>Território (área oficial IBGE)</span><b class="num">${fmt(m.aI, 1)} km²</b></div>
-      <div><span>Território (planimétrica UTM 25S)</span><b class="num">${fmt(m.aU, 1)} km²</b></div>
+      <div><span>Território (planimétrica UTM ${m.zona ?? 25}S)</span><b class="num">${fmt(m.aU, 1)} km²</b></div>
       <div><span>Setores urbanos</span><b class="num">${m.set ?? '–'}</b></div>
       <div><span>Distritos / manchas</span><b class="num">${m.dist ?? '–'}</b></div>
     </div>
@@ -694,6 +706,8 @@ async function baixarOficial(m) {
 }
 </script>
 <script src="relatorio.js?v=c943a6d3"></script>
+<script src="config.js?v=596d0bf1"></script>
+<script src="base.js?v=467b85d5"></script>
 <script>
 const pdfErro = e => { console.error(e); toast('Não foi possível gerar o PDF: ' + e.message, 5000); };
 $('btnGeral').onclick = () => gerarPdfGeral().catch(pdfErro);

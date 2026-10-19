@@ -25,6 +25,11 @@ PRINTS = [   # arquivo, URL, tamanho da janela (ou "celular": moldura de 390 x 8
     ("06_janela_manual.png", "/?manual", DESK),
     ("07_celular_lista.png", "/", CEL),
     ("08_celular_detalhe.png", "/?mun=2601904", CEL),
+    # busca e fontes: usam a simulação do servidor (?mock) para mostrar a tela como ela fica com o servidor ativo
+    ("11_busca_municipio.png", "/?mock&q=" + quote("sao bento"), DESK),
+    ("12_gerar_dados.png", "/?mock&pesquisa=2606408", DESK),
+    ("13_fontes_atualizado.png", "/?mock&mun=2604106", DESK),
+    ("14_fontes_ha_atualizacao.png", "/?mock=mudou&mun=2604106", DESK),
     ("09_celular_mapa.png", "/?painel=min", CEL),
     ("10_celular_busca.png", "/?painel=max", CEL),
 ]

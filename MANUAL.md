@@ -50,7 +50,43 @@ As cores vão de claro (menor) a escuro (maior), em 5 faixas com a mesma quantid
 - **Na busca:** digite parte do nome. Acentos são ignorados, então "sao bento" encontra São Bento do Una.
 - **No mapa:** clique dentro do limite do município. Só o limite municipal é clicável; áreas urbanas e vias não interceptam o clique.
 
-Municípios em cinza estão fora do CONIAPE. Ao clicar num deles aparece um aviso.
+Municípios em cinza ainda não têm dados na base. Com o servidor ativo, clicar num deles abre a tela para gerar os dados (próxima seção).
+
+### Pesquisar qualquer município do Brasil
+
+> Esta função depende do servidor do GIS Comercial. Se a busca só filtra os municípios que já estão na lista, o servidor ainda não foi ativado neste endereço (veja a [Parte 4](#parte-4-atualizar-e-publicar-manutenção)).
+
+Digite o nome na barra de busca (a partir de 2 letras). As sugestões aparecem em duas seções:
+
+- **Na base:** municípios que já têm dados. Clique para abrir.
+- **Outros municípios do Brasil:** qualquer um dos 5.571 municípios do IBGE, com a UF. Clique para gerar os dados.
+
+![Busca com sugestões](docs/img/11_busca_municipio.png)
+*Digitando "sao bento": São Bento do Una já está na base; os demais são sugestões para gerar.*
+
+Ao escolher um município sem dados, o mapa mostra o contorno dele e a tela **Gerar dados**. O botão envia o pedido ao servidor, que usa o **mesmo método dos demais municípios**: lê os setores censitários urbanos do IBGE (2022), busca no OpenStreetMap as vias transitáveis por veículo, recorta dentro das manchas urbanas e mede.
+
+![Tela de gerar dados](docs/img/12_gerar_dados.png)
+
+- **Tempo:** de 1 a 10 minutos, conforme o tamanho do município. A tela mostra o andamento e o tempo decorrido.
+- **Pode sair da tela:** o pedido continua no servidor. Quando fica pronto, o município entra na base e uma mensagem avisa. Ao reabrir o mapa no mesmo aparelho, o acompanhamento é retomado.
+- **Fica guardado para todos:** depois de gerado, o município aparece para qualquer pessoa que abrir o mapa, com a origem **Pesquisa**. Os do CONIAPE têm a origem **CONIAPE**.
+- **Limites:** cada visitante pode pedir até 5 municípios por hora. Se o pedido falhar (os servidores do OpenStreetMap às vezes ficam fora do ar), ele é tentado de novo sozinho até 3 vezes e depois mostra o erro, com a opção de tentar de novo.
+
+### Fontes de dados e atualização
+
+Ao abrir um município que já está na base, o cartão **Fontes de dados** mostra de onde vêm os números e **confere se as fontes mudaram** desde a geração:
+
+- **IBGE:** compara a data do arquivo de setores censitários com a registrada na geração.
+- **OpenStreetMap:** pergunta quantas vias mudaram na área desde a data da extração.
+
+![Cartão: sem atualização](docs/img/13_fontes_atualizado.png)
+*Nenhuma fonte mudou: o mapa informa que os dados já estão atualizados e quando foi a conferência.*
+
+![Cartão: há atualização](docs/img/14_fontes_ha_atualizacao.png)
+*Houve mudança: o cartão diz quantas vias mudaram (e a proporção) e oferece **Atualizar dados**. O OpenStreetMap recebe edições todos os dias, então mudanças pequenas são comuns; a proporção ajuda a decidir se vale atualizar.*
+
+Se não der para conferir (por exemplo, o servidor do OpenStreetMap fora do ar), o cartão diz que **não foi possível confirmar**, em vez de afirmar que está atualizado. **Verificar de novo** refaz a conferência. **Atualizar dados** gera o município de novo e substitui o anterior para todos.
 
 ### O detalhe do município
 
@@ -177,6 +213,7 @@ O mapa e os relatórios gerados mostram os dois valores. Os **relatórios oficia
 ### Casos especiais
 
 - **Caruaru:** a extração original do CONIAPE estava **incompleta**: faltava a maior parte dos eixos do centro (1.016 km no original). Na nova extração, as manchas pequenas bateram exatamente com o original, o que valida o método. O valor atual é 1.501,18 km.
+- **Municípios gerados sob demanda:** seguem o mesmo critério dos 39 do CONIAPE (vias transitáveis recortadas nas manchas urbanas). Diferenças pequenas: a medição usa o **fuso UTM do próprio município** (de 18S a 25S; os de PE ficam em 25S, salvo o Sertão); a **área territorial** vem da API do IBGE (agregados 2022), enquanto nos 39 vem da malha de 2024, então pode haver diferença de ~1%; e a **numeração das manchas** de um distrito segue a ordem de tamanho. Validação: Bezerros, gerado do zero por esse método, deu 357,57 km de vias contra 357,58 km do valor revisado (diferença de 0,00%), com os mesmos 103 setores e 4 manchas.
 - **Auditoria:** os 39 municípios foram comparados com o OSM atual pelo critério original. Só Caruaru tinha falha de extração (mais de 10% de diferença); veja `dados/auditoria_vias_osm_resumo.md`.
 
 ### Áreas do território
@@ -261,7 +298,31 @@ CONIAPE\MAPA_PE\
 | `compilar_pacote.py` | Gera os ZIPs e CSVs de `dados/` |
 | `capturar_prints.py` | Tira os prints deste manual (`docs/img/`) e gera o PDF do manual, com o Edge headless |
 | `gerar_icones.py` | Gera os ícones PNG do app a partir de `icones/icone.svg` |
+| `semear_base.py` | Envia os 39 municípios do CONIAPE ao servidor (catálogo e conferência de atualização) |
+| `gerar_lista_municipios.py` | Gera `dados/municipios_ibge.json`, a lista dos 5.571 municípios para a busca |
 | `auditoria/` | Scripts auxiliares da auditoria CONIAPE × OSM |
+
+### Servidor e geração sob demanda
+
+A busca por qualquer município usa um servidor (Supabase) e uma automação (GitHub Actions). O passo a passo para ligar está em [`supabase/IMPLANTAR.md`](https://github.com/montieur/coniape-mapa-pe/blob/main/supabase/IMPLANTAR.md). Resumo das peças:
+
+| Peça | Onde | O que faz |
+|---|---|---|
+| Tabelas e bucket | `supabase/migrations/` | `gc_municipios` (catálogo), `gc_pedidos` (fila) e o bucket público `gc-municipios` |
+| Função `gc-solicitar` | `supabase/functions/` | Valida o pedido, limita abuso, confere as fontes de um município existente e enfileira |
+| Verificação das fontes | `supabase/functions/_shared/verificar.ts` | IBGE (data do arquivo) e OSM (vias alteradas desde a extração) |
+| Gerador | `worker/gerar_municipio.py` | Gera um município: setores do IBGE, vias do OSM, recorte e medição |
+| Processador da fila | `worker/processar_fila.py` | Lê os pedidos, gera, grava no Storage e marca como pronto ou erro |
+| Automação | `.github/workflows/processar-fila.yml` | Roda o processador a cada 5 minutos, ou na hora com o disparo opcional |
+| Configuração do mapa | `config.js` | Endereço e chave pública do Supabase; vazio = busca e geração desligadas |
+
+Para gerar um município sem o servidor (teste ou conferência), no computador:
+
+```bat
+C:\Python314\python.exe -X utf8 worker\gerar_municipio.py 2606408 --saida gravata.json
+```
+
+O arquivo gerado traz o resumo, as manchas, as vias e a procedência das fontes. O teste de ponta a ponta da fila, com um servidor falso, é `worker\teste_fila_local.py <código IBGE>`.
 
 ### Atualizar as vias de um município
 

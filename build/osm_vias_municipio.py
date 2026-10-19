@@ -12,7 +12,8 @@ from pathlib import Path
 CONIAPE = Path(r"C:\Users\tecgeo-jordy\Desktop\CONIAPE")
 # tipos de highway presentes nos KMLs de vias do CONIAPE
 TIPOS = "trunk|primary|secondary|tertiary|unclassified|residential|living_street|service"
-ENDPOINTS = ("https://overpass-api.de/api/interpreter", "https://overpass.kumi.systems/api/interpreter",
+ENDPOINTS = ("https://overpass.openstreetmap.fr/api/interpreter", "https://z.overpass-api.de/api/interpreter",
+             "https://overpass-api.de/api/interpreter", "https://overpass.kumi.systems/api/interpreter",
              "https://overpass.private.coffee/api/interpreter")
 
 pasta = sys.argv[1]

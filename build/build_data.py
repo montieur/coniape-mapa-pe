@@ -105,7 +105,7 @@ js = "window.CONIAPE_DATA=" + json.dumps(data, ensure_ascii=False, separators=("
 # versão no endereço dos scripts: o navegador não reaproveita um data.js/relatorio.js antigo do cache
 idx = SITE / "index.html"
 html = idx.read_text(encoding="utf-8")
-for nome in ("data.js", "relatorio.js"):
+for nome in ("data.js", "relatorio.js", "config.js", "base.js"):
     v = hashlib.sha1((SITE / nome).read_bytes()).hexdigest()[:8]
     html = re.sub(rf'src="{re.escape(nome)}(\?v=\w+)?"', f'src="{nome}?v={v}"', html)
 idx.write_text(html, encoding="utf-8")

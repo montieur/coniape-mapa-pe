@@ -1,0 +1,7 @@
+# Configuração mínima para publicar a função com `supabase functions deploy gc-solicitar`.
+# Troque project_id pelo ID do projeto Supabase escolhido (ou use `supabase link --project-ref <id>`).
+project_id = "gis-comercial"
+
+[functions.gc-solicitar]
+# o mapa chama com a chave pública (anon), que é um JWT válido do projeto
+verify_jwt = true

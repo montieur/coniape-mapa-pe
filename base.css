@@ -1,0 +1,54 @@
+/* GIS Comercial · busca, cartão de fontes e andamento da geração (usa os tokens de cor do index.html) */
+:root{--ok:#1a7f4b;--ok-soft:#e6f4ec;--warn:#9a6700;--warn-soft:#fff4d6;--bad:#b42318;--bad-soft:#fdecea}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){--ok:#5fd18f;--ok-soft:#14301f;--warn:#e6b450;--warn-soft:#332a10;--bad:#ff8a80;--bad-soft:#3a1714}
+}
+:root[data-theme="dark"]{--ok:#5fd18f;--ok-soft:#14301f;--warn:#e6b450;--warn-soft:#332a10;--bad:#ff8a80;--bad-soft:#3a1714}
+
+/* ---------- chips de origem ---------- */
+.chip{display:inline-block;font-size:11px;font-weight:650;letter-spacing:.02em;padding:2px 8px;border-radius:999px;margin-right:7px;
+  background:var(--accent-soft);color:var(--accent);vertical-align:1px}
+.chip.pesq{background:var(--warn-soft);color:var(--warn)}
+.chip.novo{background:var(--sunk);color:var(--muted)}
+
+/* ---------- resultados da busca ---------- */
+#resultados{position:absolute;top:calc(100% + 4px);left:0;right:0;z-index:30;max-height:min(60vh,420px);overflow:auto;
+  background:var(--panel);border:1px solid var(--line);border-radius:10px;box-shadow:var(--shadow);padding:4px}
+#resultados[hidden]{display:none}
+#resultados .rsec{font-size:11px;font-weight:650;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);padding:8px 10px 4px}
+#resultados .ri{all:unset;box-sizing:border-box;width:100%;display:flex;align-items:center;justify-content:space-between;gap:10px;
+  padding:8px 10px;border-radius:8px;cursor:pointer}
+#resultados .ri span{font-weight:560;line-height:1.25}
+#resultados .ri small{display:block;font-weight:400;color:var(--muted);font-size:12px}
+#resultados .ri em{font-style:normal;font-size:11.5px;font-weight:620;color:var(--accent);white-space:nowrap}
+#resultados .ri:hover,#resultados .ri.on{background:var(--hover)}
+
+/* ---------- cartão "Fontes de dados" ---------- */
+.fontes{border:1px solid var(--line);border-radius:12px;padding:11px 13px;margin:0 0 14px;background:var(--sunk)}
+.fontes .fh{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin-bottom:3px}
+.fontes .fh small{color:var(--muted);font-size:11.5px}
+.fontes .fl{color:var(--muted);font-size:11.5px;margin-bottom:8px}
+.fontes .fv{display:flex;gap:8px;align-items:flex-start;font-size:13px;line-height:1.4;padding:8px 10px;border-radius:8px;background:var(--panel)}
+.fontes .fv small{color:var(--muted)}
+.fontes.ok .fv{background:var(--ok-soft);color:var(--ink)} .fontes.ok{border-color:color-mix(in srgb,var(--ok) 35%,var(--line))}
+.fontes.novo .fv{background:var(--accent-soft)} .fontes.novo{border-color:var(--accent)}
+.fontes.aviso .fv{background:var(--warn-soft)} .fontes.aviso{border-color:color-mix(in srgb,var(--warn) 40%,var(--line))}
+.fontes .fa{display:flex;gap:8px;flex-wrap:wrap;margin-top:9px}
+.fontes .fa .btn{padding:6px 11px;font-size:12.5px}
+
+/* ---------- andamento da geração ---------- */
+.spin{flex:none;width:16px;height:16px;border-radius:50%;border:2.5px solid var(--line);border-top-color:var(--accent);
+  animation:giro .8s linear infinite;margin-top:2px}
+@keyframes giro{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion: reduce){.spin{animation-duration:2.4s}}
+.andamento{display:flex;gap:12px;align-items:flex-start;padding:12px 14px;border-radius:12px;background:var(--accent-soft);margin-bottom:12px}
+.andamento b{display:block}
+.andamento small{color:var(--muted)}
+.passos{margin:0 0 12px;padding-left:22px;color:var(--muted);font-size:13px}
+.passos li{margin:3px 0}
+.passos li.em{color:var(--ink)}
+.alert.erro{border-color:var(--bad);background:var(--bad-soft)}
+aside.pesquisa .dfoot{display:none}      /* tela "gerar dados": sem baixar relatório nem "ver no mapa" */
+#detail .acts{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
+#detail p{margin:0 0 10px}
+#detail .dtitle p{margin:2px 0 14px}
