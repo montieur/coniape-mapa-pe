@@ -50,7 +50,8 @@ def recuperar_travados():
 
 
 def reservar():
-    fila = rest("GET", "gc_pedidos?status=eq.fila&order=criado_em.asc&limit=1&select=id,cd_mun,tipo,tentativas")
+    # pedidos de visitantes (gerar/atualizar) passam na frente da exportação em massa e das conferências
+    fila = rest("GET", "gc_pedidos?status=eq.fila&tipo=in.(gerar,atualizar)&order=criado_em.asc&limit=1&select=id,cd_mun,tipo,tentativas")         or rest("GET", "gc_pedidos?status=eq.fila&order=criado_em.asc&limit=1&select=id,cd_mun,tipo,tentativas")
     if not fila:
         return None
     p = fila[0]
