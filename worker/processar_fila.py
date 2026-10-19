@@ -14,6 +14,7 @@ from pathlib import Path
 import requests
 
 from gerar_municipio import gerar, log
+from verificar_fontes import verificar
 
 URL = os.environ["SUPABASE_URL"].rstrip("/")
 KEY = os.environ["SUPABASE_SERVICE_KEY"]
@@ -38,7 +39,8 @@ def rest(metodo, caminho, **kw):
 
 def recuperar_travados():
     """Pedido 'processando' há mais de 40 min = execução anterior caiu: volta para a fila (ou erro)."""
-    limite = (agora() - timedelta(minutes=40)).isoformat()
+    # formato com Z: o "+00:00" do isoformat() vira espaço na URL e o PostgREST recusa
+    limite = (agora() - timedelta(minutes=40)).strftime("%Y-%m-%dT%H:%M:%SZ")
     for p in rest("GET", f"gc_pedidos?status=eq.processando&iniciado_em=lt.{limite}&select=id,tentativas") or []:
         novo = {"status": "fila"} if p["tentativas"] < MAX_TENTATIVAS else \
             {"status": "erro", "mensagem": "A geração não terminou depois de várias tentativas.", "concluido_em": agora().isoformat()}
@@ -77,6 +79,17 @@ def guardar(cd, pacote):
          headers={"Prefer": "resolution=merge-duplicates", "Content-Type": "application/json"})
 
 
+def conferir(cd):
+    """Pedido 'verificar': confere IBGE e OSM e guarda o resultado no município (a função só lê daqui)."""
+    linhas = rest("GET", f"gc_municipios?cd_mun=eq.{cd}&select=fontes,gerado_em") or []
+    if not linhas:
+        raise RuntimeError("Município não está na base")
+    v = verificar(linhas[0]["fontes"], linhas[0]["gerado_em"])
+    rest("PATCH", f"gc_municipios?cd_mun=eq.{cd}", json={"verificacao": v, "verificado_em": v["verificado_em"]},
+         headers={"Content-Type": "application/json"})
+    log(f"conferido {cd}: {v['resumo']}")
+
+
 def main():
     inicio = time.time()
     recuperar_travados()
@@ -88,12 +101,15 @@ def main():
         cd = p["cd_mun"]
         log(f"=== pedido {p['id']}: {p['tipo']} {cd}")
         try:
-            pacote = gerar(cd, CACHE)
-            guardar(cd, pacote)
+            if p["tipo"] == "verificar":
+                conferir(cd)
+            else:
+                pacote = gerar(cd, CACHE)
+                guardar(cd, pacote)
+                log(f"pronto: {pacote['mun']['n']} - {pacote['mun']['urb']} km2 urbanos, {pacote['mun']['vias']} km de vias")
             rest("PATCH", f"gc_pedidos?id=eq.{p['id']}", json={
                 "status": "pronto", "concluido_em": agora().isoformat(), "mensagem": None},
                  headers={"Content-Type": "application/json"})
-            log(f"pronto: {pacote['mun']['n']} - {pacote['mun']['urb']} km2 urbanos, {pacote['mun']['vias']} km de vias")
         except Exception as e:     # noqa: BLE001 - qualquer falha vira mensagem para o usuário
             log("ERRO:", e)
             rest("PATCH", f"gc_pedidos?id=eq.{p['id']}", json={

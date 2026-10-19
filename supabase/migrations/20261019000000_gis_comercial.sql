@@ -30,7 +30,7 @@ create table if not exists public.gc_municipios (
 create table if not exists public.gc_pedidos (
   id           uuid primary key default gen_random_uuid(),
   cd_mun       text not null check (cd_mun ~ '^[0-9]{7}$'),
-  tipo         text not null default 'gerar' check (tipo in ('gerar', 'atualizar')),
+  tipo         text not null default 'gerar' check (tipo in ('gerar', 'atualizar', 'verificar')),
   status       text not null default 'fila' check (status in ('fila', 'processando', 'pronto', 'erro')),
   mensagem     text,
   tentativas   int  not null default 0,
