@@ -1,7 +1,7 @@
 {
-  "name": "GIS Comercial · Pernambuco",
+  "name": "GIS Comercial",
   "short_name": "GIS Comercial",
-  "description": "Área urbana e vias transitáveis dos 39 municípios de PE do CONIAPE",
+  "description": "Pesquise qualquer município do Brasil: área urbana, área rural e vias transitáveis, com download em PDF, Shapefile, KML e KMZ.",
   "lang": "pt-BR",
   "start_url": "./",
   "scope": "./",
