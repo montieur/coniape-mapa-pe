@@ -720,7 +720,7 @@ function abrirManual(secao) {
   manualPronto ??= renderManual($('manualBody'), {toc: $('manualToc'), rolagem: $('manualBody')})
     .catch(() => { manualPronto = null;
       $('manualBody').innerHTML = `<p>Não foi possível carregar o manual aqui.
-        <a href="https://github.com/montieur/coniape-mapa-pe/blob/main/MANUAL.md" target="_blank" rel="noopener">Abrir no GitHub</a>.</p>`; });
+        <a href="https://github.com/montieur/gis-comercial/blob/main/MANUAL.md" target="_blank" rel="noopener">Abrir no GitHub</a>.</p>`; });
   manualPronto?.then(() => secao ? irParaManual($('manualBody'), secao, $('manualBody')) : $('manualBody').scrollTo(0, 0));
 }
 $('btnManual').onclick = () => abrirManual();

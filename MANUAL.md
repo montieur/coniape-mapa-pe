@@ -1,8 +1,8 @@
 # Manual de uso · GIS Comercial
 
-- **Mapa:** https://montieur.github.io/coniape-mapa-pe/ (computador e smartphone)
-- **Manual em PDF:** [Manual_GIS_Comercial.pdf](https://montieur.github.io/coniape-mapa-pe/dados/Manual_GIS_Comercial.pdf)
-- **Repositório:** https://github.com/montieur/coniape-mapa-pe
+- **Mapa:** https://montieur.github.io/gis-comercial/ (computador e smartphone)
+- **Manual em PDF:** [Manual_GIS_Comercial.pdf](https://montieur.github.io/gis-comercial/dados/Manual_GIS_Comercial.pdf)
+- **Repositório:** https://github.com/montieur/gis-comercial
 
 O **GIS Comercial** mostra, para os **39 municípios de Pernambuco atendidos pelo CONIAPE**, a área urbana e a extensão de **vias transitáveis por veículo dentro das manchas urbanas**, que é a base de quantitativos do mapeamento 360°. Os outros 146 municípios de PE aparecem em cinza só para referência.
 
@@ -190,12 +190,12 @@ Dá para compartilhar um link que já abre o mapa num estado específico:
 
 | Link | Abre |
 |---|---|
-| `…/coniape-mapa-pe/?mun=2604106` | Caruaru selecionado (use o código IBGE do município) |
-| `…/coniape-mapa-pe/?mun=2604106&zoom=15` | Caruaru com zoom 15 |
-| `…/coniape-mapa-pe/?mun=2604106&mancha=Carapotós (4)` | Caruaru com zoom na mancha Carapotós (4) (nome como aparece na tabela) |
-| `…/coniape-mapa-pe/?ind=dens` | Mapa colorido por densidade de vias (`vias`, `urb`, `dens` ou `perc`) |
-| `…/coniape-mapa-pe/?mun=2601904&baixar` | Bezerros com a janela de relatório aberta |
-| `…/coniape-mapa-pe/?manual` | Manual aberto |
+| `…/gis-comercial/?mun=2604106` | Caruaru selecionado (use o código IBGE do município) |
+| `…/gis-comercial/?mun=2604106&zoom=15` | Caruaru com zoom 15 |
+| `…/gis-comercial/?mun=2604106&mancha=Carapotós (4)` | Caruaru com zoom na mancha Carapotós (4) (nome como aparece na tabela) |
+| `…/gis-comercial/?ind=dens` | Mapa colorido por densidade de vias (`vias`, `urb`, `dens` ou `perc`) |
+| `…/gis-comercial/?mun=2601904&baixar` | Bezerros com a janela de relatório aberta |
+| `…/gis-comercial/?manual` | Manual aberto |
 
 ---
 
@@ -239,17 +239,17 @@ O mapa e os relatórios gerados mostram os dois valores. Os **relatórios oficia
 
 ## Parte 3: Baixar os dados
 
-Todos os arquivos ficam na pasta [`dados/`](https://github.com/montieur/coniape-mapa-pe/tree/main/dados) do repositório:
+Todos os arquivos ficam na pasta [`dados/`](https://github.com/montieur/gis-comercial/tree/main/dados) do repositório:
 
 | Arquivo | Conteúdo |
 |---|---|
-| [CONIAPE_PE_UTM25S_gpkg.zip](https://montieur.github.io/coniape-mapa-pe/dados/CONIAPE_PE_UTM25S_gpkg.zip) | GeoPackages: `PE_Municipios_CONIAPE_UTM25S.gpkg` e `CONIAPE_PE_UTM25S.gpkg` (camadas `vias_urbanas` e `areas_urbanas`) |
-| [CONIAPE_PE_UTM25S_shp.zip](https://montieur.github.io/coniape-mapa-pe/dados/CONIAPE_PE_UTM25S_shp.zip) | Os mesmos dados em shapefile |
-| [quantitativos_municipios.csv](https://montieur.github.io/coniape-mapa-pe/dados/quantitativos_municipios.csv) | Um município por linha (abre direto no Excel: `;` e vírgula decimal) |
-| [quantitativos_manchas.csv](https://montieur.github.io/coniape-mapa-pe/dados/quantitativos_manchas.csv) | Uma mancha urbana por linha |
-| [auditoria_vias_osm.csv](https://montieur.github.io/coniape-mapa-pe/dados/auditoria_vias_osm.csv) | Comparação CONIAPE × OSM por município |
-| [revisoes.json](https://montieur.github.io/coniape-mapa-pe/dados/revisoes.json) | Registro técnico das revisões: valores, critério, km por tipo de via, excluídas, manchas |
-| [Manual_GIS_Comercial.pdf](https://montieur.github.io/coniape-mapa-pe/dados/Manual_GIS_Comercial.pdf) | Este manual em PDF, com os prints |
+| [CONIAPE_PE_UTM25S_gpkg.zip](https://montieur.github.io/gis-comercial/dados/CONIAPE_PE_UTM25S_gpkg.zip) | GeoPackages: `PE_Municipios_CONIAPE_UTM25S.gpkg` e `CONIAPE_PE_UTM25S.gpkg` (camadas `vias_urbanas` e `areas_urbanas`) |
+| [CONIAPE_PE_UTM25S_shp.zip](https://montieur.github.io/gis-comercial/dados/CONIAPE_PE_UTM25S_shp.zip) | Os mesmos dados em shapefile |
+| [quantitativos_municipios.csv](https://montieur.github.io/gis-comercial/dados/quantitativos_municipios.csv) | Um município por linha (abre direto no Excel: `;` e vírgula decimal) |
+| [quantitativos_manchas.csv](https://montieur.github.io/gis-comercial/dados/quantitativos_manchas.csv) | Uma mancha urbana por linha |
+| [auditoria_vias_osm.csv](https://montieur.github.io/gis-comercial/dados/auditoria_vias_osm.csv) | Comparação CONIAPE × OSM por município |
+| [revisoes.json](https://montieur.github.io/gis-comercial/dados/revisoes.json) | Registro técnico das revisões: valores, critério, km por tipo de via, excluídas, manchas |
+| [Manual_GIS_Comercial.pdf](https://montieur.github.io/gis-comercial/dados/Manual_GIS_Comercial.pdf) | Este manual em PDF, com os prints |
 
 Todas as camadas estão em **SIRGAS 2000 / UTM zona 25S (EPSG:31985)**.
 
@@ -318,7 +318,7 @@ CONIAPE\MAPA_PE\
 
 ### Servidor e geração sob demanda
 
-A busca por qualquer município usa um servidor (Supabase) e uma automação (GitHub Actions). O passo a passo para ligar está em [`supabase/IMPLANTAR.md`](https://github.com/montieur/coniape-mapa-pe/blob/main/supabase/IMPLANTAR.md). Resumo das peças:
+A busca por qualquer município usa um servidor (Supabase) e uma automação (GitHub Actions). O passo a passo para ligar está em [`supabase/IMPLANTAR.md`](https://github.com/montieur/gis-comercial/blob/main/supabase/IMPLANTAR.md). Resumo das peças:
 
 | Peça | Onde | O que faz |
 |---|---|---|

@@ -15,7 +15,7 @@ const LIMITE_VERIFICAR_POR_IP_HORA = 40;// conferência é barata
 const OSM_VALIDADE_MIN = 24 * 60;       // a conferência do OSM vale 24 h
 const OSM_VALIDADE_ERRO_MIN = 30;       // se a última conferência falhou, tenta de novo em 30 min
 
-const GITHUB_REPO = "montieur/coniape-mapa-pe";
+const GITHUB_REPO = "montieur/gis-comercial";
 const GITHUB_WORKFLOW = "processar-fila.yml";
 
 type Db = ReturnType<typeof createClient>;
