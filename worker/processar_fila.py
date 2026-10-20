@@ -61,7 +61,8 @@ def reservar():
     return p if ok else None      # lista vazia = outra execução reservou primeiro
 
 
-TIPOS_ARQUIVO = {"shp": "application/zip", "kml": "application/vnd.google-earth.kml+xml", "kmz": "application/vnd.google-earth.kmz"}
+# o KML não é guardado (ocupa 3 a 4 vezes mais que o KMZ, com o mesmo conteúdo): o mapa o extrai do KMZ na hora do download
+TIPOS_ARQUIVO = {"shp": "application/zip", "kmz": "application/vnd.google-earth.kmz"}
 
 
 def subir(caminho, dados, content_type):
