@@ -35,7 +35,7 @@ PRINTS = [   # arquivo, URL, tamanho da janela (ou "celular": moldura de 390 x 8
 ]
 
 def edge(*args):
-    with tempfile.TemporaryDirectory() as perfil:   # perfil isolado: não mexe no Edge do usuário
+    with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as perfil:   # perfil isolado: não mexe no Edge do usuário
         subprocess.run([EDGE, "--headless=new", "--disable-gpu", "--hide-scrollbars", "--no-first-run",
                         "--force-device-scale-factor=1", "--blink-settings=preferredColorScheme=1",
                         f"--user-data-dir={perfil}", *args], check=True, timeout=180,
