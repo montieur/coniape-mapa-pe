@@ -120,8 +120,9 @@ function save(doc, name) { doc.save(name); toast('PDF gerado'); }
 
 async function gerarPdfMunicipio(m) {
   toast('Gerando PDF com mapa base…', 0);
+  const uf = m.uf || 'PE';
   const {jsPDF} = window.jspdf; const doc = new jsPDF({unit: 'mm', format: 'a4'});
-  pdfHeader(doc, `GIS Comercial · ${m.n} – PE`, `Código IBGE ${m.c} · Região imediata de ${m.rgi} · Região intermediária de ${m.rgint}`);
+  pdfHeader(doc, `GIS Comercial · ${m.n} – ${uf}`, `Código IBGE ${m.c}` + (m.rgi ? ` · Região imediata de ${m.rgi}` : '') + (m.rgint ? ` · Região intermediária de ${m.rgint}` : ''));
   const urbs = D.urb.filter(u => u.c === m.c);
   const vias = (D.vias[m.c] || []).map(([, , f]) => { const p = []; for (let i = 0; i < f.length; i += 2) p.push([f[i], f[i + 1]]); return p; });
   await drawMap(doc, {x: 14, y: 28, w: 182, h: 120}, [
@@ -142,7 +143,7 @@ async function gerarPdfMunicipio(m) {
       ...(m.rev ? [[`Vias – critério CONIAPE original (via inteira${m.rev.motivo ? ', extração incompleta' : ''})`, fmt(m.rev.orig) + ' km']] : []),
       ['Densidade de vias', fmt(m.dens) + ' km/km²'],
       ['Território – área oficial IBGE', fmt(m.aI, 3) + ' km²'],
-      ['Território – área planimétrica UTM 25S', fmt(m.aU, 3) + ' km²'],
+      [`Território – área planimétrica UTM ${m.zona ?? 25}S`, fmt(m.aU, 3) + ' km²'],
       ['Área urbana / território', fmt(m.perc) + ' %'],
       ['Área rural (setores)', m.rur ? fmt(m.rur) + ' km²' : '–'],
       ['Setores urbanos', m.set ?? '–'], ['Distritos / manchas', m.dist ?? '–'],
@@ -155,7 +156,7 @@ async function gerarPdfMunicipio(m) {
     head: [['Distrito / mancha urbana', 'Área (km²)', 'Vias (km)']],
     body: dist.map(d => [d.distrito, fmt(d.area_km2), fmt(d.vias_km)]),
   });
-  pdfFooter(doc); save(doc, `Relatorio_mapa_${slug(m.n)}_PE.pdf`);
+  pdfFooter(doc); save(doc, `Relatorio_mapa_${slug(m.n)}_${uf}.pdf`);
 }
 
 async function gerarPdfGeral() {
