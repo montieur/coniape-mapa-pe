@@ -139,17 +139,9 @@ Se o cartão mostrar **Preparar arquivos GIS**, clique: o servidor gera os arqui
 
 ### Baixar relatórios
 
-**Relatório de um município:** no detalhe, clique em **Baixar relatório** e escolha uma opção.
+**Relatório de um município:** no detalhe, clique em **Ver relatório**. O PDF é montado na hora pelo próprio mapa (mapa base, limite, áreas urbanas, vias, escala, indicadores atuais e tabela de manchas) e abre numa **pré-visualização** sobre o mapa. Lá você escolhe **Baixar PDF**, **Abrir em nova aba** ou **Fechar**. No celular, a pré-visualização abre direto numa nova aba.
 
-![Janela de escolha do relatório](docs/img/05_baixar_relatorio.png)
-*Escolha do relatório de Bezerros: o oficial avisa que usa o critério antigo de vias.*
-
-| Opção | O que é |
-|---|---|
-| **Relatório oficial CONIAPE** | PDF original do município, baixado do repositório. Só aparece para os 39 municípios do CONIAPE. **Atenção:** traz o km de vias pelo critério antigo. |
-| **Relatório do mapa** | PDF gerado na hora com mapa base, limite, áreas urbanas, vias, escala, indicadores atuais e tabela de manchas |
-
-**Visualizar antes de baixar:** o botão **Visualizar** abre o PDF numa janela sobre o mapa, com **Baixar PDF** e **Abrir em nova aba**. No celular, a visualização abre direto numa nova aba.
+Os relatórios oficiais antigos do CONIAPE, que usavam o critério antigo de vias, não são mais oferecidos no mapa. Uma cópia de segurança deles fica na pasta **Relatórios** do Google Drive.
 
 **Relatório de municípios (PDF único):** o botão do cabeçalho abre a lista dos municípios da base. Marque os que quiser (há busca por nome, filtro por estado, **Marcar os visíveis** e **Limpar**) e clique em **Gerar PDF** ou **Visualizar**. O município aberto no momento já vem marcado.
 
@@ -208,7 +200,7 @@ Dá para compartilhar um link que já abre o mapa num estado específico:
 | `…/gis-comercial/?mun=2604106&zoom=15` | Caruaru com zoom 15 |
 | `…/gis-comercial/?mun=2604106&mancha=Carapotós (4)` | Caruaru com zoom na mancha Carapotós (4) (nome como aparece na tabela) |
 | `…/gis-comercial/?ind=dens` | Mapa colorido por densidade de vias (`vias`, `urb`, `dens` ou `perc`) |
-| `…/gis-comercial/?mun=2601904&baixar` | Bezerros com a janela de relatório aberta |
+| `…/gis-comercial/?mun=2601904&baixar` | Bezerros com o relatório aberto na pré-visualização |
 | `…/gis-comercial/?selecao` | Janela do relatório de municípios aberta |
 | `…/gis-comercial/?manual` | Manual aberto |
 

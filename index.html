@@ -319,26 +319,13 @@ dialog.manual article{overflow:auto;flex:1;padding:22px 28px 40px}
         <button class="btn" id="btnZoom">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5M11 8v6M8 11h6"/></svg>Ver no mapa</button>
         <button class="btn primary" id="btnPdf">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0-4-4m4 4 4-4M5 21h14"/></svg>Baixar relatório</button>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0-4-4m4 4 4-4M5 21h14"/></svg>Ver relatório</button>
       </div>
     </div>
   </aside>
   <div id="map"></div>
 </main>
 
-<dialog id="dlg">
-  <h3 id="dlgTit">Baixar relatório</h3>
-  <p>Escolha qual relatório baixar.</p>
-  <label id="optOficial"><input type="radio" name="tipo" value="oficial" checked>
-    <span><b>Relatório oficial CONIAPE</b><small id="optOficialTxt"></small></span></label>
-  <label><input type="radio" name="tipo" value="gerado">
-    <span><b>Relatório do mapa</b><small>Gerado agora: indicadores, distritos e mapa do município.</small></span></label>
-  <div class="rowb">
-    <button class="btn" id="dlgCancel">Cancelar</button>
-    <button class="btn" id="dlgPrev">Visualizar</button>
-    <button class="btn primary" id="dlgOk">Baixar</button>
-  </div>
-</dialog>
 <dialog id="selDlg" class="sel" aria-labelledby="selTit">
   <h3 id="selTit">Relatório de municípios</h3>
   <p>Marque os municípios da base que entram no PDF único.</p>
@@ -702,7 +689,7 @@ function renderDetail(m) {
         <td>${fmt(d.area_km2)}</td><td>${fmt(d.vias_km)}<div class="bar"><i style="width:${(d.vias_km / maxV * 100).toFixed(1)}%"></i></div></td></tr>`).join('')}
     </tbody>${dist.length > 1 ? `<tfoot><tr><td>Total</td><td>${fmt(dist.reduce((s, d) => s + d.area_km2, 0))}</td><td>${fmt(dist.reduce((s, d) => s + d.vias_km, 0))}</td></tr></tfoot>` : ''}</table>` : ''}
     ${dist.length ? '<p class="note">Toque numa mancha para aproximar o mapa nela; toque de novo para voltar ao município.</p>' : ''}
-    <p class="note">Fonte: ${m.fonte}. ${m.pdf ? '' : 'Este município não tem relatório oficial; o PDF é gerado pelo mapa.'}</p>`;
+    <p class="note">Fonte: ${m.fonte}.</p>`;
   $('btnBack').onclick = closeDetail;
   marcarManchas();
 }
@@ -758,29 +745,11 @@ $('btnZoom').onclick = () => selected && flyTo(selected);
 $('btnPdf').onclick = () => selected && askDownload(byCode[selected]);
 document.addEventListener('keydown', e => { if (e.key === 'Escape' && selected && !document.querySelector('dialog[open]')) closeDetail(); });
 
-/* ===== Download ===== */
-const dlg = $('dlg');
-function askDownload(m) {
-  $('dlgTit').textContent = `Relatório · ${m.n}`;
-  const has = !!m.pdf, opt = $('optOficial');
-  opt.querySelector('input').disabled = !has; opt.style.display = has ? '' : 'none';   // sem relatório oficial, a opção nem aparece
-  $('optOficialTxt').textContent = !has ? ''
-    : m.rev ? `PDF original do município. Atenção: traz o km de vias pelo critério antigo do CONIAPE (${fmt(m.rev.orig)} km).`
-    : 'PDF original do município, baixado do repositório.';
-  dlg.querySelector(`input[value="${has ? 'oficial' : 'gerado'}"]`).checked = true;
-  dlg.showModal();
-  $('dlgOk').onclick = async () => {
-    const tipo = dlg.querySelector('input[name=tipo]:checked').value; dlg.close();
-    tipo === 'oficial' ? await baixarOficial(m) : await gerarPdfMunicipio(m).catch(pdfErro);
-  };
-  $('dlgPrev').onclick = async () => {
-    const tipo = dlg.querySelector('input[name=tipo]:checked').value; dlg.close();
-    if (tipo === 'oficial') { window.open((PDF_BASE_URL || 'relatorios/') + encodeURIComponent(m.pdf), '_blank'); return; }
-    window.__previa = true;
-    await gerarPdfMunicipio(m).catch(e => { window.__previa = false; pdfErro(e); });
-  };
+/* ===== Relatório do município: gerado pelo mapa, abre na pré-visualização e lá se escolhe baixar ===== */
+async function askDownload(m) {
+  window.__previa = true;
+  await gerarPdfMunicipio(m).catch(e => { window.__previa = false; pdfErro(e); });
 }
-$('dlgCancel').onclick = () => dlg.close();
 
 /* ===== Pré-visualização do relatório gerado pelo mapa (ver antes de baixar) ===== */
 const prevDlg = $('prevDlg');
@@ -801,21 +770,6 @@ $('prevAbrir').onclick = () => prevUrl && window.open(prevUrl, '_blank');
 $('prevFechar').onclick = fecharPrevia;
 prevDlg.addEventListener('cancel', e => { e.preventDefault(); fecharPrevia(); });
 
-async function baixarOficial(m) {
-  const url = (PDF_BASE_URL || 'relatorios/') + encodeURIComponent(m.pdf);
-  toast('Baixando relatório…', 0);
-  try {
-    const r = await fetch(url);
-    if (!r.ok) throw new Error('HTTP ' + r.status);
-    const blob = await r.blob();
-    const a = Object.assign(document.createElement('a'), {href: URL.createObjectURL(blob), download: m.pdf});
-    document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 4000);
-    toast('Relatório baixado');
-  } catch (e) {
-    // file:// bloqueia fetch local: abre o arquivo direto
-    toast('Abrindo o PDF…'); window.open(url, '_blank');
-  }
-}
 </script>
 <script src="relatorio.js?v=916cafcf"></script>
 <script src="config.js?v=1887e0c8"></script>
