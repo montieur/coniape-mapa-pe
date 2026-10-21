@@ -80,9 +80,9 @@ def subir_arquivos(cd, pacote):
     """Arquivos GIS do município: no Drive (se configurado) ou no Storage (arquivos/<código>/…). Devolve o registro do catálogo."""
     exp, m = pacote["_exportacao"], pacote["mun"]
     registro = {"camadas": exp["camadas"], "gerado_em": agora().isoformat(),
-                "tamanhos": {k: Path(exp[k]).stat().st_size for k in ("shp", "kml", "kmz")}}
+                "tamanhos": {k: Path(exp[k]).stat().st_size for k in ("shp", "kmz")}}
     if DRIVE:
-        registro["drive"] = DRIVE.guardar_municipio(m["uf"], m["n"], cd, {k: Path(exp[k]) for k in ("shp", "kml", "kmz")})
+        registro["drive"] = DRIVE.guardar_municipio(m["uf"], m["n"], cd, {k: Path(exp[k]) for k in ("shp", "kmz")})
         log(f"  enviado ao Drive: {m['n']} ({sum(registro['tamanhos'].values()) / 1e6:.1f} MB)")
         return registro
     for chave, ct in TIPOS_ARQUIVO.items():
@@ -90,7 +90,6 @@ def subir_arquivos(cd, pacote):
         subir(f"arquivos/{cd}/{f.name}", f.read_bytes(), ct)
         registro[chave] = f"arquivos/{cd}/{f.name}"
         log(f"  enviado {f.name} ({f.stat().st_size / 1e6:.1f} MB)")
-    registro["tamanhos"].pop("kml", None)
     return registro
 
 
@@ -136,7 +135,7 @@ def atualizar_planilha():
     """Planilha geral no Drive: uma linha por município da base."""
     linhas = rest("GET", "gc_municipios?select=cd_mun,nome,uf,origem,resumo,arquivos,gerado_em&order=uf.asc,nome.asc") or []
     cab = ["Município", "UF", "Código IBGE", "Área do município (km²)", "Área urbana (km²)", "Área rural (km²)", "Vias urbanas (km)",
-           "Vias rurais (km)", "Densidade de vias urbanas (km/km²)", "Gerado em", "Origem", "Pasta no Drive", "Shapefile", "KMZ", "KML", "Relatório PDF"]
+           "Vias rurais (km)", "Densidade de vias urbanas (km/km²)", "Gerado em", "Origem", "Pasta no Drive", "Shapefile", "KMZ", "Relatório PDF"]
     saida = [cab]
     for m in linhas:
         r, a = m.get("resumo") or {}, m.get("arquivos") or {}
@@ -145,7 +144,7 @@ def atualizar_planilha():
         saida.append([m["nome"], m["uf"], m["cd_mun"], r.get("aI"), r.get("urb"), (cam.get("area_rural") or {}).get("km2"), r.get("vias"),
                       (cam.get("vias_rurais") or {}).get("km"), r.get("dens"), (m.get("gerado_em") or "")[:10], m.get("origem"),
                       f'=HYPERLINK("{url_pasta(d["pasta"])}","abrir")' if d.get("pasta") else "",
-                      link("baixar", d.get("shp")), link("baixar", d.get("kmz")), link("baixar", d.get("kml")), link("baixar", d.get("pdf"))])
+                      link("baixar", d.get("shp")), link("baixar", d.get("kmz")), link("baixar", d.get("pdf"))])
     DRIVE.atualizar_planilha(saida)
     log(f"planilha atualizada ({len(linhas)} municípios)")
 

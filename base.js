@@ -206,7 +206,7 @@
     let corpo, acoes = '', cls = 'neutro';
     if (m.arq?.estado === 'preparando') { cls = 'carregando'; corpo = '<i class="spin"></i><span>Preparando os arquivos GIS. Leva alguns minutos; pode continuar usando o mapa.</span>'; }
     else if (!a) {
-      corpo = `<span>Limite, área urbana, área rural e vias (urbanas e rurais) em Shapefile, KML e KMZ.${m.arq?.estado === 'erro' ? ` <b>Não deu certo:</b> ${esc(m.arq.mensagem)}` : ''}</span>`;
+      corpo = `<span>Limite, área urbana, área rural e vias (urbanas e rurais) em Shapefile e KMZ.${m.arq?.estado === 'erro' ? ` <b>Não deu certo:</b> ${esc(m.arq.mensagem)}` : ''}</span>`;
       acoes = `<button class="btn primary" data-arq="preparar">Preparar arquivos GIS</button>`;
     } else {
       const d = a.drive;                                   // novos: Google Drive · antigos: Storage do Supabase
@@ -217,32 +217,13 @@
       corpo = `<span>${Object.entries(a.camadas || {}).map(([k, v]) => `${NOMES_CAMADAS[k] || k}: ${v.km2 != null ? fmt(v.km2) + ' km²' : fmt(v.km) + ' km'}`).join(' · ')}</span>`;
       acoes = `<a class="btn primary" href="${url('shp')}" download>Shapefile (.zip)${t.shp ? ` · ${tamanho(t.shp)}` : ''}</a>`
         + `<a class="btn" href="${url('kmz')}" download>KMZ${t.kmz ? ` · ${tamanho(t.kmz)}` : ''}</a>`
-        + (d ? `<a class="btn" href="${url('kml')}" download>KML${t.kml ? ` · ${tamanho(t.kml)}` : ''}</a>${d.pdf ? `<a class="btn" href="${url('pdf')}" download>Relatório PDF</a>` : ''}<a class="btn" href="https://drive.google.com/drive/folders/${d.pasta}" target="_blank" rel="noopener">Abrir no Drive</a>`
-          : `<button class="btn" data-arq="kml" data-kmz="${url('kmz')}" data-nome="${esc(a.kmz.split('/').pop().replace(/\.kmz$/, '.kml'))}">KML</button>`);
+        + (d ? `${d.pdf ? `<a class="btn" href="${url('pdf')}" download>Relatório PDF</a>` : ''}<a class="btn" href="https://drive.google.com/drive/folders/${d.pasta}" target="_blank" rel="noopener">Abrir no Drive</a>` : '');
     }
     return `<div class="fontes arquivos ${cls}" data-cd="${m.c}">
-      <div class="fh"><b>Baixar dados GIS</b><small>SHP em UTM · KML/KMZ em WGS 84</small></div>
+      <div class="fh"><b>Baixar dados GIS</b><small>SHP em UTM · KMZ em WGS 84</small></div>
       <div class="fv">${corpo}</div>
       ${acoes ? `<div class="fa">${acoes}</div>` : ''}
       ${a ? '<div class="fl">Vias © colaboradores do OpenStreetMap (ODbL); limites e áreas: IBGE.</div>' : ''}</div>`;
-  }
-  /* o KML é o doc.kml de dentro do KMZ: extraído aqui, sem guardar um segundo arquivo (3 a 4 vezes maior) no servidor */
-  let jszip = null;
-  const carregarJsZip = () => jszip ??= new Promise((ok, falha) => {
-    const sc = Object.assign(document.createElement('script'), {src: 'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js', onload: ok, onerror: () => falha(new Error('JSZip'))});
-    document.head.appendChild(sc);
-  });
-  async function baixarKml(b) {
-    const rotulo = b.textContent; b.disabled = true; b.textContent = 'Preparando KML…';
-    try {
-      await carregarJsZip();
-      const r = await fetch(b.dataset.kmz); if (!r.ok) throw new Error('HTTP ' + r.status);
-      const z = await JSZip.loadAsync(await r.arrayBuffer());
-      const kml = await z.file('doc.kml').async('blob');
-      const a = Object.assign(document.createElement('a'), {href: URL.createObjectURL(new Blob([kml], {type: 'application/vnd.google-earth.kml+xml'})), download: b.dataset.nome});
-      document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 4000);
-    } catch (e) { toast('Não consegui preparar o KML: ' + e.message + '. Use o KMZ, que abre no Google Earth.', 6000); }
-    b.disabled = false; b.textContent = rotulo;
   }
   async function prepararArquivos(cd) {
     const m = byCode[cd]; m.arq = {estado: 'preparando'}; redesenhar(cd);
@@ -282,7 +263,6 @@
   };
   el('detail').addEventListener('click', async e => {
     const ba = e.target.closest('[data-arq]');
-    if (ba?.dataset.arq === 'kml') { baixarKml(ba); return; }
     if (ba) { prepararArquivos(ba.closest('.arquivos').dataset.cd); return; }
     const b = e.target.closest('[data-fonte]'); if (!b) return;
     const cd = b.closest('.fontes').dataset.cd;

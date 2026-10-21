@@ -1,0 +1,36 @@
+name: Manutenção do Drive
+
+# Tarefas pontuais no Google Drive do GIS Comercial. Roda só quando chamado à mão (Actions > Manutenção do Drive > Run workflow).
+on:
+  workflow_dispatch:
+    inputs:
+      tarefa:
+        description: "Tarefa"
+        type: choice
+        options: [apagar-kml]
+        default: apagar-kml
+
+permissions:
+  contents: read
+
+concurrency:
+  group: gc-fila
+  cancel-in-progress: false
+
+jobs:
+  manutencao:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+      GOOGLE_OAUTH: ${{ secrets.GOOGLE_OAUTH }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install google-auth requests
+      - if: inputs.tarefa == 'apagar-kml'
+        working-directory: worker
+        run: python -u limpar_kml.py

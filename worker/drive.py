@@ -95,13 +95,30 @@ class Drive:
                          headers={"Content-Type": "multipart/related; boundary=gc"})["id"]
 
     def guardar_municipio(self, uf, nome, cd, arquivos):
-        """arquivos: {'shp': Path, 'kml': Path, 'kmz': Path}. Devolve {'pasta': id, 'shp': id, 'kml': id, 'kmz': id}."""
+        """arquivos: {'shp': Path, 'kmz': Path}. Devolve {'pasta': id, 'shp': id, 'kmz': id}.
+        O KML não é mais guardado (o KMZ tem o mesmo conteúdo, compactado): um KML antigo na pasta é apagado."""
         pai = self.pasta(f"{nome} ({cd})", self.pasta(uf, self.raiz()))
-        mimes = {"shp": "application/zip", "kml": "application/vnd.google-earth.kml+xml", "kmz": "application/vnd.google-earth.kmz"}
+        mimes = {"shp": "application/zip", "kmz": "application/vnd.google-earth.kmz"}
         out = {"pasta": pai}
         for k, mime in mimes.items():
             out[k] = self.enviar(pai, arquivos[k], mime)
+        self.apagar_kml(pai)
         return out
+
+    def apagar_kml(self, pai=None):
+        """Manda para a lixeira do Drive os KML que o app criou (numa pasta ou em todo o Drive do app); ficam 30 dias recuperáveis."""
+        q = ["trashed=false", "name contains '.kml'"] + ([f"'{pai}' in parents"] if pai else [])
+        n, token = 0, None
+        while True:
+            r = self._req("GET", f"{API}/files", params={"q": " and ".join(q), "fields": "nextPageToken,files(id,name)", "pageSize": 200,
+                                                          **({"pageToken": token} if token else {})})
+            for f in r.get("files", []):
+                if f["name"].lower().endswith(".kml"):
+                    self._req("PATCH", f"{API}/files/{f['id']}", params={"fields": "id"}, json={"trashed": True})
+                    n += 1
+            token = r.get("nextPageToken")
+            if not token:
+                return n
 
     def atualizar_planilha(self, linhas):
         """Reescreve a planilha geral (cabeçalho + uma linha por município)."""

@@ -128,7 +128,6 @@ No detalhe de qualquer município da base aparece o cartão **Baixar dados GIS**
 |---|---|---|
 | Shapefile (.zip) | QGIS, ArcGIS, CAD | SIRGAS 2000 / UTM do fuso do município |
 | KMZ | Google Earth, celular | WGS 84 |
-| KML | Google Earth, outros programas | WGS 84 |
 | Relatório PDF | Leitura, envio ao cliente | — |
 
 Cada arquivo traz cinco camadas: **limite do município**, **área urbana** (manchas IBGE 2022), **área rural** (limite menos a área urbana), **vias urbanas** e **vias rurais** (só as transitáveis por veículo, do OpenStreetMap). O zip do Shapefile inclui um `LEIA-ME.txt` com fontes e licença.
