@@ -141,11 +141,13 @@ Se o cartão mostrar **Preparar arquivos GIS**, clique: o servidor gera os arqui
 
 ### Baixar relatórios
 
-**Relatório de um município:** no detalhe, clique em **Ver relatório**. O PDF é montado na hora pelo próprio mapa (mapa base, limite, áreas urbanas, vias, escala, indicadores atuais e tabela de manchas) e abre numa **pré-visualização** sobre o mapa. Lá você escolhe **Baixar PDF**, **Abrir em nova aba** ou **Fechar**. No celular, a pré-visualização abre direto numa nova aba.
+**Relatório de um município:** no detalhe, clique em **Ver relatório**. O PDF é montado na hora pelo próprio mapa (mapa base, limite, áreas urbanas, vias, escala, indicadores atuais e tabela de manchas) e abre numa **pré-visualização** sobre o mapa. Lá você escolhe **Baixar PDF**, **Abrir em nova aba** ou **Fechar**.
+
+**Mapa base do relatório:** no topo da pré-visualização há a escolha **Satélite**, **Cinza claro** ou **OpenStreetMap**. O relatório começa com o mesmo mapa base que está no mapa; ao trocar, o PDF é refeito na hora. No satélite, o limite do município sai em branco; nos mapas claros, em azul-escuro. A escolha vale também para os próximos relatórios. No celular, a pré-visualização abre direto numa nova aba.
 
 Os relatórios oficiais antigos do CONIAPE, que usavam o critério antigo de vias, não são mais oferecidos no mapa. Uma cópia de segurança deles fica na pasta **Relatórios** do Google Drive.
 
-**Relatório de municípios (PDF único):** o botão do cabeçalho abre a lista dos municípios da base. Marque os que quiser (há busca por nome, filtro por estado, **Marcar os visíveis** e **Limpar**) e clique em **Gerar PDF** ou **Visualizar**. O município aberto no momento já vem marcado.
+**Relatório de municípios (PDF único):** o botão do cabeçalho abre a lista dos municípios da base. Marque os que quiser (há busca por nome, filtro por estado, **Marcar os visíveis** e **Limpar**) escolha o **Mapa base do relatório** e clique em **Gerar PDF** ou **Visualizar**. O município aberto no momento já vem marcado.
 
 O PDF traz:
 

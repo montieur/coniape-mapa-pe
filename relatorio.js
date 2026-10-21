@@ -13,12 +13,22 @@ async function prepararLogo() {
     im.src = 'icones/logo-mark.svg';
   });
 }
-/* mapa base dos relatórios: cinza claro (não compete com as camadas) + rótulos por cima */
-const PDF_TILES = [
-  'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}',
-  'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Reference/MapServer/tile/{z}/{y}/{x}',
-];
-const PDF_TILES_ATTR = 'Mapa base: Esri, HERE, Garmin, © colaboradores OpenStreetMap';
+/* mapas base dos relatórios (o usuário escolhe; todos liberam CORS para o canvas). Camadas de cima = rótulos. */
+const PDF_BASES = {
+  'Satélite': {max: 18, attr: 'Imagem: Esri, Maxar, Earthstar Geographics · rótulos: Esri', escuro: true, tiles: [
+    'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+    'https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}']},
+  'Cinza claro': {max: 16, attr: 'Mapa base: Esri, HERE, Garmin, © colaboradores OpenStreetMap', tiles: [
+    'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}',
+    'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Reference/MapServer/tile/{z}/{y}/{x}']},
+  'OpenStreetMap': {max: 18, attr: '© colaboradores OpenStreetMap', tiles: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png']},
+};
+let pdfBase = 'Satélite';
+window.definirBasePdf = nome => { if (PDF_BASES[nome]) pdfBase = nome; };
+const baseAtualPdf = () => PDF_BASES[pdfBase];
+/* cores das linhas conforme o fundo: claras sobre o satélite, escuras sobre os mapas claros */
+const corLimite = () => baseAtualPdf().escuro ? [255, 255, 255] : [15, 70, 90];
+const corVizinhos = () => baseAtualPdf().escuro ? [225, 230, 235] : [150, 158, 168];
 
 function pdfHeader(doc, title, sub) {
   doc.setFillColor(...NAVY); doc.rect(0, 0, 210, 22, 'F');
@@ -52,14 +62,14 @@ const loadImg = url => new Promise(res => {
 
 /* monta o mapa base da janela [x0,y0,x1,y1] (unidades de mundo 0..1) num canvas com ~targetPx de largura */
 async function basemapImage(x0, y0, x1, y1, targetPx) {
-  const z = Math.max(3, Math.min(16, Math.round(Math.log2(targetPx / ((x1 - x0) * 256)))));
+  const z = Math.max(3, Math.min(baseAtualPdf().max, Math.round(Math.log2(targetPx / ((x1 - x0) * 256)))));
   const n = 2 ** z, W = Math.round((x1 - x0) * 256 * n), H = Math.round((y1 - y0) * 256 * n);
   const cv = Object.assign(document.createElement('canvas'), {width: W, height: H});
   const ctx = cv.getContext('2d');
   ctx.fillStyle = '#e9ecef'; ctx.fillRect(0, 0, W, H);
   const tx0 = Math.floor(x0 * n), tx1 = Math.floor(x1 * n), ty0 = Math.floor(y0 * n), ty1 = Math.floor(y1 * n);
   let ok = 0;
-  for (const tpl of PDF_TILES) {
+  for (const tpl of baseAtualPdf().tiles) {
     const jobs = [];
     for (let tx = tx0; tx <= tx1; tx++) for (let ty = ty0; ty <= ty1; ty++)
       jobs.push(loadImg(tpl.replace('{z}', z).replace('{x}', tx).replace('{y}', ty)).then(im => {
@@ -130,7 +140,7 @@ async function drawMap(doc, box, layers, {pad = .06, px = 1600} = {}) {
   scaleBar(doc, box, bw, latC);
   doc.setDrawColor(190); doc.setLineWidth(.25); doc.rect(box.x, box.y, box.w, box.h);
   doc.setFontSize(6); doc.setTextColor(110);
-  doc.text(img ? PDF_TILES_ATTR : 'Mapa base indisponível (sem conexão)', box.x + box.w - 1.5, box.y + box.h - 1.5, {align: 'right'});
+  doc.text(img ? baseAtualPdf().attr : 'Mapa base indisponível (sem conexão)', box.x + box.w - 1.5, box.y + box.h - 1.5, {align: 'right'});
 }
 
 function save(doc, name) {
@@ -145,13 +155,13 @@ async function paginaMunicipio(doc, m) {
   const urbs = D.urb.filter(u => u.c === m.c);
   const vias = (D.vias[m.c] || []).map(([, , f]) => { const p = []; for (let i = 0; i < f.length; i += 2) p.push([f[i], f[i + 1]]); return p; });
   await drawMap(doc, {x: 14, y: 28, w: 182, h: 120}, [
-    {geoms: D.mun.filter(x => x.c !== m.c).map(x => x.g), stroke: [150, 158, 168], lw: .15},   // vizinhos
+    {geoms: D.mun.filter(x => x.c !== m.c).map(x => x.g), stroke: corVizinhos(), lw: .15},   // vizinhos
     {geoms: urbs.map(u => u.g), stroke: [222, 105, 30], fill: [232, 118, 44], fillOp: .32, lw: .25},
     {lines: vias, stroke: [192, 57, 43], lw: .12},
-    {geoms: [m.g], stroke: [15, 70, 90], lw: .7, fit: true},
+    {geoms: [m.g], stroke: corLimite(), lw: .7, fit: true},
   ], {px: 1100});   // ~150 dpi: rótulos do mapa base legíveis no A4
   doc.setFontSize(7.5); doc.setTextColor(90);
-  doc.text('Limite municipal (azul escuro) · municípios vizinhos (cinza) · áreas urbanas (laranja) · vias transitáveis (vermelho)', 14, 152);
+  doc.text(`Limite municipal (${baseAtualPdf().escuro ? 'branco' : 'azul escuro'}) · municípios vizinhos (cinza) · áreas urbanas (laranja) · vias transitáveis (vermelho)`, 14, 152);
   doc.autoTable({
     startY: 157, theme: 'grid', headStyles: {fillColor: ACCENT}, margin: {bottom: 16}, styles: {fontSize: 9},
     columnStyles: {1: {halign: 'right'}},
@@ -202,7 +212,7 @@ async function gerarPdfSelecao(lista, {paginas = true} = {}) {
   pdfHeader(doc, 'GIS Comercial · Relatório de municípios',
     `${ms.length} município${ms.length > 1 ? 's' : ''} · ${ufs.join(', ')} · área urbana e vias transitáveis dentro das manchas urbanas`);
   await drawMap(doc, {x: 14, y: 28, w: 182, h: 80}, [
-    {geoms: D.mun.filter(x => !marcados.has(x.c)).map(x => x.g), stroke: [150, 158, 168], lw: .1},
+    {geoms: D.mun.filter(x => !marcados.has(x.c)).map(x => x.g), stroke: corVizinhos(), lw: .1},
     {geoms: ms.map(m => m.g), stroke: [255, 255, 255], fill: [2, 156, 254], fillOp: .55, lw: .15, fit: true},
   ], {pad: .06, px: 1300});
   doc.setFontSize(7.5); doc.setTextColor(90);

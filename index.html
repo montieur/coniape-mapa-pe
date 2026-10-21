@@ -200,6 +200,9 @@ dialog.sel .sellista label{margin:0;border:0;border-radius:0;border-bottom:1px s
 dialog.sel .sellista label:last-child{border-bottom:0}
 dialog.sel .sellista small{display:inline;margin-left:6px}
 dialog.sel .sellista p{padding:14px;margin:0;text-align:center}
+dialog .pbase,dialog .selbase{display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--muted)}
+dialog .selbase{margin:4px 0 2px}
+dialog .pbase select,dialog .selbase select{border:1px solid var(--line);background:var(--sunk);color:var(--ink);border-radius:8px;padding:6px 8px;font:inherit;font-size:12.5px}
 dialog.previa{max-width:none;width:min(980px,calc(100% - 24px));height:min(92vh,1100px);padding:0;display:none;flex-direction:column;overflow:hidden}
 dialog.previa[open]{display:flex}
 dialog.previa .mhead{display:flex;gap:8px;align-items:center;padding:10px 14px;border-bottom:1px solid var(--line)}
@@ -342,6 +345,7 @@ dialog.manual article{overflow:auto;flex:1;padding:22px 28px 40px}
   <div id="selLista" class="sellista"></div>
   <label class="selopt"><input type="checkbox" id="selPaginas" checked>
     <span><b>Uma página por município</b><small>Mapa com áreas urbanas e vias, indicadores e distritos. Desmarque para só o resumo e a tabela comparativa.</small></span></label>
+  <div class="selbase"><span>Mapa base do relatório</span><select id="selBase" aria-label="Mapa base do relatório"><option>Satélite</option><option>Cinza claro</option><option>OpenStreetMap</option></select></div>
   <div class="rowb">
     <button class="btn" id="selCancel" type="button">Cancelar</button>
     <button class="btn" id="selPrev" type="button">Visualizar</button>
@@ -352,6 +356,7 @@ dialog.manual article{overflow:auto;flex:1;padding:22px 28px 40px}
   <div class="mhead">
     <b id="prevTit">Pré-visualização do relatório</b>
     <span class="grow"></span>
+    <span class="pbase"><span>Mapa base</span><select id="prevBase" aria-label="Mapa base do relatório"><option>Satélite</option><option>Cinza claro</option><option>OpenStreetMap</option></select></span>
     <button class="btn primary" id="prevBaixar">Baixar PDF</button>
     <button class="btn" id="prevAbrir">Abrir em nova aba</button>
     <button class="btn" id="prevFechar" aria-label="Fechar">Fechar</button>
@@ -761,10 +766,17 @@ $('btnPdf').onclick = () => selected && askDownload(byCode[selected]);
 document.addEventListener('keydown', e => { if (e.key === 'Escape' && selected && !document.querySelector('dialog[open]')) closeDetail(); });
 
 /* ===== Relatório do município: gerado pelo mapa, abre na pré-visualização e lá se escolhe baixar ===== */
-async function askDownload(m) {
-  window.__previa = true;
-  await gerarPdfMunicipio(m).catch(e => { window.__previa = false; pdfErro(e); });
+/* mapa base do relatório: começa igual ao do mapa; a escolha do usuário vale para os próximos relatórios */
+let basePdfEscolhida = null;
+const basePdf = () => basePdfEscolhida || Object.keys(bases).find(k => map.hasLayer(bases[k])) || 'Satélite';
+let refazerRelatorio = null;   // gera de novo o último relatório (troca do mapa base na pré-visualização)
+async function gerarRelatorio(gerador, previa = true) {
+  definirBasePdf(basePdf());
+  refazerRelatorio = gerador;
+  window.__previa = previa;
+  await gerador().catch(e => { window.__previa = false; pdfErro(e); });
 }
+async function askDownload(m) { await gerarRelatorio(() => gerarPdfMunicipio(m)); }
 
 /* ===== Pré-visualização do relatório gerado pelo mapa (ver antes de baixar) ===== */
 const prevDlg = $('prevDlg');
@@ -773,20 +785,29 @@ const toque = matchMedia('(pointer: coarse)');
 function fecharPrevia() { prevDlg.close(); $('prevFrame').src = 'about:blank'; if (prevUrl) { URL.revokeObjectURL(prevUrl); prevUrl = null; } prevDoc = null; }
 window.mostrarPrevia = (doc, nome) => {
   prevDoc = {doc, nome};
+  if (prevUrl) URL.revokeObjectURL(prevUrl);
   prevUrl = URL.createObjectURL(doc.output('blob'));
+  $('prevBase').value = basePdf();
   $('prevTit').textContent = 'Pré-visualização · ' + nome;
   $('prevFrame').hidden = toque.matches; $('prevToque').hidden = !toque.matches;
   $('prevFrame').src = toque.matches ? 'about:blank' : prevUrl;
-  prevDlg.showModal();
+  if (!prevDlg.open) prevDlg.showModal();
   document.getElementById('toast').classList.remove('on');
 };
 $('prevBaixar').onclick = () => { if (prevDoc) { prevDoc.doc.save(prevDoc.nome); toast('PDF baixado'); } };
 $('prevAbrir').onclick = () => prevUrl && window.open(prevUrl, '_blank');
 $('prevFechar').onclick = fecharPrevia;
+$('prevBase').onchange = async e => {   // troca o mapa base e refaz o relatório na própria pré-visualização
+  basePdfEscolhida = e.target.value;
+  if (!refazerRelatorio) return;
+  $('prevBase').disabled = true;
+  await gerarRelatorio(refazerRelatorio);
+  $('prevBase').disabled = false;
+};
 prevDlg.addEventListener('cancel', e => { e.preventDefault(); fecharPrevia(); });
 
 </script>
-<script src="relatorio.js?v=916cafcf"></script>
+<script src="relatorio.js?v=7a2e63d9"></script>
 <script src="config.js?v=1887e0c8"></script>
 <script src="base.js?v=cd1665ca"></script>
 <script>
@@ -810,6 +831,7 @@ function abrirSelecao() {
   $('selUf').innerHTML = `<option value="">Todos os estados</option>` + ufs.map(u => `<option>${u}</option>`).join('');
   $('selUf').hidden = ufs.length < 2;
   if (!selecionados.size && selected && byCode[selected]?.co) selecionados.add(selected);   // começa com o município aberto
+  $('selBase').value = basePdf();
   selDesenhar(); selDlg.showModal();
 }
 $('selBusca').oninput = $('selUf').onchange = selDesenhar;
@@ -820,9 +842,10 @@ $('selCancel').onclick = () => selDlg.close();
 async function gerarSelecao(previa) {
   const lista = CO.filter(m => selecionados.has(m.c));
   if (!lista.length) { toast('Marque ao menos um município.'); return; }
-  selDlg.close(); window.__previa = !!previa;
-  try { await gerarPdfSelecao(lista, {paginas: $('selPaginas').checked}); }
-  catch (e) { window.__previa = false; pdfErro(e); }
+  selDlg.close();
+  basePdfEscolhida = $('selBase').value;
+  const paginas = $('selPaginas').checked;
+  await gerarRelatorio(() => gerarPdfSelecao(lista, {paginas}), !!previa);
 }
 $('selOk').onclick = () => gerarSelecao(false);
 $('selPrev').onclick = () => gerarSelecao(true);
