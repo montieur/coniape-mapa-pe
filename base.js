@@ -94,6 +94,7 @@
       fontes: r.fontes, gerado_em: r.gerado_em, verificado_em: r.verificado_em, verificacao: r.verificacao, arquivos: r.arquivos || null, detalhe: false};
   }
   function rotulo(m) {
+    window.tirarRotuloCinza?.(m.c);
     labels.addLayer(L.tooltip({permanent: true, direction: 'center', className: 'mlabel', interactive: false})
       .setLatLng(layerByCode[m.c].getCenter()).setContent(m.n));
   }
@@ -135,6 +136,7 @@
   }
   const carregarDetalhe = cd => byCode[cd].detalhe ? Promise.resolve(byCode[cd])
     : (emCurso[cd] ??= api.pacote(cd, byCode[cd].gerado_em).then(p => { aplicarPacote(cd, p); return byCode[cd]; }).finally(() => delete emCurso[cd]));
+  window.garantirDetalhe = cd => carregarDetalhe(cd);   // o relatório de vários municípios usa para baixar vias e manchas
 
   /* ================= abrir município ================= */
   window.abrirMunicipio = async (cd, zoom = true) => {

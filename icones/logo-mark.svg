@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="35 27 455 418" role="img" aria-label="tecgeo">
+<defs>
+<linearGradient id="gA" x1="0" x2="1"><stop offset="0" stop-color="#90ec9e"/><stop offset="1" stop-color="#029cfe"/></linearGradient>
+<linearGradient id="gB" x1="0" x2="1"><stop offset="0" stop-color="#029cfe"/><stop offset="1" stop-color="#90ec9e"/></linearGradient>
+</defs>
+<path fill="url(#gA)" d="M37 158 263 27v113L131 216z"/>
+<path fill="url(#gA)" d="M263 27 490 158 395 216 263 140z"/>
+<path fill="url(#gB)" d="M37 200 131 256 37 313z"/>
+<path fill="url(#gB)" d="M490 200v113l-95-57z"/>
+<path fill="#029cfe" d="M37 313 131 256 208 300 263 445zM490 313 395 256 317 300 263 445zM263 198 311 232 263 265 216 232z"/>
+</svg>

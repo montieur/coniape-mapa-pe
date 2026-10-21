@@ -1,5 +1,18 @@
 /* Relatórios PDF gerados no navegador (jsPDF). Usa os globais D, CO, byCode, fmt, slug e toast do index.html. */
-const ACCENT = [15, 110, 140];
+const ACCENT = [5, 119, 189];                    // azul tecgeo (#0577bd) para cabeçalhos de tabela
+const NAVY = [16, 54, 90];                       // azul-marinho do logotipo
+const MARCA = [[2, 156, 254], [40, 176, 229], [108, 216, 182], [144, 236, 158]];   // paleta tecgeo
+let LOGO = null;                                 // logotipo em PNG, preparado uma vez a partir do SVG
+async function prepararLogo() {
+  if (LOGO !== null) return;
+  LOGO = await new Promise(res => {
+    const im = new Image();
+    im.onload = () => { const cv = Object.assign(document.createElement('canvas'), {width: 364, height: 334});
+      cv.getContext('2d').drawImage(im, 0, 0, 364, 334); try { res(cv.toDataURL('image/png')); } catch (e) { res(''); } };
+    im.onerror = () => res('');
+    im.src = 'icones/logo-mark.svg';
+  });
+}
 /* mapa base dos relatórios: cinza claro (não compete com as camadas) + rótulos por cima */
 const PDF_TILES = [
   'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}',
@@ -8,17 +21,21 @@ const PDF_TILES = [
 const PDF_TILES_ATTR = 'Mapa base: Esri, HERE, Garmin, © colaboradores OpenStreetMap';
 
 function pdfHeader(doc, title, sub) {
-  doc.setFillColor(...ACCENT); doc.rect(0, 0, 210, 22, 'F');
-  doc.setTextColor(255); doc.setFont('helvetica', 'bold'); doc.setFontSize(14); doc.text(title, 14, 10);
-  doc.setFont('helvetica', 'normal'); doc.setFontSize(9); doc.text(sub, 14, 16.5);
-  doc.setTextColor(30);
+  doc.setFillColor(...NAVY); doc.rect(0, 0, 210, 22, 'F');
+  MARCA.forEach((c, i) => { doc.setFillColor(...c); doc.rect(i * 52.5, 22, 52.5, 1.2, 'F'); });   // faixa com as cores da marca
+  const x = LOGO ? 25 : 14;
+  if (LOGO) doc.addImage(LOGO, 'PNG', 12, 5, 10.9, 10);
+  doc.setTextColor(255); doc.setFont('helvetica', 'bold'); doc.setFontSize(14); doc.text(title, x, 10);
+  doc.setFont('helvetica', 'normal'); doc.setFontSize(9); doc.text(doc.splitTextToSize(sub, 196 - x - 22)[0], x, 16.5);
+  doc.setFont('helvetica', 'bold'); doc.setFontSize(12); doc.text('tecgeo', 196, 12, {align: 'right'});
+  doc.setFont('helvetica', 'normal'); doc.setTextColor(30);
 }
 function pdfFooter(doc) {
   const n = doc.getNumberOfPages();
   for (let i = 1; i <= n; i++) {
     doc.setPage(i); doc.setFontSize(7.5); doc.setTextColor(120);
-    doc.text(`GIS Comercial · Área urbana: setores IBGE 2022 (CD_SIT 1-3) · Vias: OpenStreetMap, transitáveis por veículo, recortadas nas manchas`, 14, 285.5);
-    doc.text(`Malha municipal IBGE 2024 · Projeção SIRGAS 2000 / UTM 25S`, 14, 289);
+    doc.text(`GIS Comercial · tecgeo · Área urbana: setores IBGE 2022 (CD_SIT 1-3) · Vias: OpenStreetMap, transitáveis por veículo, recortadas nas manchas`, 14, 285.5);
+    doc.text(`Malha municipal IBGE 2024 · Medições em SIRGAS 2000 / UTM do fuso de cada município`, 14, 289);
     doc.text(`Gerado em ${new Date().toLocaleString('pt-BR')} · pág. ${i}/${n}`, 196, 289, {align: 'right'});
   }
 }
@@ -121,10 +138,9 @@ function save(doc, name) {
   doc.save(name); toast('PDF gerado');
 }
 
-async function gerarPdfMunicipio(m) {
-  toast('Gerando PDF com mapa base…', 0);
+/* uma página de município (cabeçalho, mapa, indicadores e distritos) no documento aberto */
+async function paginaMunicipio(doc, m) {
   const uf = m.uf || 'PE';
-  const {jsPDF} = window.jspdf; const doc = new jsPDF({unit: 'mm', format: 'a4'});
   pdfHeader(doc, `GIS Comercial · ${m.n} – ${uf}`, `Código IBGE ${m.c}` + (m.rgi ? ` · Região imediata de ${m.rgi}` : '') + (m.rgint ? ` · Região intermediária de ${m.rgint}` : ''));
   const urbs = D.urb.filter(u => u.c === m.c);
   const vias = (D.vias[m.c] || []).map(([, , f]) => { const p = []; for (let i = 0; i < f.length; i += 2) p.push([f[i], f[i + 1]]); return p; });
@@ -159,29 +175,71 @@ async function gerarPdfMunicipio(m) {
     head: [['Distrito / mancha urbana', 'Área (km²)', 'Vias (km)']],
     body: dist.map(d => [d.distrito, fmt(d.area_km2), fmt(d.vias_km)]),
   });
+}
+
+async function gerarPdfMunicipio(m) {
+  toast('Gerando PDF com mapa base…', 0);
+  await prepararLogo();
+  const uf = m.uf || 'PE';
+  const {jsPDF} = window.jspdf; const doc = new jsPDF({unit: 'mm', format: 'a4'});
+  await paginaMunicipio(doc, m);
   pdfFooter(doc); save(doc, `Relatorio_mapa_${slug(m.n)}_${uf}.pdf`);
 }
 
-async function gerarPdfGeral() {
-  toast('Gerando PDF com mapa base…', 0);
+/* PDF único com os municípios escolhidos: resumo (mapa, totais e tabela comparativa) + uma página por município (opcional) */
+async function gerarPdfSelecao(lista, {paginas = true} = {}) {
+  await prepararLogo();
   const {jsPDF} = window.jspdf; const doc = new jsPDF({unit: 'mm', format: 'a4'});
-  pdfHeader(doc, 'GIS Comercial · Relatório geral · Pernambuco', `${CO.length} municípios · área urbana e vias transitáveis dentro das manchas urbanas`);
-  // Fernando de Noronha (2605459) fica no oceano e esmagaria o enquadramento do continente
-  const continente = D.mun.filter(m => !m.co && m.c !== '2605459');
-  await drawMap(doc, {x: 14, y: 28, w: 182, h: 66}, [
-    {geoms: continente.map(m => m.g), stroke: [150, 158, 168], lw: .1, fit: true},
-    {geoms: CO.map(m => m.g), stroke: [255, 255, 255], fill: [33, 127, 158], fillOp: .55, lw: .15, fit: true},
-  ], {pad: .03, px: 1300});
-  doc.setFontSize(7.5); doc.setTextColor(90); doc.text('Municípios do CONIAPE em destaque (azul) sobre a malha municipal de PE (IBGE 2024)', 14, 98);
-  const tU = CO.reduce((s, m) => s + m.urb, 0), tV = CO.reduce((s, m) => s + m.vias, 0);
-  const rows = [...CO].sort((a, b) => a.n.localeCompare(b.n));
+  const ms = [...lista].sort((a, b) => (a.uf || 'PE').localeCompare(b.uf || 'PE') || a.n.localeCompare(b.n));
+  const ufs = [...new Set(ms.map(m => m.uf || 'PE'))];
+  const marcados = new Set(ms.map(m => m.c));
+  if (paginas && window.garantirDetalhe) {                    // vias e manchas dos municípios que ainda não foram abertos
+    for (let i = 0; i < ms.length; i++) {
+      if (!ms[i].detalhe) { toast(`Carregando dados ${i + 1}/${ms.length}…`, 0); await window.garantirDetalhe(ms[i].c); }
+    }
+  }
+  toast('Gerando PDF com mapa base…', 0);
+  pdfHeader(doc, 'GIS Comercial · Relatório de municípios',
+    `${ms.length} município${ms.length > 1 ? 's' : ''} · ${ufs.join(', ')} · área urbana e vias transitáveis dentro das manchas urbanas`);
+  await drawMap(doc, {x: 14, y: 28, w: 182, h: 80}, [
+    {geoms: D.mun.filter(x => !marcados.has(x.c)).map(x => x.g), stroke: [150, 158, 168], lw: .1},
+    {geoms: ms.map(m => m.g), stroke: [255, 255, 255], fill: [2, 156, 254], fillOp: .55, lw: .15, fit: true},
+  ], {pad: .06, px: 1300});
+  doc.setFontSize(7.5); doc.setTextColor(90);
+  doc.text('Municípios selecionados em destaque (azul) sobre a malha municipal do IBGE 2024', 14, 112);
+
+  const tT = ms.reduce((s, m) => s + (m.aI || 0), 0), tU = ms.reduce((s, m) => s + (m.urb || 0), 0), tV = ms.reduce((s, m) => s + (m.vias || 0), 0);
+  const kpis = [['Municípios', String(ms.length)], ['Área urbana', fmt(tU) + ' km²'], ['Vias transitáveis', fmt(tV) + ' km'], ['Densidade de vias', fmt(tU ? tV / tU : 0) + ' km/km²']];
+  const kw = (182 - 3 * 4) / 4;
+  kpis.forEach(([rot, val], i) => {
+    const x = 14 + i * (kw + 4);
+    doc.setFillColor(225, 243, 254); doc.roundedRect(x, 116, kw, 17, 2, 2, 'F');
+    doc.setTextColor(90); doc.setFontSize(7.5); doc.text(rot, x + 3, 121.5);
+    doc.setTextColor(...NAVY); doc.setFont('helvetica', 'bold'); doc.setFontSize(12); doc.text(val, x + 3, 129);
+    doc.setFont('helvetica', 'normal');
+  });
+  doc.setTextColor(30);
+
+  const comOrig = ms.some(m => m.rev);
+  const col = {halign: 'right'};
   doc.autoTable({
-    startY: 102, theme: 'striped', headStyles: {fillColor: ACCENT}, margin: {bottom: 16}, styles: {fontSize: 8, cellPadding: 1.4},
-    columnStyles: {1: {halign: 'right'}, 2: {halign: 'right'}, 3: {halign: 'right'}, 4: {halign: 'right'}, 5: {halign: 'right'}, 6: {halign: 'right'}},
-    head: [['Município', 'Território IBGE (km²)', 'Área urbana (km²)', 'Vias transitáveis (km)', 'Vias CONIAPE orig. (km)', 'km vias/km²', '% urbano']],
-    body: rows.map(m => [m.n, fmt(m.aI, 1), fmt(m.urb), fmt(m.vias), m.rev ? fmt(m.rev.orig) : '–', fmt(m.dens), fmt(m.perc)]),
-    foot: [['TOTAL', fmt(CO.reduce((s, m) => s + m.aI, 0), 1), fmt(tU), fmt(tV), fmt(CO.reduce((s, m) => s + (m.rev ? m.rev.orig : m.vias), 0)), fmt(tV / tU), '']],
+    startY: 138, theme: 'striped', headStyles: {fillColor: ACCENT}, margin: {bottom: 16}, styles: {fontSize: 8, cellPadding: 1.4},
+    columnStyles: comOrig ? {2: col, 3: col, 4: col, 5: col, 6: col, 7: col} : {2: col, 3: col, 4: col, 5: col, 6: col},
+    head: [['Município', 'UF', 'Território IBGE (km²)', 'Área urbana (km²)', 'Vias transitáveis (km)', ...(comOrig ? ['Vias CONIAPE orig. (km)'] : []), 'km vias/km²', '% urbano']],
+    body: ms.map(m => [m.n, m.uf || 'PE', fmt(m.aI, 1), fmt(m.urb), fmt(m.vias), ...(comOrig ? [m.rev ? fmt(m.rev.orig) : '–'] : []), fmt(m.dens), fmt(m.perc)]),
+    foot: [['TOTAL', '', fmt(tT, 1), fmt(tU), fmt(tV), ...(comOrig ? [fmt(ms.reduce((s, m) => s + (m.rev ? m.rev.orig : m.vias), 0))] : []), fmt(tU ? tV / tU : 0), fmt(tT ? tU / tT * 100 : 0)]],
     footStyles: {fillColor: [230, 236, 240], textColor: 20, fontStyle: 'bold', halign: 'right'},
   });
-  pdfFooter(doc); save(doc, 'Relatorio_geral_GIS_Comercial_PE.pdf');
+  const marca = (titulo, pagina) => { try { doc.outline.add(null, titulo, {pageNumber: pagina}); } catch (e) { /* marcador é só conveniência */ } };
+  marca('Resumo', 1);
+  if (paginas) {
+    for (let i = 0; i < ms.length; i++) {
+      toast(`Montando página ${i + 1}/${ms.length}: ${ms[i].n}…`, 0);
+      doc.addPage();
+      marca(`${ms[i].n} – ${ms[i].uf || 'PE'}`, doc.getNumberOfPages());
+      await paginaMunicipio(doc, ms[i]);
+    }
+  }
+  const nome = ufs.length === 1 ? `${ufs[0]}_` : '';
+  pdfFooter(doc); save(doc, `Relatorio_municipios_GIS_Comercial_${nome}${ms.length}_municipios.pdf`);
 }
