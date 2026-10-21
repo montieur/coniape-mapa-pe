@@ -424,12 +424,13 @@ function abrirMunicipio(cd, zoom = true) { select(cd, zoom); }
 function abrirPesquisa() {}   // idem: tela de "gerar dados" para município que ainda não está na base
 
 /* ===== Mapa ===== */
+// satélite: a imagem da Esri tem detalhe até o zoom 18 (no 19 vem "sem imagem"); acima disso o mapa amplia a última imagem (até 21)
 // no celular, zoom só em níveis inteiros: zoom fracionário deixa emendas brancas entre os tiles
 const map = L.map('map', {preferCanvas: true, zoomSnap: matchMedia('(max-width: 820px)').matches ? 1 : .5}).setView([-8.3, -36], 8);
 const bases = {
-  'Cinza claro': L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}', {attribution: '© Esri', maxNativeZoom: 16, maxZoom: 19}),
-  'OpenStreetMap': L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {attribution: '© OpenStreetMap', maxZoom: 19}),
-  'Satélite': L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {attribution: '© Esri', maxZoom: 19}),
+  'Cinza claro': L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}', {attribution: '© Esri', maxNativeZoom: 16, maxZoom: 21}),
+  'OpenStreetMap': L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {attribution: '© OpenStreetMap', maxNativeZoom: 19, maxZoom: 21}),
+  'Satélite': L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {attribution: '© Esri', maxNativeZoom: 18, maxZoom: 21}),
 };
 bases['Satélite'].addTo(map);
 /* rótulos claros sobre a imagem de satélite, escuros sobre os mapas claros */
@@ -460,7 +461,7 @@ const munLayer = L.geoJSON({type: 'FeatureCollection', features: D.mun.map(m => 
     const m = byCode[f.properties.c];
     l.bindTooltip(() => m.co
       ? `<div class="tip"><b>${m.n}</b><br>${M[metric].label}: <b>${fmt(m[metric], M[metric].d)} ${M[metric].unit}</b><br><span>Clique para ver detalhes</span></div>`
-      : `<div class="tip"><b>${m.n}</b><br><span>Sem dados · clique para gerar · ${fmt(m.aI, 1)} km²</span></div>`, {sticky: true, direction: 'top', offset: [0, -6]});
+      : `<div class="tip"><b>${m.n}</b><br><span>Sem dados · clique para gerar${m.aI ? ` · ${fmt(m.aI, 1)} km²` : ''}</span></div>`, {sticky: true, direction: 'top', offset: [0, -6]});
     l.on('click', () => m.co ? abrirMunicipio(m.c, true) : abrirPesquisa(m.c));
     // sempre registrado: um município sem dados pode entrar na base depois (m.co passa a true)
     l.on('mouseover', () => { if (!m.co) return; hovered = m.c; l.setStyle(styleMun(f)); l.bringToFront(); if (selected) layerByCode[selected].bringToFront(); });
@@ -477,6 +478,13 @@ const labels = L.layerGroup(CO.map(m => rotuloMun(m, 'mlabel')));
 const rotCinza = {};
 D.mun.filter(m => !m.co).forEach(m => rotCinza[m.c] = rotuloMun(m, 'mlabel off'));
 const labelsCinza = L.layerGroup(Object.values(rotCinza));
+window.adicionarMunCinza = m => {   // malha de um estado novo: município em cinza, com nome, à espera de ser pesquisado
+  D.mun.push(m); byCode[m.c] = m;
+  munLayer.addData({type: 'Feature', properties: {c: m.c}, geometry: m.g});
+  const l = layerByCode[m.c] = munLayer.getLayers().at(-1);
+  l.bringToBack();
+  rotCinza[m.c] = rotuloMun(m, 'mlabel off'); labelsCinza.addLayer(rotCinza[m.c]);
+};
 window.tirarRotuloCinza = cd => { if (rotCinza[cd]) { labelsCinza.removeLayer(rotCinza[cd]); delete rotCinza[cd]; } };   // município que entrou na base
 let labelsOn = true;   // o usuário pode desligar no controle de camadas
 let syncing = false;
@@ -811,7 +819,7 @@ async function baixarOficial(m) {
 </script>
 <script src="relatorio.js?v=916cafcf"></script>
 <script src="config.js?v=1887e0c8"></script>
-<script src="base.js?v=e3c2d928"></script>
+<script src="base.js?v=5e8037c5"></script>
 <script>
 const pdfErro = e => { console.error(e); toast('Não foi possível gerar o PDF: ' + e.message, 5000); };
 /* ===== Relatório de municípios selecionados (PDF único) ===== */

@@ -98,6 +98,26 @@
     labels.addLayer(L.tooltip({permanent: true, direction: 'center', className: 'mlabel', interactive: false})
       .setLatLng(layerByCode[m.c].getCenter()).setContent(m.n));
   }
+  /* malha municipal de cada estado que tem município na base: os outros municípios do estado aparecem em cinza,
+     com nome, prontos para serem pesquisados (PE já vem no site) */
+  const ufsComMalha = new Set(['PE']);
+  async function carregarMalhaUf(uf) {
+    if (!uf || ufsComMalha.has(uf)) return;
+    ufsComMalha.add(uf);
+    try {
+      const [lista, r] = await Promise.all([carregarLista(),
+        fetch(`https://servicodados.ibge.gov.br/api/v3/malhas/estados/${uf}?formato=application/vnd.geo+json&qualidade=intermediaria&intrarregiao=municipio`)]);
+      if (!r.ok) throw new Error('IBGE ' + r.status);
+      const nomes = Object.fromEntries(lista.map(x => [x.cd, x.nome]));
+      (await r.json()).features.forEach(f => {
+        const cd = String(f.properties.codarea);
+        if (!byCode[cd]) window.adicionarMunCinza({c: cd, n: nomes[cd] || cd, uf, co: false, g: f.geometry});
+      });
+      munLayer.setStyle(styleMun);
+      if (selected) layerByCode[selected]?.bringToFront();
+    } catch (e) { ufsComMalha.delete(uf); console.warn('Malha do estado indisponível:', uf, e.message); }
+  }
+
   function incluirNaBase(m, lote) {
     let alvo = byCode[m.c];
     if (!alvo) {                                            // fora do mapa de PE: entra com o contorno do catálogo
@@ -114,7 +134,7 @@
     if (!CO.includes(alvo)) CO.push(alvo);
     munBounds[alvo.c] = layerByCode[alvo.c].getBounds();
     rotulo(alvo);
-    if (!lote) reconstruir();
+    if (!lote) { reconstruir(); carregarMalhaUf(alvo.uf); }
     return alvo;
   }
   function reconstruir() { calcularRanks(); atualizarKpis(); setMetric(metric); }
@@ -456,6 +476,7 @@
       const linhas = await api.catalogo();
       linhas.forEach(r => incluirNaBase(montar(r), true));
       reconstruir();
+      new Set(linhas.map(r => r.uf)).forEach(carregarMalhaUf);
       const cd = PARAMS.get('mun');
       if (cd && !selected && byCode[cd]?.co) window.abrirMunicipio(cd, !PARAMS.get('zoom'));
       else if (selected) { consultarFontes(selected); renderDetail(byCode[selected]); }
