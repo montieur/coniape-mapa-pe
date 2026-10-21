@@ -700,8 +700,8 @@ const dlg = $('dlg');
 function askDownload(m) {
   $('dlgTit').textContent = `Relatório · ${m.n}`;
   const has = !!m.pdf, opt = $('optOficial');
-  opt.querySelector('input').disabled = !has; opt.style.opacity = has ? 1 : .5;
-  $('optOficialTxt').textContent = !has ? 'Não há relatório oficial para este município.'
+  opt.querySelector('input').disabled = !has; opt.style.display = has ? '' : 'none';   // sem relatório oficial, a opção nem aparece
+  $('optOficialTxt').textContent = !has ? ''
     : m.rev ? `PDF original do município. Atenção: traz o km de vias pelo critério antigo do CONIAPE (${fmt(m.rev.orig)} km).`
     : 'PDF original do município, baixado do repositório.';
   dlg.querySelector(`input[value="${has ? 'oficial' : 'gerado'}"]`).checked = true;
