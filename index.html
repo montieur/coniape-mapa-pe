@@ -180,7 +180,14 @@ dialog p{margin:0 0 14px;color:var(--muted);font-size:13px}
 dialog label{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border:1px solid var(--line);border-radius:10px;margin-bottom:8px;cursor:pointer}
 dialog label:has(input:checked){border-color:var(--accent);background:var(--accent-soft)}
 dialog label small{display:block;color:var(--muted);margin-top:1px}
-dialog .rowb{display:flex;justify-content:flex-end;gap:8px;margin-top:14px}
+dialog .rowb{display:flex;justify-content:flex-end;gap:8px;margin-top:14px;flex-wrap:wrap}
+dialog.previa{max-width:none;width:min(980px,calc(100% - 24px));height:min(92vh,1100px);padding:0;display:none;flex-direction:column;overflow:hidden}
+dialog.previa[open]{display:flex}
+dialog.previa .mhead{display:flex;gap:8px;align-items:center;padding:10px 14px;border-bottom:1px solid var(--line)}
+dialog.previa .grow{flex:1}
+dialog.previa iframe{flex:1;border:0;width:100%;background:#fff}
+dialog.previa p{padding:18px;margin:0}
+@media(max-width:720px){dialog.previa{width:100%;height:100%;max-height:none;border-radius:0}dialog.previa .mhead{flex-wrap:wrap}}
 
 /* ---------- janela do manual ---------- */
 dialog.manual{max-width:none;width:min(980px,calc(100% - 24px));height:min(90vh,1000px);padding:0;display:none;flex-direction:column;overflow:hidden}
@@ -310,8 +317,20 @@ dialog.manual article{overflow:auto;flex:1;padding:22px 28px 40px}
     <span><b>Relatório do mapa</b><small>Gerado agora: indicadores, distritos e mapa do município.</small></span></label>
   <div class="rowb">
     <button class="btn" id="dlgCancel">Cancelar</button>
+    <button class="btn" id="dlgPrev">Visualizar</button>
     <button class="btn primary" id="dlgOk">Baixar</button>
   </div>
+</dialog>
+<dialog id="prevDlg" class="previa" aria-labelledby="prevTit">
+  <div class="mhead">
+    <b id="prevTit">Pré-visualização do relatório</b>
+    <span class="grow"></span>
+    <button class="btn primary" id="prevBaixar">Baixar PDF</button>
+    <button class="btn" id="prevAbrir">Abrir em nova aba</button>
+    <button class="btn" id="prevFechar" aria-label="Fechar">Fechar</button>
+  </div>
+  <iframe id="prevFrame" title="Pré-visualização do relatório em PDF"></iframe>
+  <p id="prevToque" hidden>Neste aparelho a pré-visualização abre numa nova aba. Toque em <b>Abrir em nova aba</b>.</p>
 </dialog>
 <dialog id="manualDlg" class="manual" aria-labelledby="manualTit">
   <div class="mhead">
@@ -691,8 +710,33 @@ function askDownload(m) {
     const tipo = dlg.querySelector('input[name=tipo]:checked').value; dlg.close();
     tipo === 'oficial' ? await baixarOficial(m) : await gerarPdfMunicipio(m).catch(pdfErro);
   };
+  $('dlgPrev').onclick = async () => {
+    const tipo = dlg.querySelector('input[name=tipo]:checked').value; dlg.close();
+    if (tipo === 'oficial') { window.open((PDF_BASE_URL || 'relatorios/') + encodeURIComponent(m.pdf), '_blank'); return; }
+    window.__previa = true;
+    await gerarPdfMunicipio(m).catch(e => { window.__previa = false; pdfErro(e); });
+  };
 }
 $('dlgCancel').onclick = () => dlg.close();
+
+/* ===== Pré-visualização do relatório gerado pelo mapa (ver antes de baixar) ===== */
+const prevDlg = $('prevDlg');
+let prevDoc = null, prevUrl = null;
+const toque = matchMedia('(pointer: coarse)');
+function fecharPrevia() { prevDlg.close(); $('prevFrame').src = 'about:blank'; if (prevUrl) { URL.revokeObjectURL(prevUrl); prevUrl = null; } prevDoc = null; }
+window.mostrarPrevia = (doc, nome) => {
+  prevDoc = {doc, nome};
+  prevUrl = URL.createObjectURL(doc.output('blob'));
+  $('prevTit').textContent = 'Pré-visualização · ' + nome;
+  $('prevFrame').hidden = toque.matches; $('prevToque').hidden = !toque.matches;
+  $('prevFrame').src = toque.matches ? 'about:blank' : prevUrl;
+  prevDlg.showModal();
+  document.getElementById('toast').classList.remove('on');
+};
+$('prevBaixar').onclick = () => { if (prevDoc) { prevDoc.doc.save(prevDoc.nome); toast('PDF baixado'); } };
+$('prevAbrir').onclick = () => prevUrl && window.open(prevUrl, '_blank');
+$('prevFechar').onclick = fecharPrevia;
+prevDlg.addEventListener('cancel', e => { e.preventDefault(); fecharPrevia(); });
 
 async function baixarOficial(m) {
   const url = (PDF_BASE_URL || 'relatorios/') + encodeURIComponent(m.pdf);
@@ -710,7 +754,7 @@ async function baixarOficial(m) {
   }
 }
 </script>
-<script src="relatorio.js?v=82a02a96"></script>
+<script src="relatorio.js?v=38cb05d6"></script>
 <script src="config.js?v=1887e0c8"></script>
 <script src="base.js?v=d9dbccab"></script>
 <script>

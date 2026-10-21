@@ -116,7 +116,10 @@ async function drawMap(doc, box, layers, {pad = .06, px = 1600} = {}) {
   doc.text(img ? PDF_TILES_ATTR : 'Mapa base indisponível (sem conexão)', box.x + box.w - 1.5, box.y + box.h - 1.5, {align: 'right'});
 }
 
-function save(doc, name) { doc.save(name); toast('PDF gerado'); }
+function save(doc, name) {
+  if (window.__previa) { window.__previa = false; return window.mostrarPrevia(doc, name); }   // ver antes de baixar
+  doc.save(name); toast('PDF gerado');
+}
 
 async function gerarPdfMunicipio(m) {
   toast('Gerando PDF com mapa base…', 0);
