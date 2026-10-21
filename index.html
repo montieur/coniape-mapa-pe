@@ -523,7 +523,15 @@ map.on('moveend zoomend overlayadd', refreshVias);
 map.on('overlayremove', e => { if (e.layer === labels && !syncing) { labelsOn = false; syncLabels(); } });
 map.on('overlayadd', e => { if (e.layer === labels && !syncing) { labelsOn = true; syncLabels(); } });
 
-L.control.layers(bases, {'Nomes dos municípios': labels, 'Áreas urbanas': urbLayer, 'Vias transitáveis': viasGroup}, {position: 'topright'}).addTo(map);
+/* limites dos estados (IBGE, malha simplificada): só linhas, sem clique, por cima dos municípios e abaixo das vias */
+map.createPane('estados');
+map.getPane('estados').style.zIndex = 420;
+map.getPane('estados').style.pointerEvents = 'none';
+const estadosLayer = L.geoJSON(null, {pane: 'estados', interactive: false,
+  style: () => ({color: map.getContainer().classList.contains('sat') ? '#ffffff' : '#4a5560', weight: 1.4, opacity: .75, fill: false})}).addTo(map);
+fetch('dados/estados_br.json').then(r => r.json()).then(g => estadosLayer.addData(g)).catch(() => {});
+map.on('baselayerchange', () => estadosLayer.setStyle(estadosLayer.options.style));
+L.control.layers(bases, {'Limites dos estados': estadosLayer, 'Nomes dos municípios': labels, 'Áreas urbanas': urbLayer, 'Vias transitáveis': viasGroup}, {position: 'topright'}).addTo(map);
 L.control.scale({imperial: false, position: 'bottomleft'}).addTo(map);
 syncLabels();   // nomes já no zoom inicial
 

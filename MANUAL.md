@@ -113,6 +113,7 @@ Para voltar à lista, use **Todos os municípios** ou a tecla **Esc**. O botão 
 No botão de camadas (canto superior direito do mapa):
 
 - **Mapa base**: Satélite (padrão), Cinza claro ou OpenStreetMap. Sobre o satélite os nomes ficam em branco; nos mapas claros, em escuro.
+- **Limites dos estados**: linhas das divisas estaduais (IBGE), em branco sobre o satélite
 - **Nomes dos municípios**: aparecem desde a abertura do mapa (só os que estão na tela, para o mapa ficar leve)
 - **Áreas urbanas**: manchas urbanas do IBGE (laranja)
 - **Vias transitáveis**: aparecem com zoom ≥ 11, ou sempre para o município selecionado
