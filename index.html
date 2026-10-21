@@ -439,7 +439,7 @@ function styleMun(f) {
     weight: isSel ? 3 : isHov ? 2.2 : .9,
     fillColor: colorFor(m[metric]),
     // de perto o preenchimento clareia, para aparecerem o mapa base, as manchas e as ruas
-    fillOpacity: (selected && !isSel ? .5 : .82) * (map.getZoom() >= 13 ? .2 : map.getZoom() >= 11 ? .45 : 1),
+    fillOpacity: (selected && !isSel ? .5 : .82) * (map.getZoom() >= 15 ? .05 : map.getZoom() >= 13 ? .2 : map.getZoom() >= 11 ? .45 : 1),
   };
 }
 const munLayer = L.geoJSON({type: 'FeatureCollection', features: D.mun.map(m => ({type: 'Feature', properties: {c: m.c}, geometry: m.g}))}, {
