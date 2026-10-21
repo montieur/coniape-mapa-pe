@@ -4,7 +4,7 @@
 - **Manual em PDF:** [Manual_GIS_Comercial.pdf](https://montieur.github.io/gis-comercial/dados/Manual_GIS_Comercial.pdf)
 - **Repositório:** https://github.com/montieur/gis-comercial
 
-O **GIS Comercial** mostra, para os **39 municípios de Pernambuco atendidos pelo CONIAPE**, a área urbana e a extensão de **vias transitáveis por veículo dentro das manchas urbanas**, que é a base de quantitativos do mapeamento 360°. Os outros 146 municípios de PE aparecem em cinza só para referência.
+O **GIS Comercial**, da **tecgeo**, mostra para qualquer município do Brasil a área urbana, a área rural e a extensão de **vias transitáveis por veículo dentro das manchas urbanas**, que é a base de quantitativos do mapeamento 360°. A base começou com os **39 municípios de Pernambuco do CONIAPE** e cresce a cada município pesquisado: quem pesquisa um município novo gera os dados na hora, e eles ficam guardados para todos. Os municípios de PE ainda sem dados aparecem em cinza.
 
 - [Parte 1: Usar o mapa](#parte-1-usar-o-mapa)
 - [Parte 2: Entender os números](#parte-2-entender-os-números)
@@ -22,11 +22,11 @@ O **GIS Comercial** mostra, para os **39 municípios de Pernambuco atendidos pel
 
 | Área | O que tem |
 |---|---|
-| **Cabeçalho** | Título e os botões **Manual** (esta janela), **Dados** (downloads) e **Relatório geral** (PDF com os 39 municípios) |
-| **Resumo** | Totais do CONIAPE em PE: municípios, km² urbanos e km de vias transitáveis |
+| **Cabeçalho** | Marca tecgeo, título e os botões **Manual** (esta janela), **Dados** (downloads) e **Relatório de municípios** (PDF único com os municípios que você escolher) |
+| **Resumo** | Totais da base: municípios, km² urbanos e km de vias transitáveis |
 | **Busca e indicador** | Campo para achar um município e escolha da variável que colore o mapa |
 | **Lista** | Municípios ranqueados pelo indicador escolhido, com barra comparativa |
-| **Mapa** | Municípios coloridos, áreas urbanas (laranja) e vias (vermelho) |
+| **Mapa** | Imagem de satélite com os municípios coloridos e nomeados, áreas urbanas (laranja) e vias (vermelho) |
 
 No smartphone a tela muda ([veja abaixo](#no-smartphone)).
 
@@ -112,8 +112,8 @@ Para voltar à lista, use **Todos os municípios** ou a tecla **Esc**. O botão 
 
 No botão de camadas (canto superior direito do mapa):
 
-- **Mapa base**: Cinza claro (padrão), OpenStreetMap ou Satélite
-- **Nomes dos municípios**: aparecem a partir do zoom 9
+- **Mapa base**: Satélite (padrão), Cinza claro ou OpenStreetMap. Sobre o satélite os nomes ficam em branco; nos mapas claros, em escuro.
+- **Nomes dos municípios**: os da base aparecem desde a abertura do mapa; os sem dados (cinza), a partir de uma aproximação maior (zoom 10)
 - **Áreas urbanas**: manchas urbanas do IBGE (laranja)
 - **Vias transitáveis**: aparecem com zoom ≥ 11, ou sempre para o município selecionado
 
@@ -122,15 +122,18 @@ No botão de camadas (canto superior direito do mapa):
 
 ### Baixar dados GIS (Shapefile, KML e KMZ)
 
-No detalhe de qualquer município da base aparece o cartão **Baixar dados GIS**, com três arquivos prontos para QGIS, ArcGIS e Google Earth:
+No detalhe de qualquer município da base aparece o cartão **Baixar dados GIS**, com os arquivos prontos para QGIS, ArcGIS e Google Earth. Eles ficam guardados no **Google Drive** da tecgeo, numa pasta por estado e por município:
 
 | Arquivo | Uso | Sistema de coordenadas |
 |---|---|---|
 | Shapefile (.zip) | QGIS, ArcGIS, CAD | SIRGAS 2000 / UTM do fuso do município |
 | KMZ | Google Earth, celular | WGS 84 |
 | KML | Google Earth, outros programas | WGS 84 |
+| Relatório PDF | Leitura, envio ao cliente | — |
 
 Cada arquivo traz cinco camadas: **limite do município**, **área urbana** (manchas IBGE 2022), **área rural** (limite menos a área urbana), **vias urbanas** e **vias rurais** (só as transitáveis por veículo, do OpenStreetMap). O zip do Shapefile inclui um `LEIA-ME.txt` com fontes e licença.
+
+O botão **Abrir no Drive** leva à pasta do município, com todos os arquivos juntos. O **Relatório PDF** é o mesmo relatório do mapa (abaixo), gerado pela automação e trocado pelo novo sempre que os dados do município mudam. Na mesma pasta raiz do Drive fica a planilha **GIS Comercial - Municípios**, com uma linha por município (áreas, km de vias, data de geração e links para os arquivos), atualizada a cada geração.
 
 Se o cartão mostrar **Preparar arquivos GIS**, clique: o servidor gera os arquivos em alguns minutos e o cartão se atualiza sozinho. Notas: o limite é a união dos setores censitários do IBGE 2022; as vias do OpenStreetMap exigem a atribuição "© colaboradores do OpenStreetMap" (licença ODbL).
 
@@ -143,10 +146,21 @@ Se o cartão mostrar **Preparar arquivos GIS**, clique: o servidor gera os arqui
 
 | Opção | O que é |
 |---|---|
-| **Relatório oficial CONIAPE** | PDF original do município, baixado do repositório. **Atenção:** traz o km de vias pelo critério antigo do CONIAPE. |
+| **Relatório oficial CONIAPE** | PDF original do município, baixado do repositório. Só aparece para os 39 municípios do CONIAPE. **Atenção:** traz o km de vias pelo critério antigo. |
 | **Relatório do mapa** | PDF gerado na hora com mapa base, limite, áreas urbanas, vias, escala, indicadores atuais e tabela de manchas |
 
-**Relatório geral:** o botão no cabeçalho gera um PDF com o mapa de PE e a tabela dos 39 municípios: território, área urbana, vias transitáveis, valor original do CONIAPE, densidade e % urbano, com totais.
+**Visualizar antes de baixar:** o botão **Visualizar** abre o PDF numa janela sobre o mapa, com **Baixar PDF** e **Abrir em nova aba**. No celular, a visualização abre direto numa nova aba.
+
+**Relatório de municípios (PDF único):** o botão do cabeçalho abre a lista dos municípios da base. Marque os que quiser (há busca por nome, filtro por estado, **Marcar os visíveis** e **Limpar**) e clique em **Gerar PDF** ou **Visualizar**. O município aberto no momento já vem marcado.
+
+O PDF traz:
+
+| Parte | Conteúdo |
+|---|---|
+| **Resumo** | Mapa com os municípios escolhidos em destaque; totais de municípios, área urbana, vias transitáveis e densidade; tabela comparativa (território, área urbana, vias, densidade e % urbano) com linha de total |
+| **Uma página por município** | O mesmo conteúdo do relatório do mapa. Desmarque **Uma página por município** para gerar só o resumo |
+
+O PDF já vem com marcadores (o índice lateral do leitor de PDF) para pular direto a cada município. Com muitos municípios e páginas individuais, a geração demora mais e o arquivo fica maior, porque cada página baixa o seu mapa base.
 
 Os PDFs são gerados no próprio navegador e precisam de internet para baixar o mapa base. Sem conexão, o PDF sai com fundo liso e um aviso.
 
@@ -164,7 +178,7 @@ No celular, o mapa ocupa a tela toda e as informações ficam num **painel que d
 - Ao **tocar na busca**, o painel abre em tela cheia para o teclado não cobrir a lista.
 - Ao **escolher um município**, o painel vai para o meio: o município aparece enquadrado em cima e o detalhe embaixo.
 - A legenda começa recolhida; toque no título dela para abrir.
-- No cabeçalho, os botões mostram só os ícones: manual, dados e relatório geral.
+- No cabeçalho, os botões mostram só os ícones: manual, dados e relatório de municípios.
 
 <img src="docs/img/07_celular_lista.png" width="260" alt="Celular: mapa e lista"> <img src="docs/img/08_celular_detalhe.png" width="260" alt="Celular: detalhe de Bezerros">
 
@@ -195,6 +209,7 @@ Dá para compartilhar um link que já abre o mapa num estado específico:
 | `…/gis-comercial/?mun=2604106&mancha=Carapotós (4)` | Caruaru com zoom na mancha Carapotós (4) (nome como aparece na tabela) |
 | `…/gis-comercial/?ind=dens` | Mapa colorido por densidade de vias (`vias`, `urb`, `dens` ou `perc`) |
 | `…/gis-comercial/?mun=2601904&baixar` | Bezerros com a janela de relatório aberta |
+| `…/gis-comercial/?selecao` | Janela do relatório de municípios aberta |
 | `…/gis-comercial/?manual` | Manual aberto |
 
 ---
@@ -326,8 +341,11 @@ A busca por qualquer município usa um servidor (Supabase) e uma automação (Gi
 | Função `gc-solicitar` | `supabase/functions/` | Valida o pedido, limita abuso, confere as fontes de um município existente e enfileira |
 | Verificação das fontes | `supabase/functions/_shared/verificar.ts` | IBGE (data do arquivo) e OSM (vias alteradas desde a extração) |
 | Gerador | `worker/gerar_municipio.py` | Gera um município: setores do IBGE, vias do OSM, recorte e medição |
-| Processador da fila | `worker/processar_fila.py` | Lê os pedidos, gera, grava no Storage e marca como pronto ou erro |
-| Automação | `.github/workflows/processar-fila.yml` | Roda o processador a cada 5 minutos, ou na hora com o disparo opcional |
+| Processador da fila | `worker/processar_fila.py` | Lê os pedidos, gera, grava o resumo no Storage, os arquivos GIS no Drive, atualiza a planilha e marca como pronto ou erro |
+| Google Drive | `worker/drive.py` | Pasta "GIS Comercial" (uma pasta por estado e por município) e planilha geral; autorização no segredo `GOOGLE_OAUTH` |
+| Relatórios PDF no Drive | `worker/relatorio_pdf.py` | Abre o site num Chrome sem tela, gera o relatório do mapa e o envia ao Drive (substitui o anterior) |
+| Cópia dos PDFs oficiais | `worker/enviar_relatorios.py` | Copia `relatorios/*.pdf` para a pasta "Relatórios" do Drive (workflow `copiar-relatorios.yml`) |
+| Automação | `.github/workflows/processar-fila.yml` | Roda o processador (na hora, pelo disparo da função, e também pela agenda do GitHub). A opção **refazer_pdfs** refaz os relatórios PDF de todos os municípios |
 | Configuração do mapa | `config.js` | Endereço e chave pública do Supabase; vazio = busca e geração desligadas |
 
 Para gerar um município sem o servidor (teste ou conferência), no computador:

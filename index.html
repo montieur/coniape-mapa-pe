@@ -887,6 +887,7 @@ $('manualPdf').onclick = () => {
   if (P.get('mancha') && selected) zoomMancha(P.get('mancha'));
   if (P.has('baixar') && selected) askDownload(byCode[selected]);
   if (P.has('manual')) abrirManual(P.get('manual') || undefined);
+  if (P.has('selecao')) abrirSelecao();
 }
 </script>
 </body>
