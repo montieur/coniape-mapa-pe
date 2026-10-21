@@ -366,7 +366,7 @@
     else corpo = '<p>Pronto! Abrindo o município…</p>';
     $('detail').innerHTML = `
       <div class="dtop"><button class="btn ghost" id="btnBack"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>Todos os municípios</button></div>
-      <div class="dtitle"><h2>${esc(p.nome)}${p.uf ? ' · ' + esc(p.uf) : ''}</h2><p><span class="chip novo">Sem dados</span>Código IBGE ${p.cd}</p></div>
+      <div class="dtitle"><h2>${esc(p.nome)}${p.uf ? ' · ' + esc(p.uf) : ''}</h2><p><span class="chip novo">Sem dados</span>Código IBGE ${p.cd}${p.uf ? ` · <a class="ibge" href="${window.ibgeCidades(p.nome, p.uf)}" target="_blank" rel="noopener">IBGE Cidades ↗</a>` : ''}</p></div>
       ${corpo}`;
     $('btnBack').onclick = closeDetail;
     const b = el('btnGerar'); if (b) b.onclick = gerar;

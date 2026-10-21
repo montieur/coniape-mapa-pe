@@ -176,6 +176,7 @@ h3{font-size:12px;font-weight:650;letter-spacing:.05em;text-transform:uppercase;
 .sat .mlabel{color:#fff;text-shadow:0 0 3px #000,0 0 3px #000,0 1px 2px #000}
 .sat .mlabel.off{color:#e6edf2}
 .mlabel::before{display:none}
+a.ibge{color:var(--accent);font-weight:600;text-decoration:none;white-space:nowrap}a.ibge:hover{text-decoration:underline}
 .tip b{font-size:13px}.tip span{color:#5b6670}
 
 .toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:var(--ink);color:var(--panel);padding:9px 15px;border-radius:9px;font-size:13px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:9999}
@@ -383,6 +384,10 @@ const D = window.CONIAPE_DATA;
 const fmt = (v, d = 2) => v == null ? '–' : Number(v).toLocaleString('pt-BR', {minimumFractionDigits: d, maximumFractionDigits: d});
 const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
 const toast = (t, ms = 2500) => { const el = document.getElementById('toast'); el.textContent = t; el.classList.add('on'); clearTimeout(el._t); if (ms) el._t = setTimeout(() => el.classList.remove('on'), ms); };
+/* página do município no IBGE Cidades: /brasil/<uf>/<nome sem acento, sem apóstrofo, com hífens>/panorama */
+const ibgeCidades = (nome, uf) => `https://cidades.ibge.gov.br/brasil/${(uf || 'PE').toLowerCase()}/${nome.normalize('NFD').replace(/[̀-ͯ]/g, '')
+  .toLowerCase().replace(/['’`´]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '')}/panorama`;
+window.ibgeCidades = ibgeCidades;
 const slug = s => s.normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^\w]+/g, '_');
 const $ = id => document.getElementById(id);
 
@@ -675,7 +680,7 @@ function renderDetail(m) {
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>Todos os municípios</button></div>
     <div class="dtitle"><h2>${m.n}${m.uf ? ' · ' + m.uf : ''}</h2>
       <p><span class="chip ${m.origem === 'pesquisa' ? 'pesq' : ''}">${m.origem === 'pesquisa' ? 'Pesquisa' : 'CONIAPE'}</span>
-        Código IBGE ${m.c}<br>${m.rgi ? `Região imediata de ${m.rgi}` : ''}${m.rgint ? ` · Região intermediária de ${m.rgint}` : ''}</p></div>
+        Código IBGE ${m.c} · <a class="ibge" href="${ibgeCidades(m.n, m.uf)}" target="_blank" rel="noopener">IBGE Cidades ↗</a><br>${m.rgi ? `Região imediata de ${m.rgi}` : ''}${m.rgint ? ` · Região intermediária de ${m.rgint}` : ''}</p></div>
     <div class="hero">
       <div><span>Área urbana</span><b class="num">${fmt(m.urb)} km²</b><small>${RANK[m.c].urb}º de ${n} na base</small></div>
       <div><span>Vias transitáveis</span><b class="num">${fmt(m.vias)} km</b><small>${RANK[m.c].vias}º de ${n} na base</small></div>
@@ -783,7 +788,7 @@ prevDlg.addEventListener('cancel', e => { e.preventDefault(); fecharPrevia(); })
 </script>
 <script src="relatorio.js?v=916cafcf"></script>
 <script src="config.js?v=1887e0c8"></script>
-<script src="base.js?v=be4ceca4"></script>
+<script src="base.js?v=cd1665ca"></script>
 <script>
 const pdfErro = e => { console.error(e); toast('Não foi possível gerar o PDF: ' + e.message, 5000); };
 /* ===== Relatório de municípios selecionados (PDF único) ===== */

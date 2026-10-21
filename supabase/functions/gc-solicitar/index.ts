@@ -9,8 +9,8 @@ import { createClient } from "npm:@supabase/supabase-js@2";
 import { checarIbge, combinar } from "../_shared/verificar.ts";
 
 const ORIGENS = ["https://montieur.github.io", "http://localhost:8791", "http://localhost:8765"];
-const LIMITE_GERAR_POR_IP_HORA = 5;     // geração/atualização: pedidos novos por visitante por hora
-const LIMITE_GERAR_POR_DIA = 150;       // geração/atualização: total por dia
+const LIMITE_GERAR_POR_IP_HORA = 30;    // geração/atualização/arquivos: pedidos novos por visitante por hora
+const LIMITE_GERAR_POR_DIA = 300;       // geração/atualização/arquivos: total por dia
 const LIMITE_VERIFICAR_POR_IP_HORA = 40;// conferência é barata
 const OSM_VALIDADE_MIN = 24 * 60;       // a conferência do OSM vale 24 h
 const OSM_VALIDADE_ERRO_MIN = 30;       // se a última conferência falhou, tenta de novo em 30 min

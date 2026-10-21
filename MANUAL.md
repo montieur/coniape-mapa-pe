@@ -106,6 +106,8 @@ No mapa, o município selecionado ganha contorno forte, os outros ficam esmaecid
 ![Zoom na mancha Carapotós (4), em Caruaru](docs/img/04b_zoom_mancha.png)
 *Clique em "Carapotós (4)" na tabela de manchas: o mapa aproxima na mancha (contorno tracejado) e mostra as vias dela.*
 
+Ao lado do código IBGE fica o link **IBGE Cidades ↗**, que abre a página do município no IBGE Cidades (população, economia, saúde, educação e outros indicadores), numa nova aba. O mesmo link aparece na tela de gerar dados de um município novo.
+
 Para voltar à lista, use **Todos os municípios** ou a tecla **Esc**. O botão **Ver no mapa** reenquadra o município.
 
 ### Camadas e mapa base
