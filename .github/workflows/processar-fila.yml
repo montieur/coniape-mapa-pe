@@ -52,21 +52,21 @@ jobs:
           echo "n=$n" >> "$GITHUB_OUTPUT"
 
       - uses: actions/checkout@v4
-        if: steps.fila.outputs.n != '0' && steps.cfg.outputs.ok == '1'
+        if: (steps.fila.outputs.n != '0' || inputs.refazer_pdfs) && steps.cfg.outputs.ok == '1'
 
       - uses: actions/setup-python@v5
-        if: steps.fila.outputs.n != '0' && steps.cfg.outputs.ok == '1'
+        if: (steps.fila.outputs.n != '0' || inputs.refazer_pdfs) && steps.cfg.outputs.ok == '1'
         with:
           python-version: "3.12"
           cache: pip
           cache-dependency-path: worker/requirements.txt
 
       - name: Instalar dependências
-        if: steps.fila.outputs.n != '0' && steps.cfg.outputs.ok == '1'
+        if: (steps.fila.outputs.n != '0' || inputs.refazer_pdfs) && steps.cfg.outputs.ok == '1'
         run: pip install -r worker/requirements.txt
 
       - name: Cache dos setores do IBGE
-        if: steps.fila.outputs.n != '0' && steps.cfg.outputs.ok == '1'
+        if: (steps.fila.outputs.n != '0' || inputs.refazer_pdfs) && steps.cfg.outputs.ok == '1'
         uses: actions/cache@v4
         with:
           path: worker/.cache
@@ -74,7 +74,7 @@ jobs:
           restore-keys: setores-ibge-
 
       - name: Processar pedidos
-        if: steps.fila.outputs.n != '0' && steps.cfg.outputs.ok == '1'
+        if: (steps.fila.outputs.n != '0' || inputs.refazer_pdfs) && steps.cfg.outputs.ok == '1'
         working-directory: worker
         run: python -u processar_fila.py
 
