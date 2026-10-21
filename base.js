@@ -93,11 +93,7 @@
       fonte: 'IBGE setores 2022 + vias OSM transitáveis (GIS Comercial)', g: r.contorno,
       fontes: r.fontes, gerado_em: r.gerado_em, verificado_em: r.verificado_em, verificacao: r.verificacao, arquivos: r.arquivos || null, detalhe: false};
   }
-  function rotulo(m) {
-    window.tirarRotuloCinza?.(m.c);
-    labels.addLayer(L.tooltip({permanent: true, direction: 'center', className: 'mlabel', interactive: false})
-      .setLatLng(layerByCode[m.c].getCenter()).setContent(m.n));
-  }
+  function rotulo(m) { window.registrarRotulo(m, true); }   // o nome passa de cinza para o da base
   /* malha municipal de cada estado que tem município na base: os outros municípios do estado aparecem em cinza,
      com nome, prontos para serem pesquisados (PE já vem no site) */
   const ufsComMalha = new Set(['PE']);
