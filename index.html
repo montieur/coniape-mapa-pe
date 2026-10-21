@@ -25,7 +25,7 @@
 <link rel="stylesheet" href="manual.css">
 <link rel="stylesheet" href="base.css">
 <script src="manual.js"></script>
-<script src="data.js?v=45ea6b44"></script>
+<script src="data.js?v=7263f2c1"></script>
 <style>
 :root{
   --bg:#f3f5f8; --panel:#ffffff; --sunk:#f6f8fa; --ink:#18212b; --ink-2:#3d4955; --muted:#6b7785; --line:#e3e7ec;
@@ -458,7 +458,7 @@ const munLayer = L.geoJSON({type: 'FeatureCollection', features: D.mun.map(m => 
 const layerByCode = {}; munLayer.eachLayer(l => layerByCode[l.feature.properties.c] = l);
 const munBounds = {}; CO.forEach(m => munBounds[m.c] = layerByCode[m.c].getBounds());
 
-/* nomes dos municípios das camadas: os da base aparecem a partir do zoom 8, os sem dados (cinza) a partir do 10.
+/* nomes dos municípios da base (a partir do zoom 8).
    Só ficam no mapa os nomes que estão na tela: com a malha de estados grandes (MG tem 853 municípios), manter todos
    os rótulos ao mesmo tempo deixava cada zoom com mais de 1 segundo. */
 const rotulos = {};   // código -> {t: rótulo, base: município com dados?, ll: posição}
@@ -471,13 +471,6 @@ function registrarRotuloMun(m, base) {
 }
 D.mun.forEach(m => registrarRotuloMun(m, !!m.co));
 window.registrarRotulo = (m, base) => { registrarRotuloMun(m, base); syncLabels(); };
-window.adicionarMunCinza = m => {   // malha de um estado novo: município em cinza, com nome, à espera de ser pesquisado
-  D.mun.push(m); byCode[m.c] = m;
-  munLayer.addData({type: 'Feature', properties: {c: m.c}, geometry: m.g});
-  const l = layerByCode[m.c] = munLayer.getLayers().at(-1);
-  l.bringToBack();
-  registrarRotuloMun(m, false);
-};
 let labelsOn = true;   // o usuário pode desligar no controle de camadas
 let syncing = false;
 function syncLabels() {
@@ -486,7 +479,7 @@ function syncLabels() {
   const z = map.getZoom(), tela = map.getBounds().pad(.15);
   for (const r of Object.values(rotulos)) {
     const grupo = r.base ? labels : labelsCinza;
-    const quer = labelsOn && z >= (r.base ? 8 : 10) && tela.contains(r.ll);
+    const quer = labelsOn && z >= 8 && tela.contains(r.ll);
     const tem = grupo.hasLayer(r.t);
     if (quer && !tem) grupo.addLayer(r.t); else if (!quer && tem) grupo.removeLayer(r.t);
   }
@@ -551,7 +544,6 @@ function drawLegend() {
   $('lgBody').innerHTML = `
     <div class="ramp">${RAMP.map(c => `<i style="background:${css(c)}"></i>`).join('')}</div>
     <div class="ticks num"><span>menor</span>${e.map(v => `<span>${fmt(v, d)}</span>`).join('')}<span>maior</span></div>
-    <div class="it"><span class="sw" style="background:${css('--off-fill')};opacity:.6"></span>Sem dados (pesquise para gerar)</div>
     <div class="it"><span class="sw" style="background:${css('--urb')};opacity:.75"></span>Área urbana</div>
     <div class="it"><span class="sw" style="height:3px;background:${css('--via')}"></span>Vias transitáveis (zoom ≥ 11)</div>`;
 }
@@ -783,7 +775,7 @@ prevDlg.addEventListener('cancel', e => { e.preventDefault(); fecharPrevia(); })
 </script>
 <script src="relatorio.js?v=916cafcf"></script>
 <script src="config.js?v=1887e0c8"></script>
-<script src="base.js?v=8056e9d4"></script>
+<script src="base.js?v=be4ceca4"></script>
 <script>
 const pdfErro = e => { console.error(e); toast('Não foi possível gerar o PDF: ' + e.message, 5000); };
 /* ===== Relatório de municípios selecionados (PDF único) ===== */

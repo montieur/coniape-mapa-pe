@@ -4,7 +4,7 @@
 - **Manual em PDF:** [Manual_GIS_Comercial.pdf](https://montieur.github.io/gis-comercial/dados/Manual_GIS_Comercial.pdf)
 - **Repositório:** https://github.com/montieur/gis-comercial
 
-O **GIS Comercial**, da **tecgeo**, mostra para qualquer município do Brasil a área urbana, a área rural e a extensão de **vias transitáveis por veículo dentro das manchas urbanas**, que é a base de quantitativos do mapeamento 360°. A base começou com os **39 municípios de Pernambuco do CONIAPE** e cresce a cada município pesquisado: quem pesquisa um município novo gera os dados na hora, e eles ficam guardados para todos. Os municípios de PE ainda sem dados aparecem em cinza.
+O **GIS Comercial**, da **tecgeo**, mostra para qualquer município do Brasil a área urbana, a área rural e a extensão de **vias transitáveis por veículo dentro das manchas urbanas**, que é a base de quantitativos do mapeamento 360°. A base começou com os **39 municípios de Pernambuco do CONIAPE** e cresce a cada município pesquisado: quem pesquisa um município novo gera os dados na hora, e eles ficam guardados para todos. O mapa mostra só os municípios que já têm dados; os demais são encontrados pela busca.
 
 - [Parte 1: Usar o mapa](#parte-1-usar-o-mapa)
 - [Parte 2: Entender os números](#parte-2-entender-os-números)
@@ -50,7 +50,7 @@ As cores vão de claro (menor) a escuro (maior), em 5 faixas com a mesma quantid
 - **Na busca:** digite parte do nome. Acentos são ignorados, então "sao bento" encontra São Bento do Una.
 - **No mapa:** clique dentro do limite do município. Só o limite municipal é clicável; áreas urbanas e vias não interceptam o clique.
 
-Municípios em cinza ainda não têm dados na base. Com o servidor ativo, clicar num deles abre a tela para gerar os dados (próxima seção).
+O mapa mostra só os municípios que já têm dados. Para um município que ainda não está na base, use a busca: ela abre a tela para gerar os dados (próxima seção).
 
 ### Pesquisar qualquer município do Brasil
 
@@ -113,7 +113,7 @@ Para voltar à lista, use **Todos os municípios** ou a tecla **Esc**. O botão 
 No botão de camadas (canto superior direito do mapa):
 
 - **Mapa base**: Satélite (padrão), Cinza claro ou OpenStreetMap. Sobre o satélite os nomes ficam em branco; nos mapas claros, em escuro.
-- **Nomes dos municípios**: os da base aparecem desde a abertura do mapa; os sem dados (cinza), a partir de uma aproximação maior (zoom 10)
+- **Nomes dos municípios**: aparecem desde a abertura do mapa (só os que estão na tela, para o mapa ficar leve)
 - **Áreas urbanas**: manchas urbanas do IBGE (laranja)
 - **Vias transitáveis**: aparecem com zoom ≥ 11, ou sempre para o município selecionado
 

@@ -40,6 +40,8 @@ for d in CONIAPE.iterdir():
 mun = []
 for f in load("web_municipios.geojson"):
     p = f["properties"]
+    if p["CONIAPE"] != "Sim":   # municípios sem dados não vão para o mapa (mais leve e rápido)
+        continue
     mun.append({
         "c": p["CD_MUN"], "n": p["NM_MUN"], "rgi": p["NM_RGI"], "rgint": p["NM_RGINT"],
         "co": p["CONIAPE"] == "Sim", "aI": p["AREA_IBGE"], "aU": p["AREA_UTM"],
