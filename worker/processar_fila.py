@@ -24,6 +24,7 @@ CACHE = os.environ.get("GC_CACHE", str(Path(__file__).resolve().parent / ".cache
 MAX_PEDIDOS = int(os.environ.get("GC_MAX_PEDIDOS", "6"))
 ORCAMENTO_MIN = int(os.environ.get("GC_ORCAMENTO_MIN", "40"))    # para antes de estourar o limite do job
 MAX_TENTATIVAS = 3
+LISTA_PDF = os.environ.get("GC_LISTA_PDF", str(Path(__file__).resolve().parent / "relatorios_pendentes.txt"))   # municípios que ganharam dados novos
 H = {"apikey": KEY, "Authorization": f"Bearer {KEY}"}
 # Google Drive (segredo GOOGLE_OAUTH): guarda os arquivos GIS e a planilha geral. Sem ele, os arquivos vão para o Storage.
 DRIVE = Drive(os.environ["GOOGLE_OAUTH"]) if os.environ.get("GOOGLE_OAUTH") else None
@@ -135,7 +136,7 @@ def atualizar_planilha():
     """Planilha geral no Drive: uma linha por município da base."""
     linhas = rest("GET", "gc_municipios?select=cd_mun,nome,uf,origem,resumo,arquivos,gerado_em&order=uf.asc,nome.asc") or []
     cab = ["Município", "UF", "Código IBGE", "Área do município (km²)", "Área urbana (km²)", "Área rural (km²)", "Vias urbanas (km)",
-           "Vias rurais (km)", "Densidade de vias urbanas (km/km²)", "Gerado em", "Origem", "Pasta no Drive", "Shapefile", "KMZ", "KML"]
+           "Vias rurais (km)", "Densidade de vias urbanas (km/km²)", "Gerado em", "Origem", "Pasta no Drive", "Shapefile", "KMZ", "KML", "Relatório PDF"]
     saida = [cab]
     for m in linhas:
         r, a = m.get("resumo") or {}, m.get("arquivos") or {}
@@ -144,7 +145,7 @@ def atualizar_planilha():
         saida.append([m["nome"], m["uf"], m["cd_mun"], r.get("aI"), r.get("urb"), (cam.get("area_rural") or {}).get("km2"), r.get("vias"),
                       (cam.get("vias_rurais") or {}).get("km"), r.get("dens"), (m.get("gerado_em") or "")[:10], m.get("origem"),
                       f'=HYPERLINK("{url_pasta(d["pasta"])}","abrir")' if d.get("pasta") else "",
-                      link("baixar", d.get("shp")), link("baixar", d.get("kmz")), link("baixar", d.get("kml"))])
+                      link("baixar", d.get("shp")), link("baixar", d.get("kmz")), link("baixar", d.get("kml")), link("baixar", d.get("pdf"))])
     DRIVE.atualizar_planilha(saida)
     log(f"planilha atualizada ({len(linhas)} municípios)")
 
@@ -183,6 +184,9 @@ def main():
                     pacote = gerar(cd, CACHE, exportar_em=tmp)
                     guardar(cd, pacote)
                 log(f"pronto: {pacote['mun']['n']} - {pacote['mun']['urb']} km2 urbanos, {pacote['mun']['vias']} km de vias")
+            if p["tipo"] != "verificar":       # dados novos ou atualizados: o relatório PDF do município precisa ser refeito
+                with open(LISTA_PDF, "a") as f:
+                    f.write(cd + "\n")
             rest("PATCH", f"gc_pedidos?id=eq.{p['id']}", json={
                 "status": "pronto", "concluido_em": agora().isoformat(), "mensagem": None},
                  headers={"Content-Type": "application/json"})

@@ -7,6 +7,11 @@ on:
   schedule:
     - cron: "*/5 * * * *"
   workflow_dispatch:
+    inputs:
+      refazer_pdfs:
+        description: "Refazer o relatório PDF de todos os municípios da base e enviar ao Drive"
+        type: boolean
+        default: false
 
 concurrency:
   group: gc-fila
@@ -24,6 +29,7 @@ jobs:
       SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
       GOOGLE_OAUTH: ${{ secrets.GOOGLE_OAUTH }}
       GC_MAX_PEDIDOS: "20"
+      GC_LISTA_PDF: ${{ github.workspace }}/pdfs_pendentes.txt
     steps:
       - name: Configurado?
         id: cfg
@@ -71,3 +77,17 @@ jobs:
         if: steps.fila.outputs.n != '0' && steps.cfg.outputs.ok == '1'
         working-directory: worker
         run: python -u processar_fila.py
+
+      - name: Relatórios PDF no Drive (municípios com dados novos)
+        if: always() && steps.cfg.outputs.ok == '1' && (steps.fila.outputs.n != '0' || inputs.refazer_pdfs)
+        continue-on-error: true
+        working-directory: worker
+        run: |
+          pip install -q playwright
+          if [ "${{ inputs.refazer_pdfs }}" = "true" ]; then
+            python -u relatorio_pdf.py --todos
+          elif [ -s "$GC_LISTA_PDF" ]; then
+            python -u relatorio_pdf.py "$GC_LISTA_PDF"
+          else
+            echo "Nenhum município com dados novos nesta rodada."
+          fi

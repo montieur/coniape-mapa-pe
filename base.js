@@ -198,7 +198,7 @@
       corpo = `<span>${Object.entries(a.camadas || {}).map(([k, v]) => `${NOMES_CAMADAS[k] || k}: ${v.km2 != null ? fmt(v.km2) + ' km²' : fmt(v.km) + ' km'}`).join(' · ')}</span>`;
       acoes = `<a class="btn primary" href="${url('shp')}" download>Shapefile (.zip)${t.shp ? ` · ${tamanho(t.shp)}` : ''}</a>`
         + `<a class="btn" href="${url('kmz')}" download>KMZ${t.kmz ? ` · ${tamanho(t.kmz)}` : ''}</a>`
-        + (d ? `<a class="btn" href="${url('kml')}" download>KML${t.kml ? ` · ${tamanho(t.kml)}` : ''}</a><a class="btn" href="https://drive.google.com/drive/folders/${d.pasta}" target="_blank" rel="noopener">Abrir no Drive</a>`
+        + (d ? `<a class="btn" href="${url('kml')}" download>KML${t.kml ? ` · ${tamanho(t.kml)}` : ''}</a>${d.pdf ? `<a class="btn" href="${url('pdf')}" download>Relatório PDF</a>` : ''}<a class="btn" href="https://drive.google.com/drive/folders/${d.pasta}" target="_blank" rel="noopener">Abrir no Drive</a>`
           : `<button class="btn" data-arq="kml" data-kmz="${url('kmz')}" data-nome="${esc(a.kmz.split('/').pop().replace(/\.kmz$/, '.kml'))}">KML</button>`);
     }
     return `<div class="fontes arquivos ${cls}" data-cd="${m.c}">
