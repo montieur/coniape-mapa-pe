@@ -190,13 +190,16 @@
       corpo = `<span>Limite, área urbana, área rural e vias (urbanas e rurais) em Shapefile, KML e KMZ.${m.arq?.estado === 'erro' ? ` <b>Não deu certo:</b> ${esc(m.arq.mensagem)}` : ''}</span>`;
       acoes = `<button class="btn primary" data-arq="preparar">Preparar arquivos GIS</button>`;
     } else {
-      const url = c => `${CFG.supabaseUrl}/storage/v1/object/public/${BUCKET}/${a[c]}?download=${encodeURIComponent(a[c].split('/').pop())}`;
+      const d = a.drive;                                   // novos: Google Drive · antigos: Storage do Supabase
+      const url = c => d ? `https://drive.google.com/uc?export=download&id=${d[c]}`
+        : `${CFG.supabaseUrl}/storage/v1/object/public/${BUCKET}/${a[c]}?download=${encodeURIComponent(a[c].split('/').pop())}`;
       const t = a.tamanhos || {};
       cls = 'ok';
       corpo = `<span>${Object.entries(a.camadas || {}).map(([k, v]) => `${NOMES_CAMADAS[k] || k}: ${v.km2 != null ? fmt(v.km2) + ' km²' : fmt(v.km) + ' km'}`).join(' · ')}</span>`;
       acoes = `<a class="btn primary" href="${url('shp')}" download>Shapefile (.zip)${t.shp ? ` · ${tamanho(t.shp)}` : ''}</a>`
         + `<a class="btn" href="${url('kmz')}" download>KMZ${t.kmz ? ` · ${tamanho(t.kmz)}` : ''}</a>`
-        + `<button class="btn" data-arq="kml" data-kmz="${url('kmz')}" data-nome="${esc(a.kmz.split('/').pop().replace(/\.kmz$/, '.kml'))}">KML</button>`;
+        + (d ? `<a class="btn" href="${url('kml')}" download>KML${t.kml ? ` · ${tamanho(t.kml)}` : ''}</a><a class="btn" href="https://drive.google.com/drive/folders/${d.pasta}" target="_blank" rel="noopener">Abrir no Drive</a>`
+          : `<button class="btn" data-arq="kml" data-kmz="${url('kmz')}" data-nome="${esc(a.kmz.split('/').pop().replace(/\.kmz$/, '.kml'))}">KML</button>`);
     }
     return `<div class="fontes arquivos ${cls}" data-cd="${m.c}">
       <div class="fh"><b>Baixar dados GIS</b><small>SHP em UTM · KML/KMZ em WGS 84</small></div>

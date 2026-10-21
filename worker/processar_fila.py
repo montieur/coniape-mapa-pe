@@ -16,6 +16,7 @@ import requests
 
 from gerar_municipio import gerar, log
 from verificar_fontes import verificar
+from drive import Drive, url_arquivo, url_pasta
 
 URL = os.environ["SUPABASE_URL"].rstrip("/")
 KEY = os.environ["SUPABASE_SERVICE_KEY"]
@@ -24,6 +25,8 @@ MAX_PEDIDOS = int(os.environ.get("GC_MAX_PEDIDOS", "6"))
 ORCAMENTO_MIN = int(os.environ.get("GC_ORCAMENTO_MIN", "40"))    # para antes de estourar o limite do job
 MAX_TENTATIVAS = 3
 H = {"apikey": KEY, "Authorization": f"Bearer {KEY}"}
+# Google Drive (segredo GOOGLE_OAUTH): guarda os arquivos GIS e a planilha geral. Sem ele, os arquivos vão para o Storage.
+DRIVE = Drive(os.environ["GOOGLE_OAUTH"]) if os.environ.get("GOOGLE_OAUTH") else None
 
 
 def agora():
@@ -72,16 +75,22 @@ def subir(caminho, dados, content_type):
         raise RuntimeError(f"Storage: HTTP {r.status_code} {r.text[:200]}")
 
 
-def subir_arquivos(cd, exp):
-    """SHP, KML e KMZ do município no Storage (arquivos/<código>/…); devolve os caminhos para o catálogo."""
-    caminhos = {"camadas": exp["camadas"], "gerado_em": agora().isoformat(), "tamanhos": {}}
+def subir_arquivos(cd, pacote):
+    """Arquivos GIS do município: no Drive (se configurado) ou no Storage (arquivos/<código>/…). Devolve o registro do catálogo."""
+    exp, m = pacote["_exportacao"], pacote["mun"]
+    registro = {"camadas": exp["camadas"], "gerado_em": agora().isoformat(),
+                "tamanhos": {k: Path(exp[k]).stat().st_size for k in ("shp", "kml", "kmz")}}
+    if DRIVE:
+        registro["drive"] = DRIVE.guardar_municipio(m["uf"], m["n"], cd, {k: Path(exp[k]) for k in ("shp", "kml", "kmz")})
+        log(f"  enviado ao Drive: {m['n']} ({sum(registro['tamanhos'].values()) / 1e6:.1f} MB)")
+        return registro
     for chave, ct in TIPOS_ARQUIVO.items():
         f = Path(exp[chave])
         subir(f"arquivos/{cd}/{f.name}", f.read_bytes(), ct)
-        caminhos[chave] = f"arquivos/{cd}/{f.name}"
-        caminhos["tamanhos"][chave] = f.stat().st_size
+        registro[chave] = f"arquivos/{cd}/{f.name}"
         log(f"  enviado {f.name} ({f.stat().st_size / 1e6:.1f} MB)")
-    return caminhos
+    registro["tamanhos"].pop("kml", None)
+    return registro
 
 
 def baixar_pacote(cd):
@@ -98,14 +107,14 @@ def guardar_json(cd, pacote):
 
 def guardar_exportacao(cd, pacote):
     """Pedido 'exportar': guarda os arquivos e o pacote enriquecido (área e vias rurais) sem mexer no resto do município."""
-    arquivos = subir_arquivos(cd, pacote["_exportacao"])
+    arquivos = subir_arquivos(cd, pacote)
     guardar_json(cd, pacote)
     rest("PATCH", f"gc_municipios?cd_mun=eq.{cd}", json={"arquivos": arquivos, "atualizado_em": agora().isoformat()},
          headers={"Content-Type": "application/json"})
 
 
 def guardar(cd, pacote):
-    arquivos = subir_arquivos(cd, pacote["_exportacao"]) if pacote.get("_exportacao") else None
+    arquivos = subir_arquivos(cd, pacote) if pacote.get("_exportacao") else None
     guardar_json(cd, pacote)
     m = pacote["mun"]
     anterior = rest("GET", f"gc_municipios?cd_mun=eq.{cd}&select=origem") or []
@@ -120,6 +129,24 @@ def guardar(cd, pacote):
     }
     rest("POST", "gc_municipios?on_conflict=cd_mun", json=linha,
          headers={"Prefer": "resolution=merge-duplicates", "Content-Type": "application/json"})
+
+
+def atualizar_planilha():
+    """Planilha geral no Drive: uma linha por município da base."""
+    linhas = rest("GET", "gc_municipios?select=cd_mun,nome,uf,origem,resumo,arquivos,gerado_em&order=uf.asc,nome.asc") or []
+    cab = ["Município", "UF", "Código IBGE", "Área do município (km²)", "Área urbana (km²)", "Área rural (km²)", "Vias urbanas (km)",
+           "Vias rurais (km)", "Densidade de vias urbanas (km/km²)", "Gerado em", "Origem", "Pasta no Drive", "Shapefile", "KMZ", "KML"]
+    saida = [cab]
+    for m in linhas:
+        r, a = m.get("resumo") or {}, m.get("arquivos") or {}
+        cam, d = a.get("camadas") or {}, a.get("drive") or {}
+        link = lambda rot, i: f'=HYPERLINK("{url_arquivo(i)}","{rot}")' if i else ""
+        saida.append([m["nome"], m["uf"], m["cd_mun"], r.get("aI"), r.get("urb"), (cam.get("area_rural") or {}).get("km2"), r.get("vias"),
+                      (cam.get("vias_rurais") or {}).get("km"), r.get("dens"), (m.get("gerado_em") or "")[:10], m.get("origem"),
+                      f'=HYPERLINK("{url_pasta(d["pasta"])}","abrir")' if d.get("pasta") else "",
+                      link("baixar", d.get("shp")), link("baixar", d.get("kmz")), link("baixar", d.get("kml"))])
+    DRIVE.atualizar_planilha(saida)
+    log(f"planilha atualizada ({len(linhas)} municípios)")
 
 
 def conferir(cd):
@@ -166,6 +193,13 @@ def main():
                 "mensagem": str(e)[:300], "concluido_em": agora().isoformat()},
                  headers={"Content-Type": "application/json"})
         feitos += 1
+    if DRIVE and feitos:
+        try:
+            if not DRIVE.raiz_publica():
+                log("AVISO: a pasta 'GIS Comercial' no Drive não está com 'Qualquer pessoa com o link'; os downloads do mapa vão pedir login.")
+            atualizar_planilha()
+        except Exception as e:     # noqa: BLE001 - a planilha não pode derrubar o processamento dos pedidos
+            log("planilha não atualizada:", e)
     log(f"{feitos} pedido(s) processado(s)")
 
 
