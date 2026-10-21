@@ -178,6 +178,7 @@
   async function consultarFontes(cd, acao = 'consultar') {
     const m = byCode[cd];
     if (!SERVIDOR || !m?.co) return;
+    if (PARAMS.has('semconferir')) return;                                // robô dos PDFs e prints: não pede conferência
     if (acao === 'consultar' && m.verif?.estado === 'ok') return;       // já sabe
     m.verif = {estado: 'verificando'}; redesenhar(cd);
     try { aplicarResposta(cd, await api.solicitar(cd, acao)); }

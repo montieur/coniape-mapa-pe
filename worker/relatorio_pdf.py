@@ -65,7 +65,7 @@ def main():
         for i, m in enumerate(alvo, 1):
             cd = m["cd_mun"]
             try:
-                pagina.goto(f"{SITE}/?mun={cd}&v={int(time.time())}", wait_until="domcontentloaded")
+                pagina.goto(f"{SITE}/?mun={cd}&semconferir&v={int(time.time())}", wait_until="domcontentloaded")
                 pagina.wait_for_function("(cd) => typeof byCode !== 'undefined' && byCode[cd] && byCode[cd].detalhe", arg=cd)
                 pdf = pagina.evaluate(JS_GERAR, cd)
                 if not pdf:
